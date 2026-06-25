@@ -1,0 +1,2026 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>客户钱包管理 - 客户端原型</title>
+  <style>
+    :root {
+      --color-primary-6: #165dff;
+      --color-primary-1: #e8f3ff;
+      --color-text-1: #1d2129;
+      --color-text-2: #4e5969;
+      --color-text-3: #86909c;
+      --color-border-1: #e5e6eb;
+      --color-fill-1: #f7f8fa;
+      --color-fill-2: #f2f3f5;
+      --color-bg-1: #ffffff;
+      --color-success-6: #00b42a;
+      --color-warning-6: #ff7d00;
+      --color-danger-6: #f53f3f;
+      --wallet-red: #fa5f6a;
+      --wallet-orange: #ff5b16;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --shadow-card: 0 10px 28px rgba(29, 33, 41, 0.08);
+      --shadow-popup: 0 18px 48px rgba(29, 33, 41, 0.22);
+      font-family: Inter, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f7f8fa 0%, #eef3ff 100%);
+      color: var(--color-text-1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 28px;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; border: none; }
+
+    .stage {
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+    }
+
+    .phone {
+      width: 390px;
+      height: 844px;
+      border: 10px solid #111;
+      border-radius: 48px;
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(29, 33, 41, 0.28);
+      position: relative;
+    }
+
+    .phone::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150px;
+      height: 28px;
+      background: #111;
+      border-radius: 0 0 18px 18px;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .app {
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      background: var(--color-fill-1);
+    }
+
+    .status-bar {
+      height: 36px;
+      padding: 10px 20px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+      background: #fff;
+      position: relative;
+      z-index: 5;
+    }
+
+    .status-icons { display: flex; align-items: center; gap: 5px; color: #111; }
+    .signal { display: flex; gap: 2px; align-items: end; }
+    .signal span { width: 3px; background: #111; border-radius: 2px; }
+    .signal span:nth-child(1) { height: 5px; }
+    .signal span:nth-child(2) { height: 8px; }
+    .signal span:nth-child(3) { height: 11px; }
+    .wifi { width: 14px; height: 10px; border: 2px solid #111; border-bottom: none; border-radius: 14px 14px 0 0; }
+    .battery { width: 18px; height: 9px; border: 1.5px solid #111; border-radius: 2px; position: relative; }
+    .battery::after { content: ""; position: absolute; right: -3px; top: 2px; width: 2px; height: 4px; background: #111; border-radius: 1px; }
+
+    .nav {
+      height: 52px;
+      display: grid;
+      grid-template-columns: 48px 1fr 92px;
+      align-items: center;
+      padding: 0 12px;
+      background: #fff;
+      border-bottom: 1px solid rgba(229, 230, 235, 0.72);
+      position: relative;
+      z-index: 5;
+    }
+
+    .back {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
+      background: transparent;
+      position: relative;
+      border-radius: 50%;
+    }
+
+    .back::before {
+      content: "";
+      position: absolute;
+      left: 18px;
+      top: 15px;
+      width: 10px;
+      height: 10px;
+      border-left: 2px solid var(--color-text-2);
+      border-bottom: 2px solid var(--color-text-2);
+      transform: rotate(45deg);
+    }
+
+    .nav-title {
+      text-align: center;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--color-text-1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .capsule {
+      justify-self: end;
+      width: 78px;
+      height: 30px;
+      border: 1px solid var(--color-border-1);
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      color: #111;
+      background: rgba(255, 255, 255, 0.86);
+    }
+
+    .capsule-dot { font-size: 17px; line-height: 1; transform: translateY(-1px); }
+    .capsule-circle { width: 16px; height: 16px; border: 2px solid #111; border-radius: 50%; position: relative; }
+    .capsule-circle::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: #111; }
+
+    .page {
+      position: absolute;
+      inset: 88px 0 0;
+      display: none;
+      flex-direction: column;
+      background: var(--color-fill-1);
+    }
+
+    .page.active { display: flex; }
+
+    .scroll {
+      flex: 1;
+      overflow: auto;
+      padding-bottom: 96px;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .scroll::-webkit-scrollbar { display: none; }
+
+    .balance-hero {
+      position: relative;
+      height: 214px;
+      background:
+        radial-gradient(circle at 72% 18%, rgba(255, 255, 255, 0.38), transparent 42%),
+        radial-gradient(circle at 12% 88%, rgba(255, 255, 255, 0.12), transparent 38%),
+        linear-gradient(155deg, #0e42d2 0%, #165dff 38%, #4080ff 72%, #6aa3ff 100%);
+      color: #fff;
+      padding: 26px 24px 0;
+      overflow: hidden;
+    }
+
+    .balance-hero::before,
+    .balance-hero::after {
+      content: "";
+      position: absolute;
+      left: -40px;
+      right: -40px;
+      height: 62px;
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 50%;
+      bottom: 22px;
+      transform: rotate(2deg);
+      pointer-events: none;
+    }
+
+    .balance-hero::after {
+      height: 76px;
+      background: #fff;
+      bottom: -34px;
+      opacity: 0.96;
+      transform: rotate(-2deg);
+    }
+
+    .rule-link {
+      position: absolute;
+      right: 22px;
+      top: 28px;
+      color: rgba(255,255,255,0.92);
+      background: transparent;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      z-index: 2;
+    }
+
+    .money-main {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      margin-top: 48px;
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      font-family: Menlo, Consolas, "Courier New", monospace;
+    }
+
+    .money-label {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      margin-top: 12px;
+      color: rgba(255,255,255,0.88);
+      font-size: 14px;
+    }
+
+    .content-card {
+      background: #fff;
+      border-radius: 18px 18px 0 0;
+      margin-top: -18px;
+      position: relative;
+      z-index: 3;
+      min-height: 480px;
+      padding: 22px 18px;
+    }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+
+    .flow-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(229,230,235,0.72);
+    }
+
+    .flow-item:last-child { border-bottom: none; }
+    .flow-title { font-size: 15px; font-weight: 600; display: flex; align-items: baseline; gap: 8px; }
+    .flow-order { color: var(--color-text-3); font-size: 12px; font-weight: 400; }
+    .flow-time { margin-top: 8px; font-size: 12px; color: var(--color-text-3); }
+    .flow-amount { align-self: center; font-size: 17px; font-weight: 600; font-family: Menlo, Consolas, monospace; }
+    .flow-amount.pos { color: var(--color-success-6); }
+    .flow-amount.neg { color: var(--color-danger-6); }
+
+    .bottom-bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 10px 18px calc(22px + env(safe-area-inset-bottom, 0px));
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), #fff 28%);
+      z-index: 8;
+    }
+
+    .primary-btn {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 8px;
+      background: var(--color-primary-6);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(22, 93, 255, 0.22);
+    }
+
+    .primary-btn:hover:not(:disabled) {
+      background: #4080ff;
+    }
+
+    .primary-btn:active:not(:disabled) {
+      background: #0e42d2;
+    }
+
+    .primary-btn:disabled {
+      background: #c9cdd4;
+      color: #fff;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .recharge-page .scroll { padding: 14px 16px 144px; }
+    .balance-summary {
+      padding: 14px 16px;
+      background: #fff;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      border: 1px solid rgba(229,230,235,0.7);
+    }
+
+    .summary-label { color: var(--color-text-2); font-size: 13px; }
+    .summary-value { font-weight: 700; font-family: Menlo, Consolas, monospace; font-size: 18px; }
+
+    .recharge-balance-lbl {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-text-1);
+      text-align: left;
+      line-height: 1.35;
+    }
+
+    .recharge-balance-amt {
+      font-size: 18px;
+      font-weight: 600;
+      font-family: Menlo, Consolas, "Courier New", monospace;
+      color: var(--color-text-1);
+      text-align: right;
+      line-height: 1.35;
+      letter-spacing: 0.02em;
+    }
+
+    .panel {
+      background: #fff;
+      border: 1px solid rgba(229,230,235,0.78);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 6px 18px rgba(29,33,41,0.04);
+    }
+
+    .panel-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tier-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .tier {
+      min-height: 92px;
+      border: 1px solid var(--color-border-1);
+      border-radius: 14px;
+      background: #fff;
+      padding: 12px;
+      text-align: left;
+      position: relative;
+      transition: 0.18s;
+    }
+
+    .tier.selected {
+      border-color: var(--color-primary-6);
+      background: var(--color-primary-1);
+      box-shadow: 0 0 0 1px rgba(22, 93, 255, 0.12), 0 8px 18px rgba(22, 93, 255, 0.08);
+    }
+
+    .tier.selected::after {
+      content: "✓";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 26px;
+      height: 22px;
+      border-radius: 0 13px 0 13px;
+      background: var(--color-primary-6);
+      color: #fff;
+      font-size: 13px;
+      text-align: center;
+      line-height: 22px;
+    }
+
+    .tier-amount { font-size: 20px; font-weight: 700; font-family: Menlo, Consolas, monospace; }
+    .tier-gift { margin-top: 10px; font-size: 13px; font-weight: 600; line-height: 1.35; }
+    .tier-gift--yes { color: var(--color-warning-6); }
+    .tier-gift--no { color: var(--color-text-1); }
+
+    .custom-input {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      border: 1px solid var(--color-border-1);
+      border-radius: 12px;
+      padding: 0 12px;
+      background: #fff;
+    }
+
+    .custom-input:focus-within { border-color: var(--color-primary-6); box-shadow: 0 0 0 3px rgba(22,93,255,0.08); }
+    .custom-input span { color: var(--color-text-1); font-weight: 600; }
+    .custom-input input { flex: 1; border: none; outline: none; font-size: 17px; padding-left: 8px; min-width: 0; }
+
+    .gift-card {
+      background: linear-gradient(135deg, #fff7f2, #fff);
+      border: 1px solid rgba(255, 125, 0, 0.18);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .coupon-badge {
+      width: 56px;
+      min-width: 56px;
+      height: 48px;
+      border-radius: 12px;
+      background: #fff1e8;
+      color: var(--wallet-orange);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Menlo, Consolas, monospace;
+    }
+
+    .gift-name { font-size: 14px; font-weight: 600; }
+    .gift-meta { color: var(--color-text-3); font-size: 12px; line-height: 1.6; margin-top: 4px; }
+
+    .pay-row, .tip-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 40px;
+      font-size: 14px;
+    }
+
+    .wechat {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+
+    .wechat-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #07c160;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .service-phone {
+      color: var(--color-primary-6);
+      font-weight: 600;
+      background: var(--color-primary-1);
+      padding: 4px 8px;
+      border-radius: 999px;
+    }
+
+    .agreement {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      color: var(--color-text-2);
+      font-size: 12px;
+      line-height: 1.5;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .check {
+      width: 18px;
+      height: 18px;
+      margin-top: 1px;
+      border: 1px solid var(--color-border-1);
+      border-radius: 50%;
+      background: #fff;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .check.checked {
+      border-color: var(--color-primary-6);
+      background: var(--color-primary-6);
+    }
+
+    .check:not(.checked) { color: transparent; }
+
+    .link { color: var(--color-primary-6); background: transparent; padding: 0; }
+
+    .pay-bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 25;
+      padding: 10px 16px calc(22px + env(safe-area-inset-bottom, 0px));
+      background: #fff;
+      border-top: 1px solid var(--color-border-1);
+    }
+
+    .pay-summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: var(--color-text-2);
+    }
+
+    .pay-summary-recharge {
+      color: var(--color-text-1);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .recharge-page .panel-title { margin-bottom: 12px; }
+
+    .recharge-page .panel-title .summary-label { display: none; }
+
+    .recharge-tip-body p {
+      margin: 0 0 10px;
+      font-size: 14px;
+      color: var(--color-text-1);
+      line-height: 1.65;
+    }
+
+    .recharge-tip-body p:last-of-type { margin-bottom: 0; }
+
+    .recharge-tip-body .cs-link-tip {
+      display: inline;
+      padding: 0;
+      margin: 0;
+      border: none;
+      background: transparent;
+      color: var(--color-primary-6);
+      font-size: inherit;
+      font-weight: 600;
+      text-decoration: underline;
+      cursor: pointer;
+      vertical-align: baseline;
+    }
+
+    .recharge-tip-body .cs-link-tip:active {
+      color: #0e42d2;
+    }
+
+    .custom-hint-error {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--color-danger-6);
+      line-height: 1.45;
+    }
+
+    .custom-hint-tip {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--color-text-2);
+      line-height: 1.45;
+    }
+
+    .pay-method-panel.panel {
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+
+    .pay-method-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 48px;
+      padding: 6px 0;
+      font-size: 15px;
+      color: var(--color-text-2);
+    }
+
+    .pay-method-label {
+      color: var(--color-text-2);
+      font-weight: 400;
+    }
+
+    .pay-method-value {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      color: var(--color-text-2);
+      font-weight: 400;
+    }
+
+    .pay-method-chevron {
+      color: var(--color-text-3);
+      font-size: 16px;
+      line-height: 1;
+      margin-left: 2px;
+    }
+
+    .gift-list-v2 { display: flex; flex-direction: column; gap: 12px; }
+
+    .gift-card-v2 {
+      border: 1px solid var(--color-border-1);
+      border-radius: 12px;
+      padding: 14px 16px;
+      background: var(--color-bg-1);
+    }
+
+    .gift-card-v2-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-text-1);
+      line-height: 1.45;
+    }
+
+    .gift-card-v2-sep {
+      height: 1px;
+      background: var(--color-border-1);
+      margin: 12px 0 4px;
+    }
+
+    .gift-v2-rows { display: flex; flex-direction: column; }
+
+    .gift-v2-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 12px 0;
+    }
+
+    .gift-v2-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .gift-v2-row-lbl {
+      flex-shrink: 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-1);
+      line-height: 1.5;
+      text-align: left;
+    }
+
+    .gift-v2-row-val {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--color-text-1);
+      line-height: 1.5;
+      text-align: right;
+      word-break: break-word;
+    }
+
+    .gift-empty-state {
+      text-align: center;
+      padding: 18px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text-1);
+    }
+
+    .recharge-page .agreement {
+      color: var(--color-text-1);
+      font-size: 14px;
+    }
+
+    .pay-amount { color: var(--color-primary-6); font-size: 18px; font-weight: 700; font-family: Menlo, Consolas, monospace; }
+
+    .result-wrap {
+      flex: 1;
+      padding: 72px 24px 0;
+      text-align: center;
+      background: #fff;
+    }
+
+    .result-icon {
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: rgba(0, 180, 42, 0.1);
+      color: var(--color-success-6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+    }
+
+    .result-icon.processing { background: rgba(255,125,0,0.1); color: var(--color-warning-6); }
+    .result-icon.fail { background: rgba(245,63,63,0.1); color: var(--color-danger-6); }
+    .result-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .result-desc { color: var(--color-text-2); font-size: 14px; line-height: 1.6; }
+
+    .result-card {
+      margin-top: 24px;
+      padding: 16px;
+      background: var(--color-fill-1);
+      border-radius: var(--radius-md);
+      text-align: left;
+    }
+
+    .kv {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      color: var(--color-text-2);
+      font-size: 13px;
+    }
+    .kv strong { color: var(--color-text-1); font-weight: 600; }
+
+    .empty, .error, .disabled-state {
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--color-text-2);
+    }
+
+    .empty-icon {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      background: var(--color-fill-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-3);
+      font-size: 24px;
+    }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      top: 116px;
+      transform: translateX(-50%) translateY(-10px);
+      max-width: 280px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(29,33,41,0.88);
+      color: #fff;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 50;
+      transition: 0.18s;
+      text-align: center;
+    }
+
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .modal-mask {
+      position: absolute;
+      inset: 0;
+      background: rgba(29,33,41,0.46);
+      z-index: 40;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-mask.show { display: flex; }
+
+    .sheet {
+      width: 100%;
+      max-height: 76%;
+      background: #fff;
+      border-radius: 20px 20px 0 0;
+      padding: 18px 18px 24px;
+      box-shadow: var(--shadow-popup);
+      animation: rise 0.18s ease;
+    }
+
+    @keyframes rise {
+      from { transform: translateY(18px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .sheet-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--color-fill-2);
+      color: var(--color-text-2);
+      font-size: 18px;
+    }
+
+    .sheet-body {
+      max-height: 520px;
+      overflow: auto;
+      color: var(--color-text-2);
+      font-size: 14px;
+      line-height: 1.75;
+    }
+
+    .sheet-body h4 { color: var(--color-text-1); margin: 14px 0 6px; }
+    .sheet-body p { margin: 0 0 10px; }
+
+    .proto-fab {
+      position: fixed;
+      z-index: 10003;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid rgba(22, 93, 255, 0.35);
+      background: var(--color-primary-6);
+      color: #fff;
+      font-size: 20px;
+      line-height: 1;
+      box-shadow: 0 10px 28px rgba(22, 93, 255, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      left: calc(50vw + 205px + 16px);
+      bottom: 80px;
+    }
+
+    @media (max-width: 560px) {
+      .proto-fab {
+        left: auto;
+        right: 16px;
+        bottom: 24px;
+      }
+    }
+
+    .proto-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10001;
+      background: rgba(29, 33, 41, 0.45);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .proto-overlay[data-proto-open="true"] {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .proto-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(360px, 88vw);
+      z-index: 10002;
+      background: var(--color-bg-1);
+      border-left: 1px solid var(--color-border-1);
+      box-shadow: -12px 0 40px rgba(29, 33, 41, 0.12);
+      transform: translateX(100%);
+      transition: transform 0.22s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .proto-overlay[data-proto-open="true"] .proto-drawer {
+      transform: translateX(0);
+    }
+
+    .proto-drawer-head {
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--color-border-1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .proto-drawer-head h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-text-1);
+    }
+
+    .proto-drawer-body {
+      padding: 12px 16px 20px;
+      overflow: auto;
+      flex: 1;
+      font-size: 13px;
+      color: var(--color-text-2);
+    }
+
+    .proto-hint {
+      font-size: 12px;
+      color: var(--color-text-3);
+      margin: 0 0 12px;
+      line-height: 1.5;
+    }
+
+    .proto-section { border-top: 1px solid var(--color-border-1); padding-top: 12px; margin-top: 12px; }
+    .proto-title { font-size: 12px; font-weight: 600; margin-bottom: 8px; color: var(--color-text-2); text-transform: none; letter-spacing: 0; }
+    .proto-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+
+    .proto-btn {
+      min-height: 40px;
+      border-radius: 6px;
+      background: var(--color-fill-1);
+      color: var(--color-text-1);
+      border: 1px solid var(--color-border-1);
+      font-size: 13px;
+    }
+
+    .proto-btn.active {
+      color: var(--color-primary-6);
+      background: var(--color-primary-1);
+      border-color: rgba(22, 93, 255, 0.32);
+      font-weight: 600;
+    }
+
+    .proto-btn.primary {
+      color: #fff;
+      background: var(--color-primary-6);
+      border-color: var(--color-primary-6);
+    }
+
+    .proto-close {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      background: var(--color-fill-2);
+      color: var(--color-text-2);
+      font-size: 18px;
+      border: 1px solid var(--color-border-1);
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, var(--color-fill-2) 25%, var(--color-fill-1) 37%, var(--color-fill-2) 63%);
+      background-size: 400% 100%;
+      animation: sk 1.2s ease-in-out infinite;
+      border-radius: 6px;
+    }
+
+    @keyframes sk {
+      0% { background-position: 100% 50%; }
+      100% { background-position: 0 50%; }
+    }
+
+    .sk-line { height: 12px; margin-bottom: 10px; }
+    .sk-line.short { width: 46%; }
+    .sk-block { height: 72px; border-radius: 12px; margin-bottom: 10px; }
+
+    .recharge-lock {
+      margin: 0 16px 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      background: var(--color-fill-2);
+      border: 1px solid var(--color-border-1);
+      color: var(--color-text-2);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .recharge-lock strong { color: var(--color-text-1); }
+
+    .gift-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .gift-detail {
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(229, 230, 235, 0.85);
+      font-size: 13px;
+      color: var(--color-text-2);
+      line-height: 1.55;
+    }
+
+    .gift-detail:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .gift-detail dt { font-weight: 600; color: var(--color-text-1); margin: 0 0 4px; }
+    .gift-detail dd { margin: 0; }
+
+    .link-inline {
+      color: var(--color-primary-6);
+      background: transparent;
+      padding: 0;
+      font-size: inherit;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .result-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+
+    .secondary-btn {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 8px;
+      background: var(--color-fill-1);
+      color: var(--color-primary-6);
+      border: 1px solid rgba(22, 93, 255, 0.35);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .money-main.is-skeleton {
+      width: 200px;
+      height: 36px;
+      margin: 48px auto 0;
+      border-radius: 8px;
+    }
+
+    .money-main.is-skeleton + .money-label { margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <button type="button" class="proto-fab" id="protoFab" data-proto-fab="true" aria-label="打开原型控制台" title="原型控制台">☰</button>
+
+  <div class="proto-overlay" id="protoOverlay" data-proto-open="false" role="presentation" aria-hidden="true">
+    <div class="proto-drawer" id="protoDrawer" role="dialog" aria-modal="true" aria-labelledby="protoDrawerTitle" tabindex="-1">
+      <div class="proto-drawer-head">
+        <h2 id="protoDrawerTitle">原型控制台</h2>
+        <button type="button" class="proto-close" id="protoClose" aria-label="关闭原型控制台">×</button>
+      </div>
+      <div class="proto-drawer-body">
+        <p class="proto-hint">演示与状态模拟仅在此抽屉内操作，主界面保持与真实产品一致。</p>
+        <div class="proto-section" style="border-top:none;margin-top:0;padding-top:0">
+          <div class="proto-title">页面</div>
+          <div class="proto-grid">
+            <button type="button" class="proto-btn active" data-proto-page="balance">账户余额</button>
+            <button type="button" class="proto-btn" data-proto-page="recharge">充值页</button>
+            <button type="button" class="proto-btn" data-proto-result="success">结果·成功</button>
+            <button type="button" class="proto-btn" data-proto-result="processing">结果·处理中</button>
+            <button type="button" class="proto-btn" data-proto-result="fail">结果·失败</button>
+          </div>
+        </div>
+        <div class="proto-section">
+          <div class="proto-title">P01 账户余额</div>
+          <div class="proto-grid">
+            <button type="button" class="proto-btn" id="protoP01Loading" data-proto-flag="p01Loading">加载态</button>
+            <button type="button" class="proto-btn" id="protoP01Error" data-proto-flag="p01Error">错误态</button>
+            <button type="button" class="proto-btn" id="protoP01Refresh" data-proto-demo="refreshBalance">模拟下拉刷新</button>
+          </div>
+        </div>
+        <div class="proto-section">
+          <div class="proto-title">P02 充值</div>
+          <div class="proto-grid">
+            <button type="button" class="proto-btn active" id="protoRechargeOn" data-proto-set="rechargeEnabled:true">充值开启</button>
+            <button type="button" class="proto-btn" id="protoRechargeOff" data-proto-set="rechargeEnabled:false">充值关闭</button>
+            <button type="button" class="proto-btn active" id="protoCustomOn" data-proto-set="customTierEnabled:true">自定义档位开</button>
+            <button type="button" class="proto-btn" id="protoCustomOff" data-proto-set="customTierEnabled:false">自定义档位关</button>
+            <button type="button" class="proto-btn" id="protoTiersEmpty" data-proto-set="tiersEmpty:true">无可用档位</button>
+            <button type="button" class="proto-btn active" id="protoTiersOk" data-proto-set="tiersEmpty:false">有档位</button>
+            <button type="button" class="proto-btn" id="protoP02Loading" data-proto-flag="p02Loading">加载态</button>
+            <button type="button" class="proto-btn" id="protoConfigErr" data-proto-set="configError:true">配置错误</button>
+            <button type="button" class="proto-btn active" id="protoConfigOk" data-proto-set="configError:false">配置正常</button>
+            <button type="button" class="proto-btn active" id="protoMaxUnlimited" data-proto-set="customMax:null">自定义无上限</button>
+            <button type="button" class="proto-btn" id="protoMax5000" data-proto-set="customMax:5000">自定义上限¥5000</button>
+          </div>
+        </div>
+        <div class="proto-section">
+          <div class="proto-title">赠送发放（成功页示意）</div>
+          <div class="proto-grid">
+            <button type="button" class="proto-btn active" id="protoGiftOk" data-proto-gift="ok">发券成功</button>
+            <button type="button" class="proto-btn" id="protoGiftPending" data-proto-gift="pending">发放中</button>
+            <button type="button" class="proto-btn" id="protoGiftFail" data-proto-gift="fail">发放失败</button>
+          </div>
+        </div>
+        <div class="proto-section">
+          <div class="proto-title">P01 明细</div>
+          <div class="proto-grid">
+            <button type="button" class="proto-btn active" id="protoFlowsNormal" data-proto-set="flowsEmpty:false">有明细</button>
+            <button type="button" class="proto-btn" id="protoFlowsEmpty" data-proto-set="flowsEmpty:true">明细空态</button>
+          </div>
+        </div>
+        <div class="proto-section">
+          <div class="proto-title">演示操作</div>
+          <button type="button" class="proto-btn primary" style="width:100%" id="protoReset">恢复默认状态</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="phone">
+      <div class="app" id="app">
+        <div class="status-bar">
+          <span>09:41</span>
+          <div class="status-icons"><div class="signal"><span></span><span></span><span></span></div><div class="wifi"></div><div class="battery"></div></div>
+        </div>
+        <div class="nav">
+          <button type="button" class="back" id="backBtn" aria-label="返回"></button>
+          <div class="nav-title" id="navTitle">账户余额</div>
+          <div class="capsule"><span class="capsule-dot">•••</span><span class="capsule-circle"></span></div>
+        </div>
+
+        <main class="page active" id="pageBalance">
+          <div class="scroll">
+            <section class="balance-hero">
+              <button type="button" class="rule-link" id="balanceRule">ⓘ 余额说明</button>
+              <div class="money-main" id="heroBalance">¥ 1000.00</div>
+              <div class="money-label">当前余额</div>
+            </section>
+            <section class="content-card" id="flowContent"></section>
+          </div>
+          <div class="bottom-bar">
+            <button type="button" class="primary-btn" id="rechargeBtn">充值</button>
+          </div>
+        </main>
+
+        <main class="page recharge-page" id="pageRecharge">
+          <div class="scroll">
+            <div class="recharge-lock" id="rechargeLockBanner" style="display:none" role="status">
+              <strong>充值功能暂不可用</strong>，请稍后再试。您仍可查看当前余额与明细。
+            </div>
+
+            <div class="balance-summary" id="rechargeBalanceSummary">
+              <span class="recharge-balance-lbl">账户余额</span>
+              <span class="recharge-balance-amt" id="rechargeBalanceValue">¥ 1000.00</span>
+            </div>
+
+            <section class="panel" id="tierPanel">
+              <div class="panel-title">充值金额</div>
+              <div id="tierSlot"></div>
+            </section>
+
+            <section class="panel" id="customPanel" style="display:none">
+              <div class="panel-title">自定义金额</div>
+              <div class="custom-input"><span>¥</span><input id="customAmount" type="number" inputmode="decimal" placeholder="请输入金额" /></div>
+              <div id="customHintTip" class="custom-hint-tip" style="display:none">输入金额查看赠送权益</div>
+              <div id="customHint" class="custom-hint-error" style="display:none"></div>
+            </section>
+
+            <section class="panel" id="giftPanel">
+              <div class="panel-title">赠送权益</div>
+              <div id="giftPreview"></div>
+            </section>
+
+            <section class="panel pay-method-panel">
+              <div class="pay-method-row" role="text">
+                <span class="pay-method-label">支付方式</span>
+                <span class="pay-method-value">微信支付<span class="pay-method-chevron" aria-hidden="true">›</span></span>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-title">充值说明</div>
+              <div class="recharge-tip-body">
+                <p>
+                  充值后余额<strong>不支持自助提现</strong>。如需退款，请联系
+                  <button type="button" class="cs-link-tip" id="csLinkRecharge" aria-label="联系平台客服">平台客服</button>
+                  处理。
+                </p>
+                <p>已使用或已过期赠送权益的处理，以平台规则与客服核实结果为准。</p>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="agreement" id="agreementCheck" role="checkbox" aria-checked="false" tabindex="0">
+                <span class="check" id="checkIcon" aria-hidden="true">✓</span>
+                <span>我已阅读并同意 <button type="button" class="link" id="agreementLink">《充值协议》</button></span>
+              </div>
+            </section>
+          </div>
+          <div class="pay-bar">
+            <div class="pay-summary pay-summary-recharge"><span>应付金额</span><span class="pay-amount" id="payAmount">¥ 100.00</span></div>
+            <button type="button" class="primary-btn" id="payBtn">微信支付</button>
+          </div>
+        </main>
+
+        <main class="page" id="pageResult">
+          <div class="result-wrap" id="resultContent"></div>
+          <div class="bottom-bar">
+            <div class="result-actions" id="resultActions">
+              <button type="button" class="primary-btn" id="resultBack">返回账户余额</button>
+              <button type="button" class="secondary-btn" id="resultCoupons" style="display:none">查看优惠券</button>
+            </div>
+          </div>
+        </main>
+
+        <div class="modal-mask" id="modalMask">
+          <div class="sheet">
+            <div class="sheet-head"><span id="sheetTitle">说明</span><button type="button" class="close" id="sheetClose">×</button></div>
+            <div class="sheet-body" id="sheetBody"></div>
+          </div>
+        </div>
+        <div class="toast" id="toast">提示</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var WALLET_BALANCE = 1000;
+
+      var state = {
+        page: "balance",
+        rechargeEnabled: true,
+        flowsEmpty: false,
+        configError: false,
+        tiersEmpty: false,
+        customTierEnabled: true,
+        customMin: 10,
+        customMax: null,
+        selectedTier: "t2",
+        customAmount: "",
+        agreed: false,
+        result: "success",
+        p01Loading: false,
+        p01Error: false,
+        p02Loading: false,
+        lastPayAmount: 100,
+        giftIssue: "ok",
+        protoOpen: false
+      };
+
+      var tierCatalog = [
+        { id: "t1", type: "fixed", amount: 50, title: "¥50", gifts: [] },
+        {
+          id: "t2",
+          type: "fixed",
+          amount: 100,
+          title: "¥100",
+          gifts: [
+            {
+              title: "汽车保养优惠券",
+              business: "汽车保养",
+              valid: "领取当日起 7 天有效",
+              qty: "1 张"
+            }
+          ]
+        },
+        {
+          id: "t3",
+          type: "fixed",
+          amount: 300,
+          title: "¥300",
+          gifts: [
+            {
+              title: "汽车美容优惠券",
+              business: "汽车美容",
+              valid: "领取当日起 15 天有效",
+              qty: "2 张"
+            }
+          ]
+        },
+        { id: "custom", type: "custom", amount: 0, title: "自定义金额", gifts: [] }
+      ];
+
+      var flows = [
+        { title: "订单支付", order: "202601011404001", time: "2026-01-01 12:00", amount: "-10.00", type: "neg" },
+        { title: "订单支付", order: "202601011404002", time: "2026-01-01 12:00", amount: "-10.00", type: "neg" },
+        { title: "钱包充值", order: "REC202601010001", time: "2026-01-01 12:00", amount: "+10.00", type: "pos" },
+        { title: "订单退款", order: "202601011404002", time: "2026-01-01 12:00", amount: "+10.00", type: "pos" },
+        { title: "订单支付", order: "202508141404001", time: "2026-01-01 12:00", amount: "-10.00", type: "neg" },
+        { title: "钱包充值", order: "REC202508140002", time: "2026-01-01 12:00", amount: "+10.00", type: "pos" },
+        { title: "订单退款", order: "202508141404001", time: "2026-01-01 12:00", amount: "+10.00", type: "pos" }
+      ];
+
+      var el = {
+        navTitle: document.getElementById("navTitle"),
+        backBtn: document.getElementById("backBtn"),
+        balance: document.getElementById("pageBalance"),
+        recharge: document.getElementById("pageRecharge"),
+        result: document.getElementById("pageResult"),
+        flowContent: document.getElementById("flowContent"),
+        heroBalance: document.getElementById("heroBalance"),
+        balanceRule: document.getElementById("balanceRule"),
+        rechargeBtn: document.getElementById("rechargeBtn"),
+        tierSlot: document.getElementById("tierSlot"),
+        customPanel: document.getElementById("customPanel"),
+        customAmount: document.getElementById("customAmount"),
+        customHintTip: document.getElementById("customHintTip"),
+        customHint: document.getElementById("customHint"),
+        giftPanel: document.getElementById("giftPanel"),
+        giftPreview: document.getElementById("giftPreview"),
+        agreementCheck: document.getElementById("agreementCheck"),
+        agreementLink: document.getElementById("agreementLink"),
+        checkIcon: document.getElementById("checkIcon"),
+        csLinkRecharge: document.getElementById("csLinkRecharge"),
+        payAmount: document.getElementById("payAmount"),
+        payBtn: document.getElementById("payBtn"),
+        resultContent: document.getElementById("resultContent"),
+        resultBack: document.getElementById("resultBack"),
+        resultCoupons: document.getElementById("resultCoupons"),
+        rechargeBalanceValue: document.getElementById("rechargeBalanceValue"),
+        rechargeLockBanner: document.getElementById("rechargeLockBanner"),
+        modalMask: document.getElementById("modalMask"),
+        sheetTitle: document.getElementById("sheetTitle"),
+        sheetBody: document.getElementById("sheetBody"),
+        sheetClose: document.getElementById("sheetClose"),
+        toast: document.getElementById("toast"),
+        protoFab: document.getElementById("protoFab"),
+        protoOverlay: document.getElementById("protoOverlay"),
+        protoDrawer: document.getElementById("protoDrawer"),
+        protoClose: document.getElementById("protoClose"),
+        protoReset: document.getElementById("protoReset")
+      };
+
+      function showToast(text) {
+        el.toast.textContent = text;
+        el.toast.classList.add("show");
+        setTimeout(function () {
+          el.toast.classList.remove("show");
+        }, 2000);
+      }
+
+      function money(value) {
+        return "¥ " + Number(value || 0).toFixed(2);
+      }
+
+      function moneyPlain(value) {
+        return "¥ " + Number(value || 0).toFixed(2);
+      }
+
+      function getVisibleTiers() {
+        if (state.tiersEmpty) return [];
+        return tierCatalog.filter(function (t) {
+          return t.type === "fixed" || (t.type === "custom" && state.customTierEnabled);
+        });
+      }
+
+      function ensureTierSelection() {
+        var list = getVisibleTiers();
+        if (!list.length) {
+          state.selectedTier = "";
+          return;
+        }
+        if (!list.some(function (t) {
+          return t.id === state.selectedTier;
+        })) {
+          var firstFixed = list.find(function (t) {
+            return t.type === "fixed";
+          });
+          state.selectedTier = firstFixed ? firstFixed.id : list[0].id;
+        }
+      }
+
+      function getTierById(id) {
+        return tierCatalog.find(function (t) {
+          return t.id === id;
+        });
+      }
+
+      function currentAmount() {
+        var tier = getTierById(state.selectedTier);
+        if (!tier) return 0;
+        if (tier.type === "custom") return Number(state.customAmount || 0);
+        return tier.amount;
+      }
+
+      function giftsForCustomAmount(amount) {
+        if (!(amount > 0)) return [];
+        if (amount >= 300) return tierCatalog[2].gifts.slice();
+        if (amount >= 100) return tierCatalog[1].gifts.slice();
+        return [];
+      }
+
+      function currentGifts() {
+        var tier = getTierById(state.selectedTier);
+        if (!tier) return [];
+        if (tier.type === "fixed") return (tier.gifts || []).slice();
+        return giftsForCustomAmount(currentAmount());
+      }
+
+      function customAmountError() {
+        var tier = getTierById(state.selectedTier);
+        if (!tier || tier.type !== "custom") return "";
+        var raw = String(state.customAmount || "").trim();
+        if (!raw) return "";
+        var n = Number(raw);
+        if (!isFinite(n) || n <= 0) return "请输入大于 0 的合法金额";
+        if (state.customMin != null && n < state.customMin) {
+          return "充值金额不能低于 " + moneyPlain(state.customMin);
+        }
+        if (state.customMax != null && n > state.customMax) {
+          return "充值金额不能高于 " + moneyPlain(state.customMax);
+        }
+        return "";
+      }
+
+      function isPayableAmount() {
+        var tier = getTierById(state.selectedTier);
+        if (!tier) return false;
+        if (tier.type === "custom") {
+          var raw = String(state.customAmount || "").trim();
+          if (!raw) return false;
+          return !customAmountError();
+        }
+        return tier.amount > 0;
+      }
+
+      function renderHero() {
+        if (state.p01Loading) {
+          el.heroBalance.className = "money-main skeleton is-skeleton";
+          el.heroBalance.textContent = "";
+          return;
+        }
+        el.heroBalance.className = "money-main";
+        el.heroBalance.textContent = state.p01Error ? "--" : moneyPlain(WALLET_BALANCE);
+      }
+
+      function renderFlows() {
+        if (state.p01Loading) {
+          el.flowContent.innerHTML =
+            '<div class="section-title">余额明细</div>' +
+            '<div class="flow-item"><div class="skeleton sk-line"></div><div class="skeleton sk-line short" style="margin-left:auto;width:72px"></div></div>' +
+            '<div class="flow-item"><div class="skeleton sk-line"></div><div class="skeleton sk-line short" style="margin-left:auto;width:72px"></div></div>' +
+            '<div class="flow-item"><div class="skeleton sk-line"></div><div class="skeleton sk-line short" style="margin-left:auto;width:72px"></div></div>';
+          return;
+        }
+        if (state.p01Error) {
+          el.flowContent.innerHTML =
+            '<div class="section-title">余额明细</div>' +
+            '<div class="error"><div class="empty-icon">!</div><div>余额信息加载失败</div><p>为避免使用过期余额发起支付，请先重试。</p>' +
+            '<button type="button" class="primary-btn" id="retryBalance" style="margin-top:12px">重试加载</button></div>';
+          var retry = document.getElementById("retryBalance");
+          if (retry) {
+            retry.onclick = function () {
+              state.p01Error = false;
+              renderBalance();
+              syncProtoUi();
+            };
+          }
+          return;
+        }
+        if (state.flowsEmpty) {
+          el.flowContent.innerHTML =
+            '<div class="section-title">余额明细</div>' +
+            '<div class="empty"><div class="empty-icon">∅</div><div>暂无余额明细</div><p>订单支付、钱包充值、订单退款等记录将展示在这里。</p></div>';
+          return;
+        }
+        el.flowContent.innerHTML =
+          '<div class="section-title">余额明细</div>' +
+          flows
+            .map(function (item) {
+              return (
+                '<div class="flow-item">' +
+                '<div><div class="flow-title">' +
+                item.title +
+                (item.order ? '<span class="flow-order">' + item.order + "</span>" : "") +
+                '</div><div class="flow-time">' +
+                item.time +
+                '</div></div><div class="flow-amount ' +
+                item.type +
+                '">' +
+                item.amount +
+                "</div></div>"
+              );
+            })
+            .join("");
+      }
+
+      function renderBalance() {
+        renderHero();
+        renderFlows();
+        if (state.rechargeEnabled) {
+          el.rechargeBtn.disabled = false;
+          el.rechargeBtn.textContent = "充值";
+        } else {
+          el.rechargeBtn.disabled = true;
+          el.rechargeBtn.textContent = "充值暂不可用";
+        }
+      }
+
+      function giftV2Row(lbl, val) {
+        return (
+          '<div class="gift-v2-row">' +
+          '<span class="gift-v2-row-lbl">' +
+          lbl +
+          "</span>" +
+          '<span class="gift-v2-row-val">' +
+          val +
+          "</span></div>"
+        );
+      }
+
+      function renderGiftPreview() {
+        var gifts = currentGifts();
+        if (!gifts.length) {
+          el.giftPreview.innerHTML = "";
+          if (el.giftPanel) el.giftPanel.style.display = "none";
+          return;
+        }
+        if (el.giftPanel) el.giftPanel.style.display = "block";
+        el.giftPreview.innerHTML =
+          '<div class="gift-list-v2">' +
+          gifts
+            .map(function (g) {
+              var title = g.title || g.name || "优惠券";
+              return (
+                '<div class="gift-card-v2">' +
+                '<div class="gift-card-v2-name">' +
+                title +
+                "</div>" +
+                '<div class="gift-card-v2-sep"></div>' +
+                '<div class="gift-v2-rows">' +
+                giftV2Row("适用业务", g.business || "—") +
+                giftV2Row("有效期", g.valid || "—") +
+                giftV2Row("数量", g.qty || "—") +
+                "</div></div>"
+              );
+            })
+            .join("") +
+          "</div>";
+      }
+
+      function tierGiftLabel(tier) {
+        if (!tier) return "无赠送";
+        if (tier.type === "custom") {
+          var raw = String(state.customAmount || "").trim();
+          if (!raw) return "输入金额查看赠送权益";
+          var n = Number(raw);
+          if (!isFinite(n) || n <= 0) return "输入金额查看赠送权益";
+          if (state.customMin != null && n < state.customMin) return "输入金额查看赠送权益";
+          if (state.customMax != null && n > state.customMax) return "输入金额查看赠送权益";
+          return giftsForCustomAmount(n).length ? "充值即赠" : "无赠送";
+        }
+        if (tier.gifts && tier.gifts.length) return "充值即赠";
+        return "无赠送";
+      }
+
+      function tierGiftClass(tier) {
+        var lbl = tierGiftLabel(tier);
+        if (lbl === "无赠送") return "tier-gift tier-gift--no";
+        return "tier-gift tier-gift--yes";
+      }
+
+      function renderTierSlot() {
+        if (state.configError) {
+          el.tierSlot.innerHTML =
+            '<div class="error" style="padding:8px 0 4px"><div class="empty-icon">!</div><div>充值配置加载失败，请重试</div><p style="margin:8px 0 0">请返回上一页稍后重试，或联系客服 400-888-6666。</p></div>';
+          return;
+        }
+        if (state.p02Loading) {
+          el.tierSlot.innerHTML =
+            '<div class="tier-grid">' +
+            '<div class="skeleton sk-block"></div><div class="skeleton sk-block"></div>' +
+            '<div class="skeleton sk-block"></div><div class="skeleton sk-block"></div>' +
+            "</div>";
+          return;
+        }
+        var list = getVisibleTiers();
+        if (!list.length) {
+          el.tierSlot.innerHTML =
+            '<div class="empty" style="padding:18px 8px"><div class="empty-icon">∅</div><div>暂无可充值档位</div><p>请联系平台或稍后再试。</p></div>';
+          return;
+        }
+        el.tierSlot.innerHTML =
+          '<div class="tier-grid">' +
+          list
+            .map(function (tier) {
+              return (
+                '<button type="button" class="tier ' +
+                (state.selectedTier === tier.id ? "selected" : "") +
+                '" data-tier="' +
+                tier.id +
+                '">' +
+                '<div class="tier-amount">' +
+                tier.title +
+                "</div>" +
+                '<div class="' +
+                tierGiftClass(tier) +
+                '">' +
+                tierGiftLabel(tier) +
+                "</div></button>"
+              );
+            })
+            .join("") +
+          "</div>";
+      }
+
+      function renderRecharge() {
+        ensureTierSelection();
+        el.rechargeBalanceValue.textContent = moneyPlain(WALLET_BALANCE);
+        var locked = !state.rechargeEnabled;
+        el.rechargeLockBanner.style.display = locked ? "block" : "none";
+
+        renderTierSlot();
+
+        var tier = getTierById(state.selectedTier);
+        var isCustom = tier && tier.type === "custom";
+        el.customPanel.style.display =
+          isCustom && state.customTierEnabled && !state.configError && !state.p02Loading ? "block" : "none";
+
+        var err = customAmountError();
+        if (isCustom && el.customHintTip) {
+          if (err) {
+            el.customHintTip.style.display = "none";
+            el.customHint.textContent = err;
+            el.customHint.style.display = "block";
+          } else {
+            el.customHint.textContent = "";
+            el.customHint.style.display = "none";
+            el.customHintTip.style.display = "block";
+          }
+        } else if (el.customHintTip) {
+          el.customHintTip.style.display = "none";
+          el.customHint.textContent = "";
+          el.customHint.style.display = "none";
+        }
+
+        renderGiftPreview();
+
+        el.checkIcon.classList.toggle("checked", state.agreed);
+        el.agreementCheck.setAttribute("aria-checked", state.agreed ? "true" : "false");
+
+        var amount = currentAmount();
+        el.payAmount.textContent = money(amount);
+
+        var block =
+          locked ||
+          state.configError ||
+          state.p02Loading ||
+          !getVisibleTiers().length ||
+          !isPayableAmount() ||
+          !state.agreed;
+        el.payBtn.disabled = block;
+        el.payBtn.setAttribute("aria-disabled", block ? "true" : "false");
+      }
+
+      function giftIssueText() {
+        if (state.giftIssue === "pending") return "赠送券发放中，请稍后到优惠券列表查看";
+        if (state.giftIssue === "fail") return "赠送券发放失败，平台将为您处理，您也可联系客服 400-888-6666";
+        return "";
+      }
+
+      function renderResult(type) {
+        var payAmt = state.lastPayAmount || currentAmount() || 0;
+        var gifts = [];
+        if (type === "success") {
+          var t = getTierById(state.selectedTier);
+          if (t && t.type === "fixed") gifts = (t.gifts || []).slice();
+          else gifts = giftsForCustomAmount(payAmt);
+        }
+
+        if (type === "success") {
+          var giftLine = "本次充值无赠送";
+          if (gifts.length) {
+            if (state.giftIssue === "ok") giftLine = "预计发放 " + gifts.length + " 组优惠券（已入账）";
+            else if (state.giftIssue === "pending") giftLine = giftIssueText();
+            else giftLine = giftIssueText();
+          }
+          el.resultContent.innerHTML =
+            '<div class="result-icon">✓</div>' +
+            '<div class="result-title">充值成功</div>' +
+            '<div class="result-desc">微信支付已完成，余额入账结果以服务端为准。</div>' +
+            '<div class="result-card">' +
+            '<div class="kv"><span>充值金额</span><strong>' +
+            money(payAmt) +
+            "</strong></div>" +
+            '<div class="kv"><span>支付方式</span><strong>微信支付</strong></div>' +
+            '<div class="kv"><span>充值单号</span><strong>REC202605090001</strong></div>' +
+            '<div class="kv"><span>支付时间</span><strong>2026-05-09 14:32</strong></div>' +
+            '<div class="kv"><span>赠送结果</span><strong>' +
+            giftLine +
+            "</strong></div>" +
+            "</div>";
+          var showCoupon = gifts.length > 0 && state.giftIssue === "ok";
+          el.resultCoupons.style.display = showCoupon ? "block" : "none";
+          return;
+        }
+
+        el.resultCoupons.style.display = "none";
+        if (type === "processing") {
+          el.resultContent.innerHTML =
+            '<div class="result-icon processing">…</div>' +
+            '<div class="result-title">充值处理中</div>' +
+            '<div class="result-desc">微信支付已完成，系统正在确认入账。您可稍后刷新订单状态。</div>' +
+            '<div class="result-card">' +
+            '<div class="kv"><span>充值金额</span><strong>' +
+            money(payAmt) +
+            "</strong></div>" +
+            '<div class="kv"><span>充值单号</span><strong>REC202605090001</strong></div>' +
+            "</div>" +
+            '<button type="button" class="secondary-btn" id="refreshOrder" style="margin-top:14px">刷新状态</button>';
+          var refresh = document.getElementById("refreshOrder");
+          if (refresh) {
+            refresh.onclick = function () {
+              showToast("已刷新（原型示意）");
+            };
+          }
+          return;
+        }
+
+        el.resultContent.innerHTML =
+          '<div class="result-icon fail">!</div>' +
+          '<div class="result-title">充值失败</div>' +
+          '<div class="result-desc">支付未完成、超时或入账失败。您可重新发起充值或联系客服。</div>' +
+          '<div class="result-card">' +
+          '<div class="kv"><span>失败原因</span><strong>支付未完成/订单失效（示意）</strong></div>' +
+          '<div class="kv"><span>充值单号</span><strong>REC202605090001</strong></div>' +
+          "</div>" +
+          '<button type="button" class="secondary-btn" id="retryRecharge" style="margin-top:14px">重新充值</button>';
+        var retry = document.getElementById("retryRecharge");
+        if (retry) {
+          retry.onclick = function () {
+            setPage("recharge");
+          };
+        }
+      }
+
+      function setPage(page) {
+        state.page = page;
+        el.balance.classList.toggle("active", page === "balance");
+        el.recharge.classList.toggle("active", page === "recharge");
+        el.result.classList.toggle("active", page === "result");
+        el.navTitle.textContent = page === "balance" ? "账户余额" : page === "recharge" ? "充值" : "充值结果";
+        document.querySelectorAll("[data-proto-page]").forEach(function (btn) {
+          btn.classList.toggle("active", btn.getAttribute("data-proto-page") === page);
+        });
+        if (page === "balance") renderBalance();
+        if (page === "recharge") renderRecharge();
+        if (page === "result") renderResult(state.result);
+        syncProtoUi();
+      }
+
+      function openSheet(title, html) {
+        el.sheetTitle.textContent = title;
+        el.sheetBody.innerHTML = html;
+        el.modalMask.classList.add("show");
+      }
+
+      function closeSheet() {
+        el.modalMask.classList.remove("show");
+      }
+
+      function balanceRuleHtml() {
+        return (
+          "<p>余额可用于平台内支持钱包支付的订单消费。</p>" +
+          "<p>余额明细包含订单支付、钱包充值、订单退款、客服调账等记录。</p>" +
+          "<p>充值成功后不支持客户自助提现；账户余额页不提供提现入口。</p>" +
+          "<p>如需退款，请联系平台客服 <strong>400-888-6666</strong>，由客服核实后通过后台调账、扣除未使用赠送优惠券并线下退款。</p>" +
+          "<p>赠送优惠券不折现、不计入余额。</p>"
+        );
+      }
+
+      function agreementHtml() {
+        return (
+          "<h4>车管家账户余额充值协议</h4>" +
+          "<p><strong>版本号：v2026.05.09</strong>（原型演示文本，正式上线前以平台发布为准）</p>" +
+          "<h4>1. 充值服务</h4><p>本充值服务仅支持微信支付；充值金额进入账户余额，可用于平台内指定业务消费。</p>" +
+          "<h4>2. 余额与不可提现</h4><p>充值成功后不支持客户自助提现。</p>" +
+          "<h4>3. 退款与客服</h4><p>如需退款，需联系平台客服处理；平台将根据实际余额、订单消费、赠送优惠券使用情况进行核实。退款前，平台可扣除该笔充值相关未使用赠送优惠券。</p>" +
+          "<h4>4. 赠送权益</h4><p>充值赠送权益以支付成功时后台配置和服务端发放结果为准。</p>" +
+          "<h4>5. 异常处理</h4><p>如遇网络异常、订单状态延迟等，请以订单查询结果为准。</p>" +
+          "<h4>6. 用户确认</h4><p>勾选即表示您已阅读并同意本协议内容（查看协议不会自动勾选）。</p>"
+        );
+      }
+
+      function refundHelpHtml() {
+        return (
+          "<p>充值后余额<strong>不支持自助提现</strong>。</p>" +
+          "<p>如需退款，请联系平台客服 <strong>400-888-6666</strong>；客服将核实余额与赠送券状态，并通过后台调账、扣除未使用赠送优惠券后安排线下退款。</p>" +
+          "<p>已使用或已过期赠送权益的处理，以平台规则与客服核实结果为准。</p>"
+        );
+      }
+
+      function customerServiceDrawerHtml() {
+        return (
+          '<div style="text-align:center;padding:8px 0 4px">' +
+          '<p style="margin:0 0 8px;font-size:13px;color:var(--color-text-2)">客服电话</p>' +
+          '<p style="margin:0;font-size:26px;font-weight:700;font-family:Menlo,Consolas,monospace;color:var(--color-primary-6);letter-spacing:0.5px">400-888-6666</p>' +
+          '<p style="margin:14px 0 0;font-size:13px;color:var(--color-text-3);line-height:1.55">如需退款或咨询，请拨打上方号码（原型示意）。</p>' +
+          "</div>"
+        );
+      }
+
+      function setProtoOpen(open) {
+        state.protoOpen = !!open;
+        el.protoOverlay.setAttribute("data-proto-open", state.protoOpen ? "true" : "false");
+        el.protoOverlay.setAttribute("aria-hidden", state.protoOpen ? "false" : "true");
+        if (state.protoOpen) {
+          setTimeout(function () {
+            try {
+              el.protoDrawer.focus();
+            } catch (e) {}
+          }, 0);
+        }
+      }
+
+      function applyProtoSet(spec) {
+        if (!spec) return;
+        var pair = String(spec).split(":");
+        var key = pair[0];
+        var val = pair.slice(1).join(":");
+        if (key === "rechargeEnabled") state.rechargeEnabled = val === "true";
+        if (key === "customTierEnabled") state.customTierEnabled = val === "true";
+        if (key === "tiersEmpty") state.tiersEmpty = val === "true";
+        if (key === "configError") state.configError = val === "true";
+        if (key === "flowsEmpty") state.flowsEmpty = val === "true";
+        if (key === "customMax") state.customMax = val === "null" || val === "" ? null : Number(val);
+        ensureTierSelection();
+      }
+
+      function syncProtoUi() {
+        document.getElementById("protoRechargeOn").classList.toggle("active", state.rechargeEnabled);
+        document.getElementById("protoRechargeOff").classList.toggle("active", !state.rechargeEnabled);
+        document.getElementById("protoCustomOn").classList.toggle("active", state.customTierEnabled);
+        document.getElementById("protoCustomOff").classList.toggle("active", !state.customTierEnabled);
+        document.getElementById("protoTiersEmpty").classList.toggle("active", state.tiersEmpty);
+        document.getElementById("protoTiersOk").classList.toggle("active", !state.tiersEmpty);
+        document.getElementById("protoConfigErr").classList.toggle("active", state.configError);
+        document.getElementById("protoConfigOk").classList.toggle("active", !state.configError);
+        document.getElementById("protoP01Loading").classList.toggle("active", state.p01Loading);
+        document.getElementById("protoP01Error").classList.toggle("active", state.p01Error);
+        document.getElementById("protoP02Loading").classList.toggle("active", state.p02Loading);
+        document.getElementById("protoFlowsEmpty").classList.toggle("active", state.flowsEmpty);
+        document.getElementById("protoFlowsNormal").classList.toggle("active", !state.flowsEmpty);
+        document.getElementById("protoMaxUnlimited").classList.toggle("active", state.customMax == null);
+        document.getElementById("protoMax5000").classList.toggle("active", state.customMax != null);
+        document.getElementById("protoGiftOk").classList.toggle("active", state.giftIssue === "ok");
+        document.getElementById("protoGiftPending").classList.toggle("active", state.giftIssue === "pending");
+        document.getElementById("protoGiftFail").classList.toggle("active", state.giftIssue === "fail");
+      }
+
+      el.rechargeBtn.onclick = function () {
+        if (!state.rechargeEnabled) {
+          showToast("充值功能暂不可用，请稍后再试");
+          return;
+        }
+        setPage("recharge");
+      };
+
+      el.backBtn.onclick = function () {
+        if (state.page === "balance") return;
+        setPage("balance");
+      };
+
+      el.balanceRule.onclick = function () {
+        openSheet("余额说明", balanceRuleHtml());
+      };
+      if (el.csLinkRecharge) {
+        el.csLinkRecharge.onclick = function (event) {
+          event.stopPropagation();
+          openSheet("联系客服", customerServiceDrawerHtml());
+        };
+      }
+      el.agreementLink.onclick = function (event) {
+        event.stopPropagation();
+        openSheet("充值协议", agreementHtml());
+      };
+      el.agreementCheck.addEventListener("click", function (event) {
+        if (event.target.closest("#agreementLink")) return;
+        event.preventDefault();
+        state.agreed = !state.agreed;
+        renderRecharge();
+      });
+      el.agreementCheck.addEventListener("keydown", function (e) {
+        if (e.target.closest && e.target.closest("#agreementLink")) return;
+        if (e.key === " " || e.key === "Enter") {
+          e.preventDefault();
+          state.agreed = !state.agreed;
+          renderRecharge();
+        }
+      });
+      el.customAmount.oninput = function () {
+        state.customAmount = el.customAmount.value;
+        renderRecharge();
+      };
+      el.sheetClose.onclick = closeSheet;
+      el.modalMask.onclick = function (event) {
+        if (event.target === el.modalMask) closeSheet();
+      };
+      el.resultBack.onclick = function () {
+        setPage("balance");
+      };
+      el.resultCoupons.onclick = function () {
+        showToast("跳转优惠券列表（原型示意）");
+      };
+
+      el.payBtn.onclick = function () {
+        if (!state.rechargeEnabled) {
+          showToast("充值功能暂不可用，请稍后再试");
+          return;
+        }
+        if (state.configError || state.p02Loading || !getVisibleTiers().length) return;
+        if (!state.agreed) {
+          showToast("请先阅读并同意充值协议");
+          return;
+        }
+        if (!isPayableAmount()) return;
+        state.lastPayAmount = currentAmount();
+        state.result = "success";
+        showToast("调起微信支付（原型示意）");
+        setPage("result");
+      };
+
+      document.addEventListener("click", function (event) {
+        var tierBtn = event.target.closest("[data-tier]");
+        if (tierBtn && state.page === "recharge" && el.recharge.contains(tierBtn)) {
+          state.selectedTier = tierBtn.getAttribute("data-tier");
+          if (state.selectedTier !== "custom") state.customAmount = "";
+          el.customAmount.value = state.customAmount;
+          renderRecharge();
+        }
+
+        var pageBtn = event.target.closest("[data-proto-page]");
+        if (pageBtn) {
+          setPage(pageBtn.getAttribute("data-proto-page"));
+          return;
+        }
+        var resultBtn = event.target.closest("[data-proto-result]");
+        if (resultBtn) {
+          state.result = resultBtn.getAttribute("data-proto-result");
+          if (state.result === "success") state.lastPayAmount = currentAmount() || 100;
+          setPage("result");
+          return;
+        }
+
+        var giftBtn = event.target.closest("[data-proto-gift]");
+        if (giftBtn) {
+          state.giftIssue = giftBtn.getAttribute("data-proto-gift");
+          syncProtoUi();
+          if (state.page === "result" && state.result === "success") renderResult("success");
+          return;
+        }
+
+        var setBtn = event.target.closest("[data-proto-set]");
+        if (setBtn) {
+          applyProtoSet(setBtn.getAttribute("data-proto-set"));
+          renderBalance();
+          if (state.page === "recharge") renderRecharge();
+          syncProtoUi();
+          return;
+        }
+
+        var flagBtn = event.target.closest("[data-proto-flag]");
+        if (flagBtn) {
+          var f = flagBtn.getAttribute("data-proto-flag");
+          if (f === "p01Loading") state.p01Loading = !state.p01Loading;
+          if (f === "p01Error") state.p01Error = !state.p01Error;
+          if (f === "p02Loading") state.p02Loading = !state.p02Loading;
+          if (f === "p01Error" && state.p01Error) state.p01Loading = false;
+          if (f === "p01Loading" && state.p01Loading) state.p01Error = false;
+          renderBalance();
+          if (state.page === "recharge") renderRecharge();
+          syncProtoUi();
+        }
+      });
+
+      el.protoFab.onclick = function () {
+        setProtoOpen(!state.protoOpen);
+      };
+      el.protoClose.onclick = function () {
+        setProtoOpen(false);
+      };
+      el.protoOverlay.onclick = function (e) {
+        if (e.target === el.protoOverlay) setProtoOpen(false);
+      };
+      el.protoReset.onclick = function () {
+        state.rechargeEnabled = true;
+        state.flowsEmpty = false;
+        state.configError = false;
+        state.tiersEmpty = false;
+        state.customTierEnabled = true;
+        state.customMin = 10;
+        state.customMax = null;
+        state.selectedTier = "t2";
+        state.customAmount = "";
+        state.agreed = false;
+        state.result = "success";
+        state.p01Loading = false;
+        state.p01Error = false;
+        state.p02Loading = false;
+        state.lastPayAmount = 100;
+        state.giftIssue = "ok";
+        el.customAmount.value = "";
+        setPage("balance");
+        syncProtoUi();
+      };
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          if (state.protoOpen) setProtoOpen(false);
+          else if (el.modalMask.classList.contains("show")) closeSheet();
+        }
+      });
+
+      var protoRefreshBtn = document.querySelector("[data-proto-demo=\"refreshBalance\"]");
+      if (protoRefreshBtn) {
+        protoRefreshBtn.onclick = function () {
+          showToast("已刷新余额与明细（原型示意）");
+        };
+      }
+
+      syncProtoUi();
+      renderBalance();
+      renderRecharge();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>车辆年检排队详情 · 微信小程序原型</title>
+  <style>
+    :root {
+      --color-primary-7: #0e42d2;
+      --color-primary-6: #165dff;
+      --color-primary-5: #4080ff;
+      --color-primary-1: #e8f3ff;
+      --color-text-1: #1d2129;
+      --color-text-2: #4e5969;
+      --color-text-3: #86909c;
+      --color-border-1: #e5e6eb;
+      --color-border-2: #c9cdd4;
+      --color-fill-1: #f7f8fa;
+      --color-fill-2: #f2f3f5;
+      --color-bg: #ffffff;
+      --color-success-6: #00b42a;
+      --color-warning-6: #ff7d00;
+      --color-danger-6: #f53f3f;
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --space-4: 4px;
+      --space-8: 8px;
+      --space-12: 12px;
+      --space-16: 16px;
+      --space-20: 20px;
+      --space-24: 24px;
+      --status-bar-h: 44px;
+      --nav-h: 44px;
+      --capsule-w: 87px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
+      font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-fill-2);
+      color: var(--color-text-1);
+      font-size: 14px;
+      line-height: 1.57;
+      min-height: 100vh;
+    }
+
+    .prototype-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-16) var(--space-12) calc(var(--space-24) + var(--safe-bottom));
+      min-height: 100vh;
+    }
+
+    .prototype-stage {
+      position: relative;
+      display: inline-block;
+      vertical-align: top;
+      max-width: 100%;
+    }
+
+    .device-shell {
+      width: 390px;
+      max-width: 100%;
+      min-height: min(820px, calc(100vh - 100px));
+      background: var(--color-fill-1);
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 0 1px var(--color-border-1), 0 12px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    .status-bar {
+      height: calc(var(--status-bar-h) + var(--safe-top));
+      padding-top: var(--safe-top);
+      background: var(--color-bg);
+      flex-shrink: 0;
+    }
+
+    .nav-bar {
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      padding: 0 var(--space-12);
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-border-1);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .nav-bar-inner {
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
+
+    .nav-side {
+      width: var(--capsule-w);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      min-height: 40px;
+    }
+
+    .nav-side--left { justify-content: flex-start; }
+    .nav-side--right { justify-content: flex-end; }
+
+    .nav-title-wrap {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0 var(--space-8);
+      min-width: 0;
+    }
+
+    .nav-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--color-text-1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .btn-back {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      color: var(--color-text-1);
+      font-size: 20px;
+      line-height: 40px;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+    }
+
+    .btn-back:active { opacity: 0.65; }
+
+    .capsule-placeholder {
+      width: var(--capsule-w);
+      height: 32px;
+      border-radius: 16px;
+      background: var(--color-fill-2);
+      border: 1px solid var(--color-border-1);
+      flex-shrink: 0;
+      pointer-events: none;
+    }
+
+    .page-body {
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100% - var(--status-bar-h) - var(--nav-h) - var(--safe-top));
+    }
+
+    .page-scroll {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: var(--space-16);
+      padding-bottom: calc(112px + var(--safe-bottom));
+    }
+
+    .hidden { display: none !important; }
+
+    /* 状态摘要区 */
+    .queue-hero {
+      background: linear-gradient(145deg, var(--color-primary-7) 0%, var(--color-primary-6) 48%, var(--color-primary-5) 100%);
+      color: #fff;
+      border-radius: var(--radius-lg);
+      padding: var(--space-24) var(--space-20);
+      margin-bottom: var(--space-16);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(22, 93, 255, 0.22);
+    }
+
+    .queue-hero::after {
+      content: "";
+      position: absolute;
+      right: -24px;
+      top: -24px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .queue-hero__top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-12);
+      position: relative;
+      z-index: 1;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-4) var(--space-12);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+    }
+
+    .status-pill__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #7dffb3;
+      box-shadow: 0 0 0 2px rgba(125, 255, 179, 0.35);
+    }
+
+    .queue-hero__hint {
+      font-size: 12px;
+      opacity: 0.88;
+      text-align: right;
+      line-height: 1.4;
+    }
+
+    .queue-hero__num {
+      margin-top: var(--space-20);
+      position: relative;
+      z-index: 1;
+    }
+
+    .queue-hero__num-label {
+      font-size: 13px;
+      opacity: 0.9;
+      margin-bottom: var(--space-8);
+    }
+
+    .queue-hero__num-value {
+      font-size: 40px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      line-height: 1.1;
+    }
+
+    .queue-hero__num-sub {
+      margin-top: var(--space-8);
+      font-size: 13px;
+      opacity: 0.92;
+    }
+
+    .queue-hero__updated {
+      margin-top: var(--space-16);
+      font-size: 12px;
+      opacity: 0.78;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* 信息卡片 */
+    .info-card {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-lg);
+      padding: var(--space-16);
+      margin-bottom: var(--space-16);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .info-card__title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-text-1);
+      margin-bottom: var(--space-12);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-12);
+      padding: var(--space-8) 0;
+      border-top: 1px solid var(--color-fill-2);
+      font-size: 14px;
+    }
+
+    .info-row:first-of-type { border-top: none; padding-top: 0; }
+
+    .info-row__k {
+      color: var(--color-text-3);
+      flex-shrink: 0;
+    }
+
+    .info-row__v {
+      color: var(--color-text-1);
+      text-align: right;
+      word-break: break-all;
+    }
+
+    /* 时间轴 */
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: var(--space-12);
+      color: var(--color-text-1);
+    }
+
+    .timeline {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-lg);
+      padding: var(--space-16) var(--space-16) var(--space-8);
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: var(--space-12);
+      position: relative;
+      padding-bottom: var(--space-20);
+    }
+
+    .timeline-item:last-child { padding-bottom: 0; }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 14px;
+      bottom: -6px;
+      width: 2px;
+      background: var(--color-border-1);
+    }
+
+    .timeline-item:last-child::before { display: none; }
+
+    .timeline-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-fill-2);
+      border: 2px solid var(--color-border-2);
+      flex-shrink: 0;
+      margin-top: 4px;
+      z-index: 1;
+    }
+
+    .timeline-item.is-done .timeline-dot {
+      background: var(--color-success-6);
+      border-color: rgba(0, 180, 42, 0.35);
+    }
+
+    .timeline-item.is-current .timeline-dot {
+      background: var(--color-primary-6);
+      border-color: rgba(22, 93, 255, 0.4);
+      box-shadow: 0 0 0 4px var(--color-primary-1);
+    }
+
+    .timeline-item.is-pending .timeline-dot {
+      background: var(--color-bg);
+      border-color: var(--color-border-2);
+    }
+
+    .timeline-body { flex: 1; min-width: 0; }
+
+    .timeline-time {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-1);
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+    }
+
+    .timeline-desc {
+      font-size: 13px;
+      color: var(--color-text-2);
+      margin-top: var(--space-4);
+    }
+
+    .timeline-tag {
+      display: inline-block;
+      margin-top: var(--space-8);
+      font-size: 12px;
+      padding: 2px var(--space-8);
+      border-radius: var(--radius-sm);
+      background: var(--color-fill-2);
+      color: var(--color-text-3);
+    }
+
+    .timeline-item.is-current .timeline-tag {
+      background: var(--color-primary-1);
+      color: var(--color-primary-6);
+      font-weight: 500;
+    }
+
+    .notice-bar {
+      margin-top: var(--space-16);
+      padding: var(--space-12) var(--space-16);
+      background: #fff7e8;
+      border: 1px solid rgba(255, 125, 0, 0.25);
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      color: var(--color-warning-6);
+      line-height: 1.5;
+    }
+
+    /* 加载 / 空 / 错 */
+    .skeleton {
+      border-radius: var(--radius-lg);
+      background: linear-gradient(90deg, var(--color-fill-2) 25%, var(--color-fill-1) 50%, var(--color-fill-2) 75%);
+      background-size: 200% 100%;
+      animation: sk 1.2s ease-in-out infinite;
+    }
+
+    @keyframes sk {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .state-panel {
+      text-align: center;
+      padding: var(--space-24) var(--space-16);
+    }
+
+    .state-panel__icon {
+      font-size: 48px;
+      line-height: 1;
+      margin-bottom: var(--space-12);
+    }
+
+    .state-panel__title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: var(--space-8);
+    }
+
+    .state-panel__desc {
+      font-size: 13px;
+      color: var(--color-text-3);
+      line-height: 1.55;
+      margin-bottom: var(--space-20);
+    }
+
+    .btn-retry {
+      height: 40px;
+      padding: 0 var(--space-24);
+      border-radius: var(--radius-md);
+      border: none;
+      background: var(--color-primary-6);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-retry:active { opacity: 0.88; }
+
+    /* 底部操作 */
+    .bottom-bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: var(--space-12) var(--space-16);
+      padding-bottom: calc(var(--space-12) + var(--safe-bottom));
+      background: var(--color-bg);
+      border-top: 1px solid var(--color-border-1);
+      display: flex;
+      gap: var(--space-12);
+      z-index: 40;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      height: 48px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border-1);
+      background: var(--color-bg);
+      color: var(--color-text-1);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-secondary:active { background: var(--color-fill-2); }
+
+    .btn-primary {
+      flex: 1;
+      height: 48px;
+      border-radius: var(--radius-md);
+      border: none;
+      background: var(--color-primary-6);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-primary:active { opacity: 0.92; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 96px;
+      transform: translateX(-50%) translateY(12px);
+      padding: var(--space-12) var(--space-20);
+      background: rgba(29, 33, 41, 0.88);
+      color: #fff;
+      font-size: 13px;
+      border-radius: var(--radius-md);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 9999;
+      max-width: min(320px, 90vw);
+      text-align: center;
+    }
+
+    .toast.is-visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* 原型 FAB + 抽屉 */
+    .proto-fab {
+      position: absolute;
+      right: -56px;
+      bottom: 120px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: none;
+      background: var(--color-text-1);
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+      z-index: 100;
+    }
+
+    .proto-fab:active { transform: scale(0.96); }
+
+    @media (max-width: 480px) {
+      .proto-fab {
+        right: 8px;
+        bottom: 8px;
+        position: fixed;
+      }
+    }
+
+    .proto-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 10000;
+    }
+
+    .proto-mask.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .proto-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: min(320px, 92vw);
+      height: 100%;
+      background: var(--color-bg);
+      box-shadow: -8px 0 32px rgba(0, 0, 0, 0.12);
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+      z-index: 10001;
+      padding: var(--space-24) var(--space-16);
+      overflow-y: auto;
+    }
+
+    .proto-drawer.is-open { transform: translateX(0); }
+
+    .proto-drawer h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: var(--space-8);
+    }
+
+    .proto-drawer-sub {
+      font-size: 12px;
+      color: var(--color-text-3);
+      line-height: 1.5;
+      margin-bottom: var(--space-20);
+    }
+
+    .proto-section-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin: var(--space-16) 0 var(--space-8);
+    }
+
+    .proto-section-label:first-of-type { margin-top: 0; }
+
+    .proto-pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-8);
+    }
+
+    .proto-pill {
+      padding: 6px var(--space-12);
+      border-radius: 999px;
+      border: 1px solid var(--color-border-1);
+      background: var(--color-fill-1);
+      font-size: 12px;
+      color: var(--color-text-2);
+      cursor: pointer;
+    }
+
+    .proto-pill.is-active {
+      border-color: var(--color-primary-6);
+      background: var(--color-primary-1);
+      color: var(--color-primary-6);
+      font-weight: 600;
+    }
+
+    .proto-menu-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: var(--space-12) var(--space-12);
+      margin-bottom: var(--space-8);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border-1);
+      background: var(--color-bg);
+      font-size: 14px;
+      color: var(--color-text-1);
+      cursor: pointer;
+    }
+
+    .proto-menu-item.is-active {
+      border-color: var(--color-primary-6);
+      background: var(--color-primary-1);
+    }
+
+    .proto-simulate-btn {
+      width: 100%;
+      height: 40px;
+      border-radius: var(--radius-md);
+      border: none;
+      background: var(--color-fill-2);
+      color: var(--color-text-1);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: var(--space-8);
+    }
+
+    .proto-note {
+      font-size: 11px;
+      color: var(--color-text-3);
+      line-height: 1.5;
+      margin-top: var(--space-12);
+    }
+  </style>
+</head>
+<body>
+  <div class="prototype-layout">
+    <div class="prototype-stage">
+      <div class="device-shell">
+        <div class="status-bar" aria-hidden="true"></div>
+        <header class="nav-bar">
+          <div class="nav-bar-inner">
+            <div class="nav-side nav-side--left">
+              <button type="button" class="btn-back" id="btn-back" aria-label="返回">‹</button>
+            </div>
+            <div class="nav-title-wrap">
+              <h1 class="nav-title">年检排队详情</h1>
+            </div>
+            <div class="nav-side nav-side--right">
+              <div class="capsule-placeholder" aria-hidden="true"></div>
+            </div>
+          </div>
+        </header>
+
+        <div class="page-body">
+          <main class="page-scroll" id="main-scroll">
+            <!-- 加载态 -->
+            <div id="content-loading" class="hidden">
+              <div class="skeleton" style="height:168px;margin-bottom:16px;"></div>
+              <div class="skeleton" style="height:120px;margin-bottom:16px;"></div>
+              <div class="skeleton" style="height:220px;"></div>
+            </div>
+
+            <!-- 空态 -->
+            <div id="content-empty" class="hidden">
+              <div class="state-panel">
+                <div class="state-panel__icon" aria-hidden="true">📋</div>
+                <div class="state-panel__title">暂无排队信息</div>
+                <p class="state-panel__desc">订单尚未进入检测环节，或排队数据暂未同步。您可在订单开始后再次查看。</p>
+              </div>
+            </div>
+
+            <!-- 错误态 -->
+            <div id="content-error" class="hidden">
+              <div class="state-panel">
+                <div class="state-panel__icon" aria-hidden="true">⚠️</div>
+                <div class="state-panel__title">排队信息加载失败</div>
+                <p class="state-panel__desc">网络异常或服务繁忙，请检查网络后重试。</p>
+                <button type="button" class="btn-retry" id="btn-retry">重新加载</button>
+              </div>
+            </div>
+
+            <!-- 默认：有数据 -->
+            <div id="content-default">
+              <section class="queue-hero" aria-labelledby="queue-status-label">
+                <div class="queue-hero__top">
+                  <div>
+                    <span id="queue-status-label" class="status-pill">
+                      <span class="status-pill__dot" aria-hidden="true"></span>
+                      <span id="hero-status-text">检测中</span>
+                    </span>
+                  </div>
+                  <div class="queue-hero__hint" id="hero-hint">预计还需 <strong style="font-weight:700">约 25 分钟</strong></div>
+                </div>
+                <div class="queue-hero__num">
+                  <div class="queue-hero__num-label" id="hero-num-label">当前叫号</div>
+                  <div class="queue-hero__num-value" id="hero-queue-no">A-028</div>
+                  <div class="queue-hero__num-sub" id="hero-num-sub">您的号码 · 前方等待 <strong id="hero-ahead" style="font-weight:700">3</strong> 辆</div>
+                </div>
+                <div class="queue-hero__updated" id="hero-updated">最近更新：14:32</div>
+              </section>
+
+              <section class="info-card">
+                <h2 class="info-card__title">订单与车辆</h2>
+                <div class="info-row">
+                  <span class="info-row__k">服务门店</span>
+                  <span class="info-row__v" id="info-store">连云港车管家·年检服务站（演示）</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-row__k">车牌号</span>
+                  <span class="info-row__v" id="info-plate">苏G·D8XXX</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-row__k">年检订单</span>
+                  <span class="info-row__v" id="info-order">NJ20260509001427</span>
+                </div>
+                <div class="info-row">
+                  <span class="info-row__k">当前环节</span>
+                  <span class="info-row__v" id="info-stage">外观检验 · 排队中</span>
+                </div>
+              </section>
+
+              <section>
+                <h2 class="section-title">进度时间轴</h2>
+                <div class="timeline" id="timeline-root">
+                  <div class="timeline-item is-done">
+                    <span class="timeline-dot"></span>
+                    <div class="timeline-body">
+                      <div class="timeline-time">09:40</div>
+                      <div class="timeline-desc">已下单并支付成功</div>
+                      <span class="timeline-tag">已完成</span>
+                    </div>
+                  </div>
+                  <div class="timeline-item is-done">
+                    <span class="timeline-dot"></span>
+                    <div class="timeline-body">
+                      <div class="timeline-time">13:55</div>
+                      <div class="timeline-desc">已到店签到，领取排队号</div>
+                      <span class="timeline-tag">已完成</span>
+                    </div>
+                  </div>
+                  <div class="timeline-item is-current" id="tl-current">
+                    <span class="timeline-dot"></span>
+                    <div class="timeline-body">
+                      <div class="timeline-time" id="tl-current-time">14:10</div>
+                      <div class="timeline-desc" id="tl-current-desc">外观检验通道 · 排队中</div>
+                      <span class="timeline-tag" id="tl-current-tag">进行中</span>
+                    </div>
+                  </div>
+                  <div class="timeline-item is-pending" id="tl-next">
+                    <span class="timeline-dot"></span>
+                    <div class="timeline-body">
+                      <div class="timeline-time">—</div>
+                      <div class="timeline-desc">上线检测（环检 / 安检）</div>
+                      <span class="timeline-tag">待开始</span>
+                    </div>
+                  </div>
+                  <div class="timeline-item is-pending">
+                    <span class="timeline-dot"></span>
+                    <div class="timeline-body">
+                      <div class="timeline-time">—</div>
+                      <div class="timeline-desc">检测完成，领取标志与报告</div>
+                      <span class="timeline-tag">待开始</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="notice-bar" role="note">
+                  排队顺序与预计时间由检测站现场调度，仅供参考；若叫号过号请尽快联系现场工作人员重新排队。
+                </div>
+              </section>
+            </div>
+          </main>
+
+          <footer class="bottom-bar" id="bottom-bar">
+            <button type="button" class="btn-secondary" id="btn-contact">联系门店</button>
+            <button type="button" class="btn-primary" id="btn-order">查看订单</button>
+          </footer>
+        </div>
+      </div>
+
+      <button type="button" class="proto-fab" id="proto-fab" aria-label="打开原型控制菜单" title="原型控制">☰</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <div class="proto-mask" id="proto-mask"></div>
+  <aside class="proto-drawer" id="proto-drawer" aria-hidden="true">
+    <h3>原型控制</h3>
+    <p class="proto-drawer-sub">与小程序业务界面分离，仅用于评审演示。结构遵循《微信小程序页面结构约束规范》；视觉参考 Arco 色板。</p>
+
+    <div class="proto-section-label">数据加载状态</div>
+    <div class="proto-pill-row" role="tablist">
+      <button type="button" class="proto-pill is-active" data-data-state="default">默认</button>
+      <button type="button" class="proto-pill" data-data-state="loading">加载中</button>
+      <button type="button" class="proto-pill" data-data-state="empty">空数据</button>
+      <button type="button" class="proto-pill" data-data-state="error">加载失败</button>
+    </div>
+
+    <div class="proto-section-label">业务进度（检测中阶段）</div>
+    <div class="proto-pill-row">
+      <button type="button" class="proto-pill is-active" data-flow="waiting">排队等候</button>
+      <button type="button" class="proto-pill" data-flow="inspecting">已入场检测</button>
+      <button type="button" class="proto-pill" data-flow="finish">检测完成待取证</button>
+    </div>
+
+    <div class="proto-section-label">演示操作</div>
+    <button type="button" class="proto-simulate-btn" id="btn-simulate-refresh">模拟刷新排队信息</button>
+    <p class="proto-note">正式实现中建议使用下拉刷新或自动轮询；此处按钮模拟服务端推送后的界面更新与 Toast 反馈。</p>
+  </aside>
+
+  <script>
+    (function () {
+      var toastEl = document.getElementById("toast");
+      var toastTimer;
+      function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add("is-visible");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+          toastEl.classList.remove("is-visible");
+        }, 2200);
+      }
+
+      function setDataState(st) {
+        document.getElementById("content-default").classList.toggle("hidden", st !== "default");
+        document.getElementById("content-loading").classList.toggle("hidden", st !== "loading");
+        document.getElementById("content-empty").classList.toggle("hidden", st !== "empty");
+        document.getElementById("content-error").classList.toggle("hidden", st !== "error");
+        document.getElementById("bottom-bar").classList.toggle("hidden", st !== "default");
+        document.querySelectorAll(".proto-pill[data-data-state]").forEach(function (b) {
+          b.classList.toggle("is-active", b.getAttribute("data-data-state") === st);
+        });
+      }
+
+      var flowPresets = {
+        waiting: {
+          statusText: "检测中",
+          hint: "预计还需 <strong style=\"font-weight:700\">约 25 分钟</strong>",
+          numLabel: "当前叫号",
+          queueNo: "A-028",
+          sub: "您的号码 · 前方等待 <strong id=\"hero-ahead\" style=\"font-weight:700\">3</strong> 辆",
+          ahead: "3",
+          updated: "最近更新：14:32",
+          stage: "外观检验 · 排队中",
+          currentTime: "14:10",
+          currentDesc: "外观检验通道 · 排队中",
+          currentTag: "进行中",
+        },
+        inspecting: {
+          statusText: "检测中",
+          hint: "车辆已入场，请在现场安全区等候",
+          numLabel: "当前环节",
+          queueNo: "环检中",
+          sub: "工位：2 号线 · 无需重新取号",
+          ahead: "",
+          updated: "最近更新：14:48",
+          stage: "上线检测 · 环检 / 安检",
+          currentTime: "14:45",
+          currentDesc: "环检工位进行中",
+          currentTag: "进行中",
+        },
+        finish: {
+          statusText: "待取证",
+          hint: "检测已完成，请至窗口领取标志",
+          numLabel: "当前状态",
+          queueNo: "可取证",
+          sub: "请携带行驶证至发证窗口",
+          ahead: "",
+          updated: "最近更新：15:05",
+          stage: "检测完成 · 待发证",
+          currentTime: "15:02",
+          currentDesc: "检测报告已生成，等待领证",
+          currentTag: "请取证",
+        },
+      };
+
+      function applyFlow(key) {
+        var p = flowPresets[key];
+        if (!p) return;
+        document.getElementById("hero-status-text").textContent = p.statusText;
+        document.getElementById("hero-hint").innerHTML = p.hint;
+        document.getElementById("hero-num-label").textContent = p.numLabel;
+        document.getElementById("hero-queue-no").textContent = p.queueNo;
+        document.getElementById("hero-num-sub").innerHTML = p.sub;
+        document.getElementById("hero-updated").textContent = p.updated;
+        document.getElementById("info-stage").textContent = p.stage;
+        document.getElementById("tl-current-time").textContent = p.currentTime;
+        document.getElementById("tl-current-desc").textContent = p.currentDesc;
+        document.getElementById("tl-current-tag").textContent = p.currentTag;
+
+        var tlCurrent = document.getElementById("tl-current");
+        var tlNext = document.getElementById("tl-next");
+        if (key === "finish") {
+          tlCurrent.className = "timeline-item is-done";
+          document.getElementById("tl-current-tag").textContent = "已完成";
+          tlNext.className = "timeline-item is-current";
+          tlNext.querySelector(".timeline-time").textContent = "15:02";
+          tlNext.querySelector(".timeline-desc").textContent = "检测完成，待发证";
+          tlNext.querySelector(".timeline-tag").textContent = "进行中";
+        } else {
+          tlCurrent.className = "timeline-item is-current";
+          document.getElementById("tl-current-tag").textContent = p.currentTag;
+          tlNext.className = "timeline-item is-pending";
+          tlNext.querySelector(".timeline-time").textContent = "—";
+          tlNext.querySelector(".timeline-desc").textContent = "上线检测（环检 / 安检）";
+          tlNext.querySelector(".timeline-tag").textContent = "待开始";
+        }
+
+        document.querySelectorAll(".proto-pill[data-flow]").forEach(function (b) {
+          b.classList.toggle("is-active", b.getAttribute("data-flow") === key);
+        });
+      }
+
+      function closeProtoDrawer() {
+        document.getElementById("proto-mask").classList.remove("is-open");
+        document.getElementById("proto-drawer").classList.remove("is-open");
+        document.getElementById("proto-drawer").setAttribute("aria-hidden", "true");
+      }
+
+      document.getElementById("proto-fab").addEventListener("click", function () {
+        document.getElementById("proto-mask").classList.add("is-open");
+        document.getElementById("proto-drawer").classList.add("is-open");
+        document.getElementById("proto-drawer").setAttribute("aria-hidden", "false");
+      });
+      document.getElementById("proto-mask").addEventListener("click", closeProtoDrawer);
+
+      document.querySelectorAll(".proto-pill[data-data-state]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          setDataState(btn.getAttribute("data-data-state"));
+          closeProtoDrawer();
+        });
+      });
+
+      document.querySelectorAll(".proto-pill[data-flow]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          setDataState("default");
+          applyFlow(btn.getAttribute("data-flow"));
+          closeProtoDrawer();
+        });
+      });
+
+      document.getElementById("btn-simulate-refresh").addEventListener("click", function () {
+        setDataState("default");
+        showToast("排队信息已更新（演示）");
+        closeProtoDrawer();
+      });
+
+      document.getElementById("btn-retry").addEventListener("click", function () {
+        setDataState("loading");
+        setTimeout(function () {
+          setDataState("default");
+          showToast("加载成功");
+        }, 900);
+      });
+
+      document.getElementById("btn-back").addEventListener("click", function () {
+        showToast("返回上一页（演示）");
+      });
+      document.getElementById("btn-contact").addEventListener("click", function () {
+        showToast("将拨打门店电话（演示）");
+      });
+      document.getElementById("btn-order").addEventListener("click", function () {
+        showToast("跳转订单详情（演示）");
+      });
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeProtoDrawer();
+      });
+
+      applyFlow("waiting");
+      setDataState("default");
+    })();
+  </script>
+</body>
+</html>

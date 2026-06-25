@@ -1,0 +1,13 @@
+{
+  "name": "theme-config-api",
+  "private": true,
+  "version": "0.1.0",
+  "description": "主题色配置原型：客户端生效主色 primaryColor 的读写 API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

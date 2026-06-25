@@ -1,0 +1,4135 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>汽车服务首页预览</title>
+    <style>
+      :root {
+        --bg: #f7f8fa;
+        --surface: #ffffff;
+        --text-primary: #1d2129;
+        --text-secondary: #4e5969;
+        --text-muted: #86909c;
+        --brand: #165dff;
+        --brand-hover: #4080ff;
+        --brand-active: #0e42d2;
+        --border: #e5e6eb;
+        --border-strong: #c9cdd4;
+        --fill-1: #f7f8fa;
+        --fill-2: #f2f3f5;
+        --focus-ring: rgba(22, 93, 255, 0.2);
+        --status-bar-h: 0px;
+        --safe-top: env(safe-area-inset-top, 0px);
+        --safe-bottom: env(safe-area-inset-bottom, 0px);
+        --success: #00b42a;
+        --warning: #ff7d00;
+        --danger: #f53f3f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text-primary);
+        font-family:
+          "Inter",
+          "PingFang SC",
+          "Microsoft YaHei",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          "Helvetica Neue",
+          Arial,
+          sans-serif;
+      }
+
+      .page {
+        max-width: 430px;
+        margin: 0 auto;
+        min-height: 100vh;
+        padding: 0 12px 92px;
+        padding-bottom: calc(92px + var(--safe-bottom));
+        background: var(--surface);
+      }
+
+      /* 系统状态栏安全区（微信小程序结构约束） */
+      .status-bar-spacer {
+        height: calc(var(--status-bar-h) + var(--safe-top));
+        margin: 0 -12px;
+        width: calc(100% + 24px);
+        background: var(--surface);
+        flex-shrink: 0;
+      }
+
+      .page-inner {
+        padding: 0 0 12px;
+      }
+
+      .nav {
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 4px;
+      }
+
+      .loc-btn {
+        border: 0;
+        background: transparent;
+        color: #5c6068;
+        border-radius: 999px;
+        padding: 6px 2px;
+        font-size: 14px;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+      }
+
+      .loc-btn svg {
+        width: 17px;
+        height: 17px;
+        fill: #a6a7ab;
+        flex-shrink: 0;
+      }
+
+      .loc-btn span {
+        font-size: 12px;
+      }
+
+      .title {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+
+      .wx-capsule {
+        height: 36px;
+        min-width: 96px;
+        border: 1px solid #cbcbcf;
+        border-radius: 999px;
+        background: #f2f2f2;
+        padding: 0 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .wx-dot-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .wx-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #111;
+      }
+
+      .wx-divider {
+        width: 1px;
+        height: 14px;
+        background: #c7c7cb;
+      }
+
+      .wx-circle {
+        width: 24px;
+        height: 24px;
+        border: 3px solid #111;
+        border-radius: 50%;
+        position: relative;
+      }
+
+      .wx-circle::after {
+        content: "";
+        position: absolute;
+        inset: 5px;
+        border: 2px solid #111;
+        border-radius: 50%;
+      }
+
+      .hero {
+        position: relative;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        margin-top: 8px;
+        height: 188px;
+      }
+
+      .slides {
+        display: flex;
+        width: 300%;
+        height: 100%;
+        animation: slide 9s infinite;
+      }
+
+      .slide {
+        width: 100%;
+        position: relative;
+      }
+
+      .slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(29, 33, 41, 0.18), rgba(29, 33, 41, 0.62));
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+      }
+
+      .overlay h2 {
+        margin: 0;
+        color: #fff;
+        font-size: 20px;
+        font-weight: 600;
+      }
+
+      .overlay p {
+        margin: 8px 0 0;
+        color: #f6f6f3;
+        font-size: 12px;
+      }
+
+      .more-btn {
+        margin-top: 12px;
+        align-self: flex-start;
+        border: 0;
+        background: var(--brand);
+        color: #fff;
+        border-radius: 6px;
+        height: 32px;
+        padding: 0 14px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .card {
+        margin-top: 14px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 2px 8px rgba(29, 33, 41, 0.04);
+      }
+
+      .login-card {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: var(--fill-1);
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--border);
+      }
+
+      .avatar svg {
+        width: 22px;
+        height: 22px;
+        stroke: var(--brand);
+        fill: none;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .login-main {
+        flex: 1;
+      }
+
+      .login-main h3 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      .login-main p {
+        margin: 6px 0 0;
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      .login-go {
+        border: 0;
+        background: var(--brand);
+        color: #fff;
+        border-radius: 6px;
+        height: 32px;
+        padding: 0 12px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .services {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 16px 10px;
+      }
+
+      .service {
+        text-align: center;
+      }
+
+      .service-link {
+        display: block;
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .service .icon {
+        width: 44px;
+        height: 44px;
+        margin: 0 auto;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        background: var(--fill-1);
+        border: 1px solid var(--border);
+        color: var(--brand);
+      }
+
+      .service .icon svg {
+        width: 22px;
+        height: 22px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .service span {
+        display: block;
+        margin-top: 7px;
+        font-size: 12px;
+      }
+
+      .section {
+        margin-top: 24px;
+      }
+
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .section-head h3 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+      }
+
+      .section-head a {
+        color: var(--brand);
+        text-decoration: none;
+        font-size: 12px;
+      }
+
+      .feature-grid {
+        margin-top: 12px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .feature {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--surface);
+        box-shadow: 0 2px 6px rgba(29, 33, 41, 0.03);
+      }
+
+      .feature img {
+        width: 100%;
+        height: 98px;
+        object-fit: cover;
+      }
+
+      .feature .content {
+        padding: 12px;
+      }
+
+      .feature .name {
+        min-height: 34px;
+        font-size: 12px;
+        color: var(--text-primary);
+      }
+
+      .price {
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .price strong {
+        color: var(--brand);
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .price del {
+        color: var(--text-muted);
+        font-size: 12px;
+      }
+
+      .buy {
+        margin-top: 8px;
+        width: 100%;
+        border: 0;
+        background: var(--brand);
+        color: #fff;
+        border-radius: 6px;
+        height: 32px;
+        padding: 0;
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .news-list {
+        margin-top: 12px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .news {
+        background: var(--surface);
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: 120px 1fr;
+      }
+
+      .news img {
+        width: 120px;
+        height: 82px;
+        object-fit: cover;
+      }
+
+      .news .meta {
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .news .meta h4 {
+        margin: 0;
+        font-size: 14px;
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+
+      .news .meta time {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+      .order-detail-demo {
+        margin-top: 18px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--fill-1);
+        padding: 12px;
+      }
+      .order-demo-title {
+        margin: 0 0 10px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+      .order-status {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px;
+      }
+      .order-status-top {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .order-clock {
+        width: 20px;
+        height: 20px;
+        border: 1px solid var(--text-primary);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+      }
+      .order-status-top strong {
+        font-size: 32px;
+        line-height: 1;
+        font-weight: 500;
+      }
+      .order-status-time {
+        margin-top: 6px;
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+      .order-limit {
+        margin-top: 10px;
+        background: #fff7e8;
+        color: #ff7d00;
+        border-radius: 6px;
+        padding: 8px 10px;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .order-item-card {
+        margin-top: 10px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .order-item-card img {
+        width: 56px;
+        height: 56px;
+        border-radius: 6px;
+        object-fit: cover;
+      }
+      .order-item-main {
+        flex: 1;
+        min-width: 0;
+      }
+      .order-item-main h4 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .order-item-main p {
+        margin: 6px 0 0;
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+      .order-item-price {
+        text-align: right;
+      }
+      .order-item-price .origin {
+        font-size: 16px;
+      }
+      .order-item-price .paid {
+        margin-top: 6px;
+        font-size: 28px;
+        line-height: 1;
+        color: #f53f3f;
+        font-weight: 600;
+      }
+      .order-info-card {
+        margin-top: 10px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px;
+      }
+      .order-info-card h4 {
+        margin: 0 0 8px;
+        font-size: 14px;
+      }
+      .order-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 7px 0;
+      }
+      .order-row span:first-child {
+        color: var(--text-muted);
+      }
+      .copy-btn {
+        margin-left: 6px;
+        border: 1px solid var(--border-strong);
+        border-radius: 999px;
+        background: var(--surface);
+        color: var(--text-muted);
+        font-size: 10px;
+        padding: 2px 7px;
+      }
+      .order-note {
+        margin-top: 10px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px;
+      }
+      .order-note h4 {
+        margin: 0 0 8px;
+        font-size: 14px;
+      }
+      .order-note p {
+        margin: 0;
+        line-height: 1.7;
+        color: var(--text-secondary);
+      }
+      .order-note b {
+        color: var(--brand);
+      }
+      .order-actions {
+        margin-top: 10px;
+        display: flex;
+        gap: 10px;
+      }
+      .order-actions button {
+        flex: 1;
+        height: 36px;
+        border-radius: 999px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      .order-actions .ghost {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-secondary);
+      }
+      .order-actions .primary {
+        border: 0;
+        background: var(--brand);
+        color: #fff;
+      }
+
+      .tabbar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: 0 auto;
+        max-width: 430px;
+        height: calc(72px + var(--safe-bottom));
+        padding-bottom: var(--safe-bottom);
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        /* 高于「我的」全屏层，便于在个人中心继续操作底部导航 */
+        z-index: 120;
+      }
+
+      .tab {
+        border: 0;
+        background: transparent;
+        color: var(--text-secondary);
+        display: grid;
+        place-items: center;
+        align-content: center;
+        gap: 4px;
+        padding: 8px 4px 10px;
+        font-size: 12px;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .tab-icon {
+        width: 24px;
+        height: 24px;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+      }
+
+      .tab-icon svg {
+        width: 24px;
+        height: 24px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .tab > span:last-child {
+        font-size: 12px;
+      }
+
+      .tab.active {
+        color: var(--brand);
+      }
+
+      .loc-btn:focus-visible,
+      .wx-capsule:focus-visible,
+      .more-btn:focus-visible,
+      .login-go:focus-visible,
+      .buy:focus-visible,
+      .tab:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 1px;
+      }
+
+      .more-btn:hover,
+      .login-go:hover,
+      .buy:hover {
+        background: var(--brand-hover);
+      }
+
+      .more-btn:active,
+      .login-go:active,
+      .buy:active {
+        background: var(--brand-active);
+      }
+
+      /* —— 优惠套餐 F01 —— */
+      .home-package-section .package-grid {
+        margin-top: 12px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .package-card {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--surface);
+        box-shadow: 0 2px 6px rgba(29, 33, 41, 0.03);
+        text-align: left;
+        cursor: pointer;
+        padding: 0;
+        font: inherit;
+        color: inherit;
+        display: block;
+        width: 100%;
+        min-height: 44px;
+      }
+
+      .package-card:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 2px;
+      }
+
+      .package-card img {
+        width: 100%;
+        height: 88px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .package-card .pkg-body {
+        padding: 10px 12px 12px;
+      }
+
+      .package-card .pkg-title {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-primary);
+        line-height: 1.35;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .package-card .pkg-sub {
+        margin: 6px 0 0;
+        font-size: 11px;
+        color: var(--text-secondary);
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .package-card .pkg-tags {
+        margin-top: 8px;
+        font-size: 11px;
+        color: var(--text-muted);
+        line-height: 1.4;
+      }
+
+      .package-card .pkg-price-row {
+        margin-top: 8px;
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .package-card .pkg-price {
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--brand);
+      }
+
+      .package-card .pkg-origin {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-decoration: line-through;
+      }
+
+      .package-card .pkg-save {
+        font-size: 11px;
+        color: var(--warning);
+        font-weight: 500;
+      }
+
+      /* 全屏子页：状态栏 + 导航 + 滚动 + 底部安全区 */
+      .wx-screen {
+        position: fixed;
+        inset: 0;
+        max-width: 430px;
+        margin: 0 auto;
+        background: var(--fill-1);
+        /* 默认盖住底部 Tab；「我的」页单独降低，见 #wx-mine */
+        z-index: 130;
+        display: none;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      /* 个人中心与底部导航并存：全屏层在 Tab 之下，滚动区为 Tab 预留空间 */
+      #wx-mine.wx-screen {
+        z-index: 110;
+      }
+
+      #wx-mine .wx-screen-scroll {
+        padding-bottom: calc(96px + var(--safe-bottom));
+      }
+
+      .wx-screen.is-open {
+        display: flex;
+      }
+
+      .wx-screen .status-bar-spacer {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .wx-screen-nav {
+        flex-shrink: 0;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        padding: 0 8px 0 4px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .wx-screen-nav .nav-slot {
+        width: 87px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        min-height: 40px;
+      }
+
+      .wx-screen-nav .nav-slot--right {
+        justify-content: flex-end;
+      }
+
+      .wx-screen-nav .nav-title {
+        flex: 1;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding: 0 8px;
+      }
+
+      .btn-nav-back {
+        width: 40px;
+        height: 40px;
+        border: 0;
+        background: transparent;
+        color: var(--text-primary);
+        font-size: 20px;
+        line-height: 40px;
+        cursor: pointer;
+        border-radius: 6px;
+      }
+
+      .btn-nav-back:active {
+        opacity: 0.65;
+      }
+
+      .capsule-fake {
+        width: 87px;
+        height: 32px;
+        border-radius: 16px;
+        background: var(--fill-2);
+        border: 1px solid var(--border);
+        pointer-events: none;
+        flex-shrink: 0;
+      }
+
+      .wx-screen-scroll {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 12px 12px 24px;
+        padding-bottom: calc(24px + var(--safe-bottom));
+      }
+
+      .wx-screen-footer {
+        flex-shrink: 0;
+        padding: 10px 12px calc(10px + var(--safe-bottom));
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+        box-shadow: 0 -4px 16px rgba(29, 33, 41, 0.06);
+      }
+
+      .wx-screen-footer .btn-primary-lg {
+        width: 100%;
+        min-height: 44px;
+        border: 0;
+        border-radius: 6px;
+        background: var(--brand);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .wx-screen-footer .btn-primary-lg:hover {
+        background: var(--brand-hover);
+      }
+
+      .wx-screen-footer .btn-primary-lg:active {
+        background: var(--brand-active);
+      }
+
+      .wx-screen-footer .btn-primary-lg:disabled {
+        background: var(--fill-2);
+        color: var(--text-muted);
+        cursor: not-allowed;
+        opacity: 1;
+      }
+
+      .wx-screen-footer .btn-primary-lg:disabled:hover,
+      .wx-screen-footer .btn-primary-lg:disabled:active {
+        background: var(--fill-2);
+        color: var(--text-muted);
+      }
+
+      /* 次要按钮（Arco Secondary：描边 + 浅底） */
+      .btn-secondary-lg {
+        min-height: 44px;
+        padding: 0 28px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-secondary);
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        font: inherit;
+        max-width: 100%;
+      }
+
+      .btn-secondary-lg:hover {
+        border-color: var(--border-strong);
+        color: var(--text-primary);
+        background: var(--fill-1);
+      }
+
+      .btn-secondary-lg:active {
+        background: var(--fill-2);
+      }
+
+      .btn-secondary-lg:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 2px;
+      }
+
+      /* 支付成功页：订单摘要卡片外、正下方居中 */
+      .pay-success-secondary-wrap {
+        display: flex;
+        justify-content: center;
+        margin-top: 0;
+        margin-bottom: 8px;
+      }
+
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+      }
+
+      .panel-title {
+        margin: 0 0 10px;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .muted {
+        color: var(--text-secondary);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      .tag--success {
+        background: rgba(0, 180, 42, 0.12);
+        color: var(--success);
+      }
+
+      .tag--warn {
+        background: rgba(255, 125, 0, 0.12);
+        color: var(--warning);
+      }
+
+      .tag--danger {
+        background: rgba(245, 63, 63, 0.1);
+        color: var(--danger);
+      }
+
+      .tag--info {
+        background: rgba(22, 93, 255, 0.1);
+        color: var(--brand);
+      }
+
+      .filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .filter-chip {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-secondary);
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 13px;
+        cursor: pointer;
+        min-height: 36px;
+      }
+
+      .filter-chip.is-active {
+        border-color: var(--brand);
+        color: var(--brand);
+        background: rgba(22, 93, 255, 0.06);
+      }
+
+      .list-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        text-align: left;
+        width: 100%;
+        font: inherit;
+        color: inherit;
+        min-height: 44px;
+      }
+
+      .list-card:active {
+        background: var(--fill-1);
+      }
+
+      .list-card h4 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .list-card p {
+        margin: 6px 0 0;
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      /* 优惠套餐列表（全屏列表页）：左图 + 文案可点详情 + 右「立即购买」 */
+      .pkg-list-card {
+        display: flex;
+        align-items: stretch;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 10px;
+        overflow: hidden;
+      }
+
+      .pkg-list-card-detail {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 4px 10px 12px;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        text-align: left;
+        font: inherit;
+        color: inherit;
+      }
+
+      .pkg-list-card-detail:active {
+        background: var(--fill-1);
+      }
+
+      .pkg-list-card-detail:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: -2px;
+      }
+
+      .pkg-list-card-thumb {
+        width: 88px;
+        height: 72px;
+        object-fit: cover;
+        border-radius: 6px;
+        flex-shrink: 0;
+        display: block;
+        background: var(--fill-2);
+      }
+
+      .pkg-list-card-text h4 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.35;
+      }
+
+      .pkg-list-card-text .pkg-list-sub {
+        margin: 6px 0 0;
+        font-size: 12px;
+        color: var(--text-muted);
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .pkg-list-card-text .pkg-list-price-row {
+        margin-top: 6px;
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .pkg-list-card-text .pkg-list-sale {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--brand);
+      }
+
+      .pkg-list-card-text .pkg-list-orig {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-decoration: line-through;
+      }
+
+      .pkg-list-card-buy {
+        align-self: center;
+        margin: 8px 12px 8px 0;
+        flex-shrink: 0;
+        min-height: 36px;
+        padding: 0 12px;
+        border-radius: 6px;
+        border: 0;
+        background: var(--brand);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      .pkg-list-card-buy:hover {
+        background: var(--brand-hover);
+      }
+
+      .pkg-list-card-buy:active {
+        background: var(--brand-active);
+      }
+
+      .pkg-list-card-buy:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 2px;
+      }
+
+      .pkg-list-card-buy:disabled {
+        background: var(--fill-2);
+        color: var(--text-muted);
+        cursor: not-allowed;
+      }
+
+      .detail-hero {
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        margin-bottom: 12px;
+      }
+
+      .detail-hero img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .detail-hero .dh-cap {
+        padding: 12px 14px;
+        background: var(--surface);
+      }
+
+      .detail-hero .dh-cap h2 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .price-block {
+        margin-top: 8px;
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+      }
+
+      .price-block .sale {
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--brand);
+      }
+
+      .price-block .orig {
+        font-size: 13px;
+        color: var(--text-muted);
+        text-decoration: line-through;
+      }
+
+      .dl-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+      }
+
+      .dl-row:last-child {
+        border-bottom: 0;
+      }
+
+      .dl-row span:first-child {
+        color: var(--text-muted);
+        flex-shrink: 0;
+      }
+
+      .notice-box {
+        background: #fff7e8;
+        border: 1px solid rgba(255, 125, 0, 0.35);
+        color: var(--text-secondary);
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 12px;
+        line-height: 1.55;
+        margin-top: 10px;
+      }
+
+      /* 确认订单页 */
+      .checkout-pkg-card {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 14px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 12px;
+      }
+
+      .checkout-pkg-card img {
+        width: 88px;
+        height: 88px;
+        border-radius: 6px;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 1px solid var(--border);
+      }
+
+      .checkout-pkg-card .cpc-body {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .checkout-pkg-card .cpc-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-primary);
+        line-height: 1.35;
+      }
+
+      .checkout-pkg-card .cpc-content {
+        margin: 8px 0 0;
+        font-size: 12px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+      }
+
+      .checkout-pkg-card .cpc-price-row {
+        margin-top: 10px;
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .checkout-pkg-card .cpc-sale {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--brand);
+      }
+
+      .checkout-pkg-card .cpc-orig {
+        font-size: 13px;
+        color: var(--text-muted);
+        text-decoration: line-through;
+      }
+
+      .checkout-panel-title {
+        margin: 0 0 4px;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .checkout-form-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 14px;
+      }
+
+      .checkout-form-row:last-child {
+        border-bottom: 0;
+      }
+
+      .checkout-form-row label:first-child {
+        color: var(--text-secondary);
+        flex-shrink: 0;
+      }
+
+      .checkout-select {
+        flex: 1;
+        min-width: 0;
+        max-width: 65%;
+        height: 36px;
+        padding: 0 10px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: 13px;
+        color: var(--text-primary);
+        background: var(--surface);
+      }
+
+      .checkout-coupon-hint {
+        display: block;
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 4px;
+      }
+
+      .pay-method-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 10px;
+      }
+
+      .pay-method-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        color: var(--text-primary);
+      }
+
+      .pay-method-item--active {
+        border-color: var(--brand);
+        background: rgba(22, 93, 255, 0.06);
+      }
+
+      .pay-method-item input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--brand);
+      }
+
+      .checkout-notice-plain {
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.65;
+        margin: 0;
+      }
+
+      .checkout-notice-plain + .checkout-notice-plain {
+        margin-top: 10px;
+      }
+
+      .checkout-agree {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin: 16px 0 8px;
+        padding: 0 2px;
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--text-primary);
+        cursor: pointer;
+      }
+
+      .checkout-agree input {
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+        flex-shrink: 0;
+        accent-color: var(--brand);
+      }
+
+      .checkout-agree .link-like {
+        color: var(--brand);
+      }
+
+      .checkout-pay-footer .checkout-pay-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: nowrap;
+      }
+
+      .checkout-pay-footer .checkout-pay-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        flex: 1;
+      }
+
+      .checkout-pay-footer .pay-total-label {
+        font-size: 13px;
+        color: var(--text-secondary);
+        flex-shrink: 0;
+      }
+
+      .checkout-pay-footer .pay-total-num {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--brand);
+        flex-shrink: 0;
+      }
+
+      .checkout-pay-footer .btn-detail-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        border: 0;
+        background: transparent;
+        color: var(--brand);
+        font-size: 13px;
+        padding: 6px 4px;
+        margin-left: 4px;
+        cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .checkout-pay-footer .detail-chevron {
+        display: inline-block;
+        font-size: 10px;
+        line-height: 1;
+        transition: transform 0.2s ease;
+        transform: rotate(0deg);
+      }
+
+      .checkout-pay-footer .detail-chevron.is-open {
+        transform: rotate(180deg);
+      }
+
+      .checkout-pay-footer .checkout-btn-submit {
+        width: auto;
+        min-width: 104px;
+        flex-shrink: 0;
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .checkout-detail-panel {
+        display: none;
+        font-size: 12px;
+        color: var(--text-secondary);
+        border-top: 1px solid var(--border);
+        padding: 10px 0 0;
+        margin-top: 10px;
+      }
+
+      .checkout-detail-panel.is-open {
+        display: block;
+      }
+
+      .checkout-detail-panel .dd-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 0;
+      }
+
+      .skeleton-block {
+        border-radius: 8px;
+        background: linear-gradient(90deg, var(--fill-2) 25%, var(--fill-1) 37%, var(--fill-2) 63%);
+        background-size: 400% 100%;
+        animation: sk 1.2s ease-in-out infinite;
+        height: 72px;
+        margin-bottom: 10px;
+      }
+
+      .state-empty {
+        text-align: center;
+        padding: 40px 16px;
+        color: var(--text-muted);
+        font-size: 13px;
+      }
+
+      .state-error {
+        background: rgba(245, 63, 63, 0.08);
+        border: 1px solid rgba(245, 63, 63, 0.25);
+        color: var(--danger);
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 13px;
+        margin-bottom: 12px;
+      }
+
+      .toast-success {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 300;
+        background: rgba(29, 33, 41, 0.88);
+        color: #fff;
+        padding: 14px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        display: none;
+        max-width: 280px;
+        text-align: center;
+      }
+
+      .toast-success.is-show {
+        display: block;
+      }
+
+      .wallet-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+        background: transparent;
+        border-left: 0;
+        border-right: 0;
+        border-top: 0;
+        width: 100%;
+        font: inherit;
+        text-align: left;
+        min-height: 44px;
+      }
+
+      .wallet-row:last-child {
+        border-bottom: 0;
+      }
+
+      .wallet-row .w-main strong {
+        display: block;
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .wallet-row .w-main span {
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      .wallet-row .w-go {
+        color: var(--text-muted);
+        font-size: 18px;
+      }
+
+      /* —— 我的页（Arco token：卡片 8px 圆角、14px 正文、主色 #165DFF）—— */
+      .mine-profile-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px;
+        background: var(--fill-2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 12px;
+      }
+
+      .mine-avatar-lg {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+      }
+
+      .mine-avatar-lg svg {
+        width: 28px;
+        height: 28px;
+        stroke: var(--brand);
+        fill: none;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .mine-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        line-height: 1.35;
+      }
+
+      .mine-phone {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-top: 6px;
+        line-height: 1.4;
+      }
+
+      .mine-wallet-grid {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+        align-items: stretch;
+        margin-top: 4px;
+      }
+
+      .mine-w-vline {
+        width: 1px;
+        background: var(--border);
+        align-self: stretch;
+        margin: 6px 0;
+      }
+
+      .mine-w-cell {
+        text-align: center;
+        padding: 10px 4px;
+        min-width: 0;
+      }
+
+      button.mine-w-cell {
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        font: inherit;
+        color: inherit;
+        border-radius: 6px;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      button.mine-w-cell:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 2px;
+      }
+
+      button.mine-w-cell:active {
+        opacity: 0.88;
+      }
+
+      .mine-w-val {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        display: block;
+        line-height: 1.3;
+      }
+
+      .mine-w-lbl {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 6px;
+        display: block;
+        line-height: 1.4;
+      }
+
+      .mine-pkg-hint {
+        font-size: 12px;
+        margin: -4px 0 0;
+        line-height: 1.5;
+      }
+
+      .mine-section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .mine-section-head .panel-title {
+        margin: 0;
+      }
+
+      .mine-link-all {
+        border: 0;
+        background: transparent;
+        color: var(--brand);
+        font-size: 13px;
+        cursor: pointer;
+        padding: 4px 4px 4px 8px;
+        font: inherit;
+        border-radius: 4px;
+      }
+
+      .mine-link-all:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 1px;
+      }
+
+      .mine-order-shortcuts {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px 2px;
+      }
+
+      .mine-o-btn {
+        border: 0;
+        background: transparent;
+        padding: 6px 2px 8px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        font: inherit;
+        color: inherit;
+        border-radius: 6px;
+      }
+
+      .mine-o-btn:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 1px;
+      }
+
+      .mine-o-ic {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+      }
+
+      .mine-o-ic svg {
+        width: 22px;
+        height: 22px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .mine-o-ic--warn {
+        background: rgba(255, 125, 0, 0.14);
+        color: var(--warning);
+      }
+
+      .mine-o-ic--pending {
+        background: rgba(22, 93, 255, 0.12);
+        color: var(--brand);
+      }
+
+      .mine-o-ic--process {
+        background: rgba(22, 93, 255, 0.18);
+        color: var(--brand-active);
+      }
+
+      .mine-o-ic--danger {
+        background: rgba(245, 63, 63, 0.12);
+        color: var(--danger);
+      }
+
+      .mine-o-ic--success {
+        background: rgba(0, 180, 42, 0.12);
+        color: var(--success);
+      }
+
+      .mine-o-label {
+        font-size: 11px;
+        color: var(--text-secondary);
+        line-height: 1.25;
+        text-align: center;
+        max-width: 100%;
+      }
+
+      .mine-menu-panel {
+        padding: 4px 0 4px 16px;
+      }
+
+      .mine-menu {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .mine-menu li {
+        border-bottom: 1px solid var(--border);
+      }
+
+      .mine-menu li:last-child {
+        border-bottom: 0;
+      }
+
+      .mine-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        padding: 13px 16px 13px 0;
+        border: 0;
+        background: transparent;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+        min-height: 48px;
+        color: inherit;
+        border-radius: 0;
+      }
+
+      .mine-menu-item:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: -2px;
+      }
+
+      .mine-menu-item .menu-ic {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: var(--fill-1);
+        border: 1px solid var(--border);
+        display: grid;
+        place-items: center;
+        color: var(--brand);
+        flex-shrink: 0;
+      }
+
+      .mine-menu-item .menu-ic svg {
+        width: 20px;
+        height: 20px;
+        stroke: currentColor;
+        fill: none;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .mine-menu-item .menu-txt {
+        flex: 1;
+        font-size: 14px;
+        color: var(--text-primary);
+      }
+
+      .mine-menu-item .menu-chev {
+        color: var(--text-muted);
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+
+      .btn-logout-mine {
+        width: 100%;
+        margin-top: 20px;
+        min-height: 48px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--brand);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(22, 93, 255, 0.2);
+      }
+
+      .btn-logout-mine:hover {
+        background: var(--brand-hover);
+      }
+
+      .btn-logout-mine:active {
+        background: var(--brand-active);
+      }
+
+      .btn-logout-mine:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 2px;
+      }
+
+      .biz-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 10px;
+      }
+
+      .biz-card .biz-meta h4 {
+        margin: 0;
+        font-size: 15px;
+      }
+
+      .biz-card .biz-meta p {
+        margin: 6px 0 0;
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      .my-pkg-tabbar {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 14px;
+      }
+
+      .my-pkg-tabwrap {
+        display: inline-flex;
+        padding: 3px;
+        background: var(--fill-1);
+        border-radius: 999px;
+        border: 1px solid var(--border);
+      }
+
+      .my-pkg-tab {
+        border: 0;
+        background: transparent;
+        padding: 8px 18px;
+        font-size: 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        color: var(--text-secondary);
+        font: inherit;
+        min-height: 36px;
+        white-space: nowrap;
+      }
+
+      .my-pkg-tab.is-active {
+        background: var(--surface);
+        color: var(--brand);
+        font-weight: 600;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+      }
+
+      .my-pkg-tab:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 2px;
+      }
+
+      .usage-record-item {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+      }
+
+      .usage-record-item strong {
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .usage-record-item .ur-meta {
+        margin: 6px 0 0;
+        font-size: 12px;
+        color: var(--text-muted);
+        line-height: 1.45;
+      }
+
+      .btn-sm {
+        min-height: 36px;
+        padding: 0 14px;
+        border-radius: 6px;
+        border: 0;
+        background: var(--brand);
+        color: #fff;
+        font-size: 13px;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      .btn-sm:disabled {
+        background: var(--fill-2);
+        color: var(--text-muted);
+        cursor: not-allowed;
+      }
+
+      .store-item {
+        display: flex;
+        gap: 10px;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        background: var(--surface);
+        width: 100%;
+        text-align: left;
+        font: inherit;
+      }
+
+      .store-item.is-selected {
+        border-color: var(--brand);
+        box-shadow: 0 0 0 1px rgba(22, 93, 255, 0.2);
+      }
+
+      .order-type-badge {
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: var(--fill-2);
+        color: var(--text-secondary);
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+
+      kbd {
+        font-family: inherit;
+        font-size: 11px;
+        padding: 1px 5px;
+        border-radius: 4px;
+        border: 1px solid var(--border-strong);
+        background: var(--fill-2);
+      }
+
+      @keyframes sk {
+        0% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0 50%;
+        }
+      }
+
+      @keyframes slide {
+        0%,
+        30% {
+          transform: translateX(0);
+        }
+        33%,
+        63% {
+          transform: translateX(-33.3333%);
+        }
+        66%,
+        96% {
+          transform: translateX(-66.6666%);
+        }
+        100% {
+          transform: translateX(0);
+        }
+      }
+
+      /* —— 原型控制台（仅演示，非正式功能；Arco token）—— */
+      /* 全视口：遮罩与抽屉相对浏览器，不限制在 430 原型宽内 */
+      .proto-console-root {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        pointer-events: none;
+        z-index: 200;
+      }
+
+      .proto-console-root.is-open {
+        pointer-events: auto;
+      }
+
+      .proto-console-mask {
+        position: absolute;
+        inset: 0;
+        background: rgba(29, 33, 41, 0.45);
+        opacity: 0;
+        transition: opacity 0.22s ease;
+      }
+
+      .proto-console-root.is-open .proto-console-mask {
+        opacity: 1;
+      }
+
+      .proto-console-drawer {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: min(360px, 88vw);
+        background: var(--surface);
+        border-left: 1px solid var(--border);
+        box-shadow: -8px 0 32px rgba(29, 33, 41, 0.12);
+        transform: translateX(100%);
+        transition: transform 0.26s cubic-bezier(0.34, 1.02, 0.68, 1);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .proto-console-root.is-open .proto-console-drawer {
+        transform: translateX(0);
+      }
+
+      .proto-console-head {
+        flex-shrink: 0;
+        padding: 20px 16px 16px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+      }
+
+      .proto-console-head h2 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .proto-console-head p {
+        margin: 8px 0 0;
+        font-size: 12px;
+        color: var(--text-muted);
+        line-height: 1.55;
+      }
+
+      .proto-console-body {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 16px 16px 24px;
+      }
+
+      .proto-console-section {
+        margin-bottom: 22px;
+      }
+
+      .proto-console-section:last-child {
+        margin-bottom: 0;
+      }
+
+      .proto-console-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 10px;
+      }
+
+      .proto-console-hint {
+        font-size: 12px;
+        color: var(--text-muted);
+        line-height: 1.5;
+        margin: 10px 0 0;
+      }
+
+      .proto-pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .proto-pill {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text-secondary);
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 12px;
+        cursor: pointer;
+        font: inherit;
+        line-height: 1.3;
+      }
+
+      .proto-pill.is-active {
+        border-color: var(--brand);
+        color: var(--brand);
+        background: rgba(22, 93, 255, 0.06);
+      }
+
+      .proto-pill:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 2px;
+      }
+
+      .proto-page-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .proto-page-item {
+        width: 100%;
+        text-align: left;
+        border: 1px solid var(--border);
+        background: var(--fill-1);
+        color: var(--text-primary);
+        border-radius: 8px;
+        padding: 12px 14px;
+        font-size: 13px;
+        cursor: pointer;
+        font: inherit;
+        line-height: 1.4;
+      }
+
+      .proto-page-item.is-active {
+        border-color: var(--brand);
+        color: var(--brand);
+        background: rgba(22, 93, 255, 0.06);
+      }
+
+      .proto-page-item:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 2px;
+      }
+
+      .proto-demo-btn {
+        width: 100%;
+        border: 1px solid rgba(22, 93, 255, 0.35);
+        background: rgba(22, 93, 255, 0.1);
+        color: var(--brand);
+        border-radius: 8px;
+        padding: 12px 14px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .proto-demo-btn:hover {
+        background: rgba(22, 93, 255, 0.14);
+      }
+
+      .proto-demo-btn:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 2px;
+      }
+
+      /* 悬浮钮：优先放在 430 原型右缘外侧；空间不足时退化为视口右下，不压在手机框上 */
+      .proto-console-fab {
+        position: fixed;
+        --proto-fab-size: 52px;
+        --proto-fab-gap: 20px;
+        --proto-half: 215px;
+        width: var(--proto-fab-size);
+        height: var(--proto-fab-size);
+        border-radius: 50%;
+        border: 0;
+        background: var(--brand);
+        color: #fff;
+        cursor: pointer;
+        z-index: 220;
+        box-shadow: 0 6px 20px rgba(22, 93, 255, 0.38);
+        display: grid;
+        place-items: center;
+        padding: 0;
+        transition: background 0.15s ease, transform 0.15s ease;
+        bottom: calc(24px + var(--safe-bottom));
+        left: min(
+          calc(50% + var(--proto-half) + var(--proto-fab-gap)),
+          calc(100vw - var(--proto-fab-size) - max(12px, env(safe-area-inset-right, 0px)))
+        );
+        right: auto;
+      }
+
+      .proto-console-fab:hover {
+        background: var(--brand-hover);
+      }
+
+      .proto-console-fab:active {
+        background: var(--brand-active);
+        transform: scale(0.96);
+      }
+
+      .proto-console-fab:focus-visible {
+        outline: 2px solid var(--focus-ring);
+        outline-offset: 3px;
+      }
+
+      .proto-console-fab svg {
+        width: 24px;
+        height: 24px;
+        stroke: #fff;
+        fill: none;
+        stroke-width: 2;
+        stroke-linecap: round;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <div class="status-bar-spacer" aria-hidden="true"></div>
+      <div class="page-inner">
+      <header class="nav">
+        <button type="button" class="loc-btn">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2.5a7 7 0 00-7 7c0 4.8 5.2 10.9 6.3 12.1a.9.9 0 001.4 0C13.8 20.4 19 14.3 19 9.5a7 7 0 00-7-7zm0 10a3 3 0 110-6 3 3 0 010 6z" />
+          </svg>
+          <span>点击定位</span>
+        </button>
+        <div class="title">首页</div>
+        <button type="button" class="wx-capsule" aria-label="微信胶囊">
+          <span class="wx-dot-group" aria-hidden="true">
+            <span class="wx-dot"></span>
+            <span class="wx-dot"></span>
+            <span class="wx-dot"></span>
+          </span>
+          <span class="wx-divider" aria-hidden="true"></span>
+          <span class="wx-circle" aria-hidden="true"></span>
+        </button>
+      </header>
+
+      <section class="hero">
+        <div class="slides">
+          <article class="slide">
+            <img src="https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&w=1200&q=80" alt="汽车横幅图1" />
+            <div class="overlay">
+              <h2>专业品质 享受无忧</h2>
+              <p>百顺汽车 比您期待的更多</p>
+              <button class="more-btn">了解更多</button>
+            </div>
+          </article>
+          <article class="slide">
+            <img src="https://images.unsplash.com/photo-1489824904134-891ab64532f1?auto=format&fit=crop&w=1200&q=80" alt="汽车横幅图2" />
+            <div class="overlay">
+              <h2>安心养车 省心用车</h2>
+              <p>保养维修洗车一站式服务</p>
+              <button class="more-btn">了解更多</button>
+            </div>
+          </article>
+          <article class="slide">
+            <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1200&q=80" alt="汽车横幅图3" />
+            <div class="overlay">
+              <h2>专业团队 贴心服务</h2>
+              <p>让每一次出行都更放心</p>
+              <button class="more-btn">了解更多</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="card login-card">
+        <div class="avatar" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M3 13l2-6h14l2 6" />
+            <rect x="4" y="13" width="16" height="6" rx="2" />
+            <circle cx="8" cy="16" r="1" />
+            <circle cx="16" cy="16" r="1" />
+            <path d="M12 10v-4" />
+            <path d="M10.5 7.5L12 6l1.5 1.5" />
+          </svg>
+        </div>
+        <div class="login-main">
+          <h3>登录后添加爱车</h3>
+          <p>获取您的保养与年检状态</p>
+        </div>
+        <button class="login-go">去登录</button>
+      </section>
+
+      <section class="services">
+        <div class="service">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 13l2-6h14l2 6" />
+              <rect x="4" y="13" width="16" height="6" rx="2" />
+              <circle cx="8" cy="16" r="1" />
+              <circle cx="16" cy="16" r="1" />
+            </svg>
+          </div>
+          <span>租赁</span>
+        </div>
+        <div class="service">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="6" />
+              <path d="M20 20l-4.2-4.2" />
+              <path d="M11 8v6M8 11h6" />
+            </svg>
+          </div>
+          <span>检测</span>
+        </div>
+        <div class="service">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 14c1 0 1.5.6 2 1.2.5.6 1 .8 2 .8s1.5-.2 2-.8c.5-.6 1-.8 2-.8s1.5.2 2 .8c.5.6 1 .8 2 .8" />
+              <path d="M8 11c0-1.7 1.2-3 3-3s3 1.3 3 3" />
+              <path d="M6 17h12" />
+            </svg>
+          </div>
+          <span>洗车美容</span>
+        </div>
+        <div class="service">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M14 4l6 6-7 7-6-6z" />
+              <path d="M10 8l6 6" />
+              <path d="M4 20l4-4" />
+            </svg>
+          </div>
+          <span>维保</span>
+        </div>
+        <a class="service service-link" href="../充电卡销售/index_fontend_充电卡销售.html">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 3v6h4L6 21v-6H2z" />
+              <path d="M14 3h6v8h-6z" />
+            </svg>
+          </div>
+          <span>充电</span>
+        </a>
+        <a class="service service-link" href="../加油卡销售/index_fontend_加油卡销售.html">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 5h6a3 3 0 013 3v11H8a2 2 0 01-2-2V8a3 3 0 013-3z" />
+              <path d="M16 9h2.5a1.5 1.5 0 010 3H16" />
+              <path d="M10 9v4" />
+            </svg>
+          </div>
+          <span>加油</span>
+        </a>
+        <a class="service service-link" href="../新车销售/index_fontend_新车销售.html">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 9l8-5 8 5v10a1 1 0 01-1 1H5a1 1 0 01-1-1z" />
+              <path d="M9 13h6M9 16h4" />
+            </svg>
+          </div>
+          <span>销售</span>
+        </a>
+        <a class="service service-link" href="../二手车交易/index_fontend_二手车交易.html">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 8H4v4" />
+              <path d="M16 16h4v-4" />
+              <path d="M4 12a8 8 0 0113.6-5.6L20 9" />
+              <path d="M20 12a8 8 0 01-13.6 5.6L4 15" />
+            </svg>
+          </div>
+          <span>二手车交易</span>
+        </a>
+        <a class="service service-link" href="../保险报价/index_fontend_保险报价.html">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z" />
+              <path d="M9.5 12.5l1.6 1.6 3.4-3.4" />
+            </svg>
+          </div>
+          <span>保险报价</span>
+        </a>
+        <div class="service">
+          <div class="icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="5" y="3" width="14" height="18" rx="2" />
+              <path d="M9 7v10M9 7h4v4.5H9" />
+            </svg>
+          </div>
+          <span>港城停车</span>
+        </div>
+      </section>
+
+      <!-- F01 首页-优惠套餐板块 home-package-section -->
+      <section class="section home-package-section" id="home-package-section" aria-label="优惠套餐">
+        <div class="section-head">
+          <h3>优惠套餐</h3>
+          <a href="javascript:void(0)" id="pkg-link-more">更多 &gt;</a>
+        </div>
+        <div class="package-grid" id="pkg-home-grid">
+          <button type="button" class="package-card" data-pkg-id="p1">
+            <img src="https://images.unsplash.com/photo-1607861716497-e65ab29fc7ac?auto=format&fit=crop&w=900&q=80" alt="" />
+            <div class="pkg-body">
+              <p class="pkg-title">洗车美容畅享包</p>
+              <p class="pkg-sub">精洗 + 打蜡组合，全城门店通用</p>
+              <div class="pkg-tags">含洗车 15 次 + 打蜡 1 次 · 购买后 365 天内有效</div>
+              <div class="pkg-price-row">
+                <span class="pkg-price">¥299</span>
+                <span class="pkg-origin">¥598</span>
+                <span class="pkg-save">立省 ¥299</span>
+              </div>
+            </div>
+          </button>
+          <button type="button" class="package-card" data-pkg-id="p2">
+            <img src="https://images.unsplash.com/photo-1486006920555-c77dcf18193c?auto=format&fit=crop&w=900&q=80" alt="" />
+            <div class="pkg-body">
+              <p class="pkg-title">家用车维保省心套餐</p>
+              <p class="pkg-sub">小保养两次 + 安全检查一次</p>
+              <div class="pkg-tags">含保养 2 次 + 检测 1 次 · 固定有效期至 2026-12-31</div>
+              <div class="pkg-price-row">
+                <span class="pkg-price">¥688</span>
+                <span class="pkg-origin">¥960</span>
+                <span class="pkg-save">立省 ¥272</span>
+              </div>
+            </div>
+          </button>
+          <button type="button" class="package-card" data-pkg-id="p3">
+            <img src="https://images.unsplash.com/photo-1625047509168-a7026f36de04?auto=format&fit=crop&w=900&q=80" alt="" />
+            <div class="pkg-body">
+              <p class="pkg-title">全车安全检测套餐</p>
+              <p class="pkg-sub">人保合作检测线，报告可查</p>
+              <div class="pkg-tags">检测 1 次 · 适用指定检测站</div>
+              <div class="pkg-price-row">
+                <span class="pkg-price">¥128</span>
+                <span class="pkg-origin">¥199</span>
+                <span class="pkg-save">立省 ¥71</span>
+              </div>
+            </div>
+          </button>
+          <button type="button" class="package-card" data-pkg-id="p4">
+            <img src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=900&q=80" alt="" />
+            <div class="pkg-body">
+              <p class="pkg-title">综合养车大礼包</p>
+              <p class="pkg-sub">洗车 + 维保 + 检测一站囤齐</p>
+              <div class="pkg-tags">多业务组合 · 购买后 180 天内有效</div>
+              <div class="pkg-price-row">
+                <span class="pkg-price">¥999</span>
+                <span class="pkg-origin">¥1580</span>
+                <span class="pkg-save">立省 ¥581</span>
+              </div>
+            </div>
+          </button>
+        </div>
+        <p class="muted" id="pkg-home-empty" style="display: none; margin-top: 8px">当前城市暂无上架套餐，请稍后再试。</p>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h3>首推服务</h3>
+          <a href="javascript:void(0)">更多 &gt;</a>
+        </div>
+        <div class="feature-grid">
+          <article class="feature">
+            <img src="https://images.unsplash.com/photo-1486006920555-c77dcf18193c?auto=format&fit=crop&w=900&q=80" alt="家用车年检" />
+            <div class="content">
+              <div class="name">家用车年检（先囤后用）</div>
+              <div class="price"><strong>¥199</strong><del>¥499</del></div>
+              <button class="buy">立即抢购</button>
+            </div>
+          </article>
+          <article class="feature">
+            <img src="https://images.unsplash.com/photo-1607861716497-e65ab29fc7ac?auto=format&fit=crop&w=900&q=80" alt="自动洗车" />
+            <div class="content">
+              <div class="name">自动洗车</div>
+              <div class="price"><strong>¥15</strong><del>¥25</del></div>
+              <button class="buy">立即抢购</button>
+            </div>
+          </article>
+          <article class="feature">
+            <img src="https://images.unsplash.com/photo-1486006920555-c77dcf18193c?auto=format&fit=crop&w=900&q=80" alt="家用车年检" />
+            <div class="content">
+              <div class="name">家用车年检（先囤后用）</div>
+              <div class="price"><strong>¥199</strong><del>¥499</del></div>
+              <button class="buy">立即抢购</button>
+            </div>
+          </article>
+          <article class="feature">
+            <img src="https://images.unsplash.com/photo-1607861716497-e65ab29fc7ac?auto=format&fit=crop&w=900&q=80" alt="自动洗车" />
+            <div class="content">
+              <div class="name">自动洗车</div>
+              <div class="price"><strong>¥15</strong><del>¥25</del></div>
+              <button class="buy">立即抢购</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <h3>用车 | 交通资讯</h3>
+          <a href="javascript:void(0)">更多 &gt;</a>
+        </div>
+        <div class="news-list">
+          <article class="news">
+            <img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=900&q=80" alt="交通资讯1" />
+            <div class="meta">
+              <h4>市交通运输系统警示教育会召开</h4>
+              <time>2025-06-21</time>
+            </div>
+          </article>
+          <article class="news">
+            <img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=900&q=80" alt="交通资讯2" />
+            <div class="meta">
+              <h4>团中央调研组来连调研网约车行业...</h4>
+              <time>2025-06-21</time>
+            </div>
+          </article>
+        </div>
+      </section>
+      </div>
+    </main>
+
+    <!-- 优惠套餐子流程（微信小程序页面结构：顶栏+滚动+底栏安全区） -->
+    <div class="wx-screen" id="wx-pkg-list" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="status-bar-spacer" aria-hidden="true"></div>
+      <header class="wx-screen-nav">
+        <div class="nav-slot nav-slot--left">
+          <button type="button" class="btn-nav-back" data-close-screen aria-label="返回">‹</button>
+        </div>
+        <div class="nav-title">优惠套餐</div>
+        <div class="nav-slot nav-slot--right"><span class="capsule-fake" aria-hidden="true"></span></div>
+      </header>
+      <div class="wx-screen-scroll">
+        <div class="filter-row" id="pkg-list-filters">
+          <button type="button" class="filter-chip is-active" data-filter="all">全部</button>
+          <button type="button" class="filter-chip" data-filter="maint">维保</button>
+          <button type="button" class="filter-chip" data-filter="wash">洗车美容</button>
+          <button type="button" class="filter-chip" data-filter="check">检测</button>
+        </div>
+        <div id="pkg-list-loading" style="display: none">
+          <div class="skeleton-block"></div>
+          <div class="skeleton-block"></div>
+          <div class="skeleton-block"></div>
+        </div>
+        <div id="pkg-list-error" class="state-error" style="display: none">网络异常，请检查网络后重试。<button type="button" class="filter-chip" style="margin-top: 8px" data-retry-list>重新加载</button></div>
+        <div id="pkg-list-body"></div>
+        <div id="pkg-list-empty" class="state-empty" style="display: none">暂无可售套餐，请稍后再来。</div>
+      </div>
+    </div>
+
+    <div class="wx-screen" id="wx-pkg-detail" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="status-bar-spacer" aria-hidden="true"></div>
+      <header class="wx-screen-nav">
+        <div class="nav-slot nav-slot--left">
+          <button type="button" class="btn-nav-back" data-close-screen aria-label="返回">‹</button>
+        </div>
+        <div class="nav-title">套餐详情</div>
+        <div class="nav-slot nav-slot--right"><span class="capsule-fake" aria-hidden="true"></span></div>
+      </header>
+      <div class="wx-screen-scroll">
+        <div class="detail-hero">
+          <img id="pkg-d-img" src="https://images.unsplash.com/photo-1607861716497-e65ab29fc7ac?auto=format&fit=crop&w=900&q=80" alt="套餐主图" />
+          <div class="dh-cap">
+            <h2 id="pkg-d-title">洗车美容畅享包</h2>
+            <div class="price-block"><span class="sale" id="pkg-d-price">¥299</span><span class="orig" id="pkg-d-orig">¥598</span></div>
+            <p class="muted" id="pkg-d-sub" style="margin-top: 8px">精洗 + 打蜡组合，全城门店通用</p>
+          </div>
+        </div>
+        <div id="pkg-detail-offline" class="state-error" style="display: none; margin: 0 0 12px">
+          该套餐已下架，暂不可购买。
+        </div>
+        <div class="panel">
+          <h3 class="panel-title">套餐内容</h3>
+          <div class="dl-row"><span>精洗服务</span><span>洗车美容 · 15 次</span></div>
+          <div class="dl-row"><span>打蜡服务</span><span>洗车美容 · 1 次</span></div>
+          <div class="dl-row"><span>适用门店</span><span>连云港全城 12 家门店 · <a href="javascript:void(0)" style="color: var(--brand)">查看全部</a></span></div>
+          <div class="dl-row"><span>有效期</span><span>购买后 365 天内有效</span></div>
+        </div>
+        <div class="panel">
+          <h3 class="panel-title">购买须知</h3>
+          <p class="muted">套餐购买后，请在有效期内使用套餐中的服务，过期未使用的服务将自动作废。</p>
+          <p class="muted" style="margin-top: 8px"><strong>未使用任何</strong>套餐内容时，可申请退款；使用过任意内容后套餐不支持退款。</p>
+        </div>
+      </div>
+      <footer class="wx-screen-footer">
+        <button type="button" class="btn-primary-lg" id="pkg-btn-buy">立即购买</button>
+      </footer>
+    </div>
+
+    <div class="wx-screen" id="wx-pkg-checkout" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="status-bar-spacer" aria-hidden="true"></div>
+      <header class="wx-screen-nav">
+        <div class="nav-slot nav-slot--left">
+          <button type="button" class="btn-nav-back" data-close-screen aria-label="返回">‹</button>
+        </div>
+        <div class="nav-title">确认订单</div>
+        <div class="nav-slot nav-slot--right"><span class="capsule-fake" aria-hidden="true"></span></div>
+      </header>
+      <div class="wx-screen-scroll">
+        <div class="checkout-pkg-card">
+          <img id="chk-pkg-img" src="https://images.unsplash.com/photo-1607861716497-e65ab29fc7ac?auto=format&fit=crop&w=900&q=80" alt="" />
+          <div class="cpc-body">
+            <p class="cpc-title" id="chk-pkg-title">洗车美容畅享包</p>
+            <p class="cpc-content" id="chk-pkg-content">精洗服务 15 次、打蜡服务 1 次</p>
+            <div class="cpc-price-row">
+              <span class="cpc-sale" id="chk-pkg-sale">¥299</span>
+              <span class="cpc-orig" id="chk-pkg-orig">¥598</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3 class="checkout-panel-title">订单信息</h3>
+          <div class="checkout-form-row">
+            <label for="chk-vehicle">车辆信息</label>
+            <select id="chk-vehicle" class="checkout-select" aria-label="选择车辆">
+              <option value="v1">苏G·D12345 · 大众 朗逸</option>
+              <option value="v2">苏G·A88888 · 丰田 凯美瑞</option>
+            </select>
+          </div>
+          <div class="checkout-form-row">
+            <label for="chk-vehicle">优惠券</label>
+            <select id="chk-platform-coupon" class="checkout-select" aria-label="选择优惠券" style="max-width: 58%">
+              <option value="0">不使用优惠券</option>
+              <option value="10">满100减10</option>
+              <option value="20" selected>满200减20</option>
+              <option value="50">满500减50</option>
+            </select>
+          </div>
+          <div style="padding-top: 4px">
+            <span class="checkout-panel-title" style="font-size: 14px">支付方式</span>
+            <div class="pay-method-list" role="radiogroup" aria-label="支付方式">
+              <label class="pay-method-item pay-method-item--active" data-pay-item>
+                <input type="radio" name="pay-method" value="wechat" checked />
+                <span>微信支付</span>
+              </label>
+              <label class="pay-method-item" data-pay-item>
+                <input type="radio" name="pay-method" value="balance" />
+                <span>余额支付（可用 ¥128.00）</span>
+              </label>
+              <label class="pay-method-item" data-pay-item>
+                <input type="radio" name="pay-method" value="combined" />
+                <span>组合支付</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3 class="checkout-panel-title">购买须知</h3>
+          <p class="checkout-notice-plain">套餐购买后，请在有效期内使用套餐中的服务，过期未使用的服务将自动作废。</p>
+          <p class="checkout-notice-plain">未使用任何套餐内容时，可申请退款；使用过任意内容后套餐不支持退款。</p>
+        </div>
+
+        <label class="checkout-agree">
+          <input type="checkbox" id="chk-rule-agree" />
+          <span>已阅读并同意<span class="link-like">《优惠套餐购买规则及退改说明》</span></span>
+        </label>
+      </div>
+      <footer class="wx-screen-footer checkout-pay-footer">
+        <div class="checkout-pay-bar">
+          <div class="checkout-pay-left">
+            <span class="pay-total-label">实际支付</span>
+            <span class="pay-total-num" id="chk-pay-total">¥279.00</span>
+            <button type="button" class="btn-detail-toggle" id="chk-detail-toggle" aria-expanded="false" aria-controls="chk-pay-detail">
+              <span>明细</span>
+              <span class="detail-chevron" id="chk-detail-chevron" aria-hidden="true">▼</span>
+            </button>
+          </div>
+          <button type="button" class="btn-primary-lg checkout-btn-submit" id="pkg-btn-pay">确认下单</button>
+        </div>
+        <div class="checkout-detail-panel" id="chk-pay-detail" aria-hidden="true">
+          <div class="dd-row"><span>套餐售价</span><span id="chk-d-line-pkg">¥299.00</span></div>
+          <div class="dd-row"><span>优惠券（满减）</span><span id="chk-d-line-coupon">-¥20.00</span></div>
+          <div class="dd-row" id="chk-d-line-balance" style="display: none"><span>余额抵扣</span><span id="chk-d-balance-amt">¥0.00</span></div>
+          <div class="dd-row" style="font-weight: 600; color: var(--text-primary); padding-top: 6px; border-top: 1px dashed var(--border); margin-top: 4px">
+            <span>应付合计</span><span id="chk-d-line-total">¥279.00</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <div class="wx-screen" id="wx-pkg-pay-success" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="status-bar-spacer" aria-hidden="true"></div>
+      <header class="wx-screen-nav">
+        <div class="nav-slot nav-slot--left">
+          <button type="button" class="btn-nav-back" id="btn-pay-success-home" aria-label="回首页">‹</button>
+        </div>
+        <div class="nav-title">支付成功</div>
+        <div class="nav-slot nav-slot--right"><span class="capsule-fake" aria-hidden="true"></span></div>
+      </header>
+      <div class="wx-screen-scroll">
+        <div class="panel" style="text-align: center; padding: 24px 16px">
+          <span class="tag tag--success" style="font-size: 14px; padding: 6px 14px">支付成功</span>
+          <p class="muted" style="margin-top: 16px">购买成功，您可在「我的-我的钱包-可用套餐」中查看使用相应服务。</p>
+        </div>
+        <div class="panel">
+          <h3 class="panel-title">订单摘要</h3>
+          <div class="dl-row"><span>实付金额</span><span>¥299.00</span></div>
+          <div class="dl-row"><span>券数量</span><span>共 16 张</span></div>
+        </div>
+        <div class="pay-success-secondary-wrap">
+          <button type="button" class="btn-secondary-lg" data-open="wx-my-pkg">查看我的套餐资产</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="wx-screen" id="wx-mine" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="status-bar-spacer" aria-hidden="true"></div>
+      <header class="wx-screen-nav">
+        <div class="nav-slot nav-slot--left">
+          <button type="button" class="btn-nav-back" data-close-screen aria-label="返回">‹</button>
+        </div>
+        <div class="nav-title">我的</div>
+        <div class="nav-slot nav-slot--right"><span class="capsule-fake" aria-hidden="true"></span></div>
+      </header>
+      <div class="wx-screen-scroll">
+        <div class="mine-profile-header">
+          <div class="mine-avatar-lg" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20a8 8 0 0116 0" />
+            </svg>
+          </div>
+          <div>
+            <div class="mine-name">车管家会员8888</div>
+            <div class="mine-phone">13888888888</div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-bottom: 8px">
+          <h3 class="panel-title" style="margin-bottom: 4px">我的钱包</h3>
+          <div class="mine-wallet-grid">
+            <div class="mine-w-cell">
+              <span class="mine-w-val">0.00元</span>
+              <span class="mine-w-lbl">账户余额</span>
+            </div>
+            <div class="mine-w-vline" aria-hidden="true"></div>
+            <div class="mine-w-cell">
+              <span class="mine-w-val">0 张</span>
+              <span class="mine-w-lbl">优惠券</span>
+            </div>
+            <div class="mine-w-vline" aria-hidden="true"></div>
+            <div class="mine-w-cell">
+              <span class="mine-w-val">0 单</span>
+              <span class="mine-w-lbl">可开票</span>
+            </div>
+            <div class="mine-w-vline" aria-hidden="true"></div>
+            <button type="button" class="mine-w-cell" data-open="wx-my-pkg" aria-label="查看可用套餐">
+              <span class="mine-w-val"><span id="mine-pkg-count">18</span> 张</span>
+              <span class="mine-w-lbl">可用套餐</span>
+            </button>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="mine-section-head">
+            <h3 class="panel-title">我的订单</h3>
+            <button type="button" class="mine-link-all" data-mine-stub="订单中心页面在本原型中已移除；正式版将打开订单列表。">全部 ›</button>
+          </div>
+          <div class="mine-order-shortcuts">
+            <button type="button" class="mine-o-btn" data-mine-stub="订单中心页面在本原型中已移除；正式版将打开订单列表。" aria-label="待支付订单">
+              <span class="mine-o-ic mine-o-ic--warn">
+                <svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 7v6l4 2" />
+                </svg>
+              </span>
+              <span class="mine-o-label">待支付</span>
+            </button>
+            <button type="button" class="mine-o-btn" data-mine-stub="订单中心页面在本原型中已移除；正式版将打开订单列表。" aria-label="未开始订单">
+              <span class="mine-o-ic mine-o-ic--pending">
+                <svg viewBox="0 0 24 24">
+                  <path d="M22 2L11 13" />
+                  <path d="M22 2l-7 20-4-9-9-4 20-7z" />
+                </svg>
+              </span>
+              <span class="mine-o-label">未开始</span>
+            </button>
+            <button type="button" class="mine-o-btn" data-mine-stub="订单中心页面在本原型中已移除；正式版将打开订单列表。" aria-label="进行中订单">
+              <span class="mine-o-ic mine-o-ic--process">
+                <svg viewBox="0 0 24 24">
+                  <path d="M5 11l4-6 4 10 6 3" />
+                  <circle cx="5" cy="11" r="2" />
+                  <circle cx="19" cy="18" r="2" />
+                </svg>
+              </span>
+              <span class="mine-o-label">进行中</span>
+            </button>
+            <button type="button" class="mine-o-btn" data-mine-stub="订单中心页面在本原型中已移除；正式版将打开订单列表。" aria-label="退款与售后">
+              <span class="mine-o-ic mine-o-ic--danger">
+                <svg viewBox="0 0 24 24">
+                  <rect x="3" y="5" width="18" height="14" rx="2" />
+                  <path d="M7 9h10M7 13h6" />
+                </svg>
+              </span>
+              <span class="mine-o-label">退款/售后</span>
+            </button>
+            <button type="button" class="mine-o-btn" data-mine-stub="订单中心页面在本原型中已移除；正式版将打开订单列表。" aria-label="已完成订单">
+              <span class="mine-o-ic mine-o-ic--success">
+                <svg viewBox="0 0 24 24">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+              </span>
+              <span class="mine-o-label">已完成</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="panel mine-menu-panel">
+          <ul class="mine-menu">
+            <li>
+              <button type="button" class="mine-menu-item" data-mine-stub="我的车辆（原型）">
+                <span class="menu-ic" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M5 17h14v-5l-3-4H8L5 12v5z" />
+                    <circle cx="7.5" cy="17" r="1.5" />
+                    <circle cx="16.5" cy="17" r="1.5" />
+                  </svg>
+                </span>
+                <span class="menu-txt">我的车辆</span>
+                <span class="menu-chev" aria-hidden="true">›</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="mine-menu-item" data-mine-stub="我的评价（原型）">
+                <span class="menu-ic" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M9 18h6M10 22h4" />
+                    <path d="M12 2a7 7 0 017 7c0 4-3 6-5 8H10c-2-2-5-4-5-8a7 7 0 017-7z" />
+                  </svg>
+                </span>
+                <span class="menu-txt">我的评价</span>
+                <span class="menu-chev" aria-hidden="true">›</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="mine-menu-item" data-mine-stub="我的地址（原型）">
+                <span class="menu-ic" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 21s7-4.35 7-10a7 7 0 10-14 0c0 5.65 7 10 7 10z" />
+                    <circle cx="12" cy="11" r="2.5" />
+                  </svg>
+                </span>
+                <span class="menu-txt">我的地址</span>
+                <span class="menu-chev" aria-hidden="true">›</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="mine-menu-item" data-mine-stub="实名认证（原型）">
+                <span class="menu-ic" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 20a8 8 0 0116 0" />
+                  </svg>
+                </span>
+                <span class="menu-txt">实名认证</span>
+                <span class="menu-chev" aria-hidden="true">›</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="mine-menu-item" data-mine-stub="帮助与反馈（原型）">
+                <span class="menu-ic" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M9.5 9.5a2.5 2.5 0 014.5 1.5c0 2-2 2-2 3" />
+                    <path d="M12 17h.01" />
+                  </svg>
+                </span>
+                <span class="menu-txt">帮助与反馈</span>
+                <span class="menu-chev" aria-hidden="true">›</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="mine-menu-item" data-mine-stub="注销账户（原型）">
+                <span class="menu-ic" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 2v10" />
+                    <path d="M8 6H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-3" />
+                    <path d="M16 6a4 4 0 00-8 0" />
+                  </svg>
+                </span>
+                <span class="menu-txt">注销账户</span>
+                <span class="menu-chev" aria-hidden="true">›</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <button type="button" class="btn-logout-mine" id="btn-mine-logout">退出登录</button>
+      </div>
+    </div>
+
+    <div class="wx-screen" id="wx-my-pkg" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="status-bar-spacer" aria-hidden="true"></div>
+      <header class="wx-screen-nav">
+        <div class="nav-slot nav-slot--left">
+          <button type="button" class="btn-nav-back" data-close-screen aria-label="返回">‹</button>
+        </div>
+        <div class="nav-title">我的套餐</div>
+        <div class="nav-slot nav-slot--right"><span class="capsule-fake" aria-hidden="true"></span></div>
+      </header>
+      <div class="wx-screen-scroll">
+        <div class="my-pkg-tabbar" role="tablist" aria-label="我的套餐与使用记录">
+          <div class="my-pkg-tabwrap">
+            <button type="button" class="my-pkg-tab is-active" role="tab" aria-selected="true" id="my-pkg-tab-list" aria-controls="my-pkg-panel-list" data-my-pkg-tab="list">我的套餐</button>
+            <button type="button" class="my-pkg-tab" role="tab" aria-selected="false" id="my-pkg-tab-records" aria-controls="my-pkg-panel-records" data-my-pkg-tab="records">使用记录</button>
+          </div>
+        </div>
+        <div id="my-pkg-panel-list" role="tabpanel" aria-labelledby="my-pkg-tab-list">
+          <div class="biz-card">
+            <div class="biz-meta">
+              <h4>维保</h4>
+              <p>可用券 2 张 · 即将过期 1 张</p>
+            </div>
+            <button type="button" class="btn-sm" data-open="wx-coupon-list" data-biz="维保">去使用</button>
+          </div>
+          <div class="biz-card">
+            <div class="biz-meta">
+              <h4>洗车美容</h4>
+              <p>可用券 15 张</p>
+            </div>
+            <button type="button" class="btn-sm" data-open="wx-coupon-list" data-biz="洗车美容">去使用</button>
+          </div>
+          <div class="biz-card">
+            <div class="biz-meta">
+              <h4>检测</h4>
+              <p>可用券 1 张</p>
+            </div>
+            <button type="button" class="btn-sm" data-open="wx-coupon-list" data-biz="检测">去使用</button>
+          </div>
+          <div class="biz-card" style="opacity: 0.65">
+            <div class="biz-meta">
+              <h4>救援</h4>
+              <p>可用券 0 张</p>
+            </div>
+            <button type="button" class="btn-sm" disabled>去使用</button>
+          </div>
+        </div>
+        <div id="my-pkg-panel-records" role="tabpanel" aria-labelledby="my-pkg-tab-records" hidden>
+          <div class="usage-record-item">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+              <strong>精洗服务券</strong>
+              <span class="tag tag--warn">已使用</span>
+            </div>
+            <p class="ur-meta">2026-05-08 10:24 · 海州旗舰店 · 服务订单 SO202605080001</p>
+          </div>
+          <div class="usage-record-item">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+              <strong>小保养券</strong>
+              <span class="tag tag--warn">已使用</span>
+            </div>
+            <p class="ur-meta">2026-05-01 14:20 · 连云新城店 · 服务订单 SO202604280012</p>
+          </div>
+          <div class="usage-record-item">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+              <strong>打蜡服务券</strong>
+              <span class="tag tag--danger">已取消</span>
+            </div>
+            <p class="ur-meta">2026-04-28 16:05 · 用户取消预约 · 海州旗舰店</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wx-screen" id="wx-coupon-list" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="status-bar-spacer" aria-hidden="true"></div>
+      <header class="wx-screen-nav">
+        <div class="nav-slot nav-slot--left">
+          <button type="button" class="btn-nav-back" data-close-screen aria-label="返回">‹</button>
+        </div>
+        <div class="nav-title" id="coupon-list-title">洗车美容可用套餐</div>
+        <div class="nav-slot nav-slot--right"><span class="capsule-fake" aria-hidden="true"></span></div>
+      </header>
+      <div class="wx-screen-scroll">
+        <div class="filter-row">
+          <button type="button" class="filter-chip is-active" data-coupon-filter="unused">待使用</button>
+          <button type="button" class="filter-chip" data-coupon-filter="used">已使用</button>
+          <button type="button" class="filter-chip" data-coupon-filter="expired">已过期</button>
+        </div>
+        <button type="button" class="list-card" id="card-unused-sample" data-open="wx-coupon-detail">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+            <h4>精洗服务券</h4>
+            <span class="tag tag--success">待使用</span>
+          </div>
+          <p>所属套餐：洗车美容畅享包 · 剩余 3 次 · 有效期至 2026-12-31</p>
+          <p style="margin-top: 4px">适用门店：全城 12 家门店</p>
+          <span class="tag tag--info" style="margin-top: 8px">使用</span>
+        </button>
+        <button type="button" class="list-card" data-open="wx-coupon-detail" id="card-expired-sample" style="display: none">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+            <h4>示例过期券</h4>
+            <span class="tag tag--danger">已过期</span>
+          </div>
+          <p>已超过有效期，不可使用。</p>
+        </button>
+        <button type="button" class="list-card" data-open="wx-coupon-detail" id="card-used-sample" style="display: none">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px">
+            <h4>示例已使用券</h4>
+            <span class="tag tag--warn">已使用</span>
+          </div>
+          <p>已关联服务订单 SO202605080001</p>
+        </button>
+      </div>
+    </div>
+
+    <div class="wx-screen" id="wx-coupon-detail" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="status-bar-spacer" aria-hidden="true"></div>
+      <header class="wx-screen-nav">
+        <div class="nav-slot nav-slot--left">
+          <button type="button" class="btn-nav-back" data-close-screen aria-label="返回">‹</button>
+        </div>
+        <div class="nav-title">套餐券详情</div>
+        <div class="nav-slot nav-slot--right"><span class="capsule-fake" aria-hidden="true"></span></div>
+      </header>
+      <div class="wx-screen-scroll">
+        <div class="panel">
+          <div style="display: flex; justify-content: space-between; align-items: center">
+            <h3 class="panel-title" style="margin: 0">精洗服务券</h3>
+            <span class="tag tag--success" id="cdetail-status">待使用</span>
+          </div>
+          <p class="muted" style="margin-top: 10px">套餐：洗车美容畅享包<br>业务：洗车美容<br>商品/服务：精洗服务</p>
+        </div>
+        <div class="panel">
+          <h3 class="panel-title">权益信息</h3>
+          <div class="dl-row"><span>剩余次数</span><span>3 次</span></div>
+          <div class="dl-row"><span>有效期</span><span>至 2026-12-31</span></div>
+        </div>
+      </div>
+      <footer class="wx-screen-footer">
+        <button type="button" class="btn-primary-lg" id="coupon-use-btn" data-open="wx-store-select">使用</button>
+      </footer>
+    </div>
+
+    <div class="wx-screen" id="wx-store-select" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="status-bar-spacer" aria-hidden="true"></div>
+      <header class="wx-screen-nav">
+        <div class="nav-slot nav-slot--left">
+          <button type="button" class="btn-nav-back" data-close-screen aria-label="返回">‹</button>
+        </div>
+        <div class="nav-title">选择门店</div>
+        <div class="nav-slot nav-slot--right"><span class="capsule-fake" aria-hidden="true"></span></div>
+      </header>
+      <div class="wx-screen-scroll">
+        <p class="muted" style="margin-bottom: 10px">当前券：精洗服务券 · 精洗服务</p>
+        <button type="button" class="store-item is-selected" data-store>
+          <div style="flex: 1; min-width: 0">
+            <strong>海州旗舰店</strong>
+            <p class="muted" style="margin: 4px 0 0">连云港市海州区××路 88 号 · 距您 1.2km</p>
+            <p class="muted" style="margin: 4px 0 0">营业中 · 可预约</p>
+          </div>
+        </button>
+        <button type="button" class="store-item" data-store>
+          <div style="flex: 1; min-width: 0">
+            <strong>连云新城店</strong>
+            <p class="muted" style="margin: 4px 0 0">连云港市连云区××大道 66 号 · 距您 8.4km</p>
+            <p class="muted" style="margin: 4px 0 0">营业中</p>
+          </div>
+        </button>
+      </div>
+      <footer class="wx-screen-footer">
+        <button type="button" class="btn-primary-lg" id="btn-confirm-store">确认使用并下单</button>
+      </footer>
+    </div>
+
+    <div class="wx-screen" id="wx-service-success" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="status-bar-spacer" aria-hidden="true"></div>
+      <header class="wx-screen-nav">
+        <div class="nav-slot nav-slot--left">
+          <button type="button" class="btn-nav-back" data-close-all aria-label="完成">‹</button>
+        </div>
+        <div class="nav-title">下单成功</div>
+        <div class="nav-slot nav-slot--right"><span class="capsule-fake" aria-hidden="true"></span></div>
+      </header>
+      <div class="wx-screen-scroll">
+        <div class="panel" style="text-align: center; padding: 20px">
+          <span class="tag tag--success">服务订单已创建</span>
+          <p class="muted" style="margin-top: 14px">下单成功！不要忘记提前致电预约哦！</p>
+        </div>
+        <div class="panel">
+          <h3 class="panel-title">订单信息</h3>
+          <div class="dl-row"><span>订单号</span><span>SO202605080001</span></div>
+          <div class="dl-row"><span>来源</span><span>套餐券 </span></div>
+          <div class="dl-row"><span>门店</span><span>海州旗舰店</span></div>
+        </div>
+      </div>
+      <footer class="wx-screen-footer">
+        <button type="button" class="btn-primary-lg" id="btn-service-success-view-order">查看订单</button>
+      </footer>
+    </div>
+
+    <!-- 以下三页（P11 订单入口 / P12 套餐购买订单 / P13 套餐券服务订单）已按需求注释，控制台入口已移除；恢复时取消注释并同步 screens 与脚本 -->
+    <!--
+    <div class="wx-screen" id="wx-orders-pkg" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="status-bar-spacer" aria-hidden="true"></div>
+      <header class="wx-screen-nav">
+        <div class="nav-slot nav-slot--left">
+          <button type="button" class="btn-nav-back" data-close-screen aria-label="返回">‹</button>
+        </div>
+        <div class="nav-title">套餐购买订单</div>
+        <div class="nav-slot nav-slot--right"><span class="capsule-fake" aria-hidden="true"></span></div>
+      </header>
+      <div class="wx-screen-scroll">
+        <div class="panel">
+          <div class="dl-row"><span>订单号</span><span>PKG202605080001</span></div>
+          <div class="dl-row"><span>类型</span><span>套餐购买订单</span></div>
+          <div class="dl-row"><span>实付</span><span>¥299.00</span></div>
+          <div class="dl-row"><span>退款</span><span><button type="button" class="filter-chip" id="btn-refund-ok">申请退款（未使用）</button></span></div>
+          <div class="dl-row"><span>演示</span><span><button type="button" class="filter-chip" id="btn-pkg-used-flag">标记套餐已使用（阻断退款）</button></span></div>
+        </div>
+        <div class="panel" id="panel-refund-blocked" style="display: none">
+          <p class="state-error" style="border: 0; padding: 0; background: transparent">套餐已使用，不支持退款</p>
+          <button type="button" class="filter-chip" id="btn-refund-reset" style="margin-top: 8px">演示：恢复为可退状态</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="wx-screen" id="wx-orders-svc" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="status-bar-spacer" aria-hidden="true"></div>
+      <header class="wx-screen-nav">
+        <div class="nav-slot nav-slot--left">
+          <button type="button" class="btn-nav-back" data-close-screen aria-label="返回">‹</button>
+        </div>
+        <div class="nav-title">套餐券服务订单</div>
+        <div class="nav-slot nav-slot--right"><span class="capsule-fake" aria-hidden="true"></span></div>
+      </header>
+      <div class="wx-screen-scroll">
+        <div class="panel">
+          <div class="dl-row"><span>订单号</span><span>SO202605080001</span></div>
+          <div class="dl-row"><span>来源</span><span>套餐券核销</span></div>
+          <div class="dl-row"><span>用户支付</span><span>¥0</span></div>
+          <div class="dl-row"><span>订单实付（分担金额）</span><span>¥38.00（示例）</span></div>
+          <div class="dl-row"><span>退款入口</span><span>隐藏 / 置灰不可申请</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wx-screen" id="wx-order-hub" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="status-bar-spacer" aria-hidden="true"></div>
+      <header class="wx-screen-nav">
+        <div class="nav-slot nav-slot--left">
+          <button type="button" class="btn-nav-back" data-close-screen aria-label="返回">‹</button>
+        </div>
+        <div class="nav-title">订单</div>
+        <div class="nav-slot nav-slot--right"><span class="capsule-fake" aria-hidden="true"></span></div>
+      </header>
+      <div class="wx-screen-scroll">
+        <p class="muted" style="margin-bottom: 12px">以下为优惠套餐相关订单类型入口，接入真实订单列表后映射至对应 Tab/筛选。</p>
+        <button type="button" class="list-card" data-open="wx-orders-pkg">
+          <h4>套餐购买订单</h4>
+          <p>含退款入口展示：未使用可退 / 已使用阻断提示</p>
+        </button>
+        <button type="button" class="list-card" data-open="wx-orders-svc">
+          <h4>套餐券服务订单</h4>
+          <p>用户实付 0；订单实付为分担金额；退款入口隐藏</p>
+        </button>
+      </div>
+    </div>
+    -->
+
+    <div class="toast-success" id="proto-toast" role="status" aria-live="polite"></div>
+
+    <div class="proto-console-root" id="proto-console-root" aria-hidden="true">
+      <div class="proto-console-mask" id="proto-console-mask" tabindex="-1"></div>
+      <aside
+        class="proto-console-drawer"
+        id="proto-console-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="proto-console-title"
+        aria-hidden="true"
+      >
+        <div class="proto-console-head">
+          <h2 id="proto-console-title">原型控制</h2>
+          <p>从右侧滑出，与正式业务界面隔离，仅用于评审与演示。</p>
+        </div>
+        <div class="proto-console-body">
+          <section class="proto-console-section" aria-label="套餐列表状态">
+            <h3 class="proto-console-label">P01 套餐列表状态</h3>
+            <div class="proto-pill-row">
+              <button type="button" class="proto-pill is-active" data-proto-list-state="default">默认列表</button>
+              <button type="button" class="proto-pill" data-proto-list-state="loading">加载态</button>
+              <button type="button" class="proto-pill" data-proto-list-state="empty">空态</button>
+              <button type="button" class="proto-pill" data-proto-list-state="error">错误态</button>
+            </div>
+          </section>
+          <section class="proto-console-section" aria-label="页面跳转">
+            <h3 class="proto-console-label">页面</h3>
+            <div class="proto-page-list">
+              <button type="button" class="proto-page-item is-active" data-proto-jump="pkg-list">P01 优惠套餐列表</button>
+              <button type="button" class="proto-page-item" data-proto-jump="pkg-detail">P02 套餐详情 · 可购</button>
+              <button type="button" class="proto-page-item" data-proto-jump="pkg-detail-offline">P02 套餐详情 · 模拟下架</button>
+              <button type="button" class="proto-page-item" data-proto-jump="pkg-checkout">P03 结算下单</button>
+              <button type="button" class="proto-page-item" data-proto-jump="pay-success">P04 支付成功</button>
+              <button type="button" class="proto-page-item" data-proto-jump="mine">P05 个人中心</button>
+              <button type="button" class="proto-page-item" data-proto-jump="my-pkg">P06 我的套餐</button>
+              <button type="button" class="proto-page-item" data-proto-jump="coupon-list">P07 可用套餐券列表</button>
+              <button type="button" class="proto-page-item" data-proto-jump="coupon-detail">P08 套餐券详情</button>
+              <button type="button" class="proto-page-item" data-proto-jump="store-select">P09 选择门店</button>
+              <button type="button" class="proto-page-item" data-proto-jump="service-success">P10 服务下单成功</button>
+            </div>
+          </section>
+          <section class="proto-console-section" aria-label="演示操作">
+            <h3 class="proto-console-label">演示操作</h3>
+            <button type="button" class="proto-demo-btn" id="proto-btn-refresh">模拟下拉刷新</button>
+            <p class="proto-console-hint">
+              真机小程序中为微信原生下拉刷新；此处仅模拟重新请求并刷新当前筛选下的套餐列表（若当前不在列表页会先打开列表）。
+            </p>
+          </section>
+        </div>
+      </aside>
+    </div>
+
+    <button type="button" class="proto-console-fab" id="proto-console-fab" aria-label="打开原型控制台" aria-expanded="false" aria-controls="proto-console-drawer">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16" />
+      </svg>
+    </button>
+
+    <nav class="tabbar">
+      <button type="button" class="tab active" id="tab-home" aria-current="page">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            <path d="M9 22V12h6v10" />
+          </svg>
+        </span>
+        <span>首页</span>
+      </button>
+      <button type="button" class="tab" id="tab-assist">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M7 8h10a2 2 0 012 2v6a2 2 0 01-2 2h-2.5L9 21v-3H7a2 2 0 01-2-2v-6a2 2 0 012-2z" />
+            <circle cx="9" cy="11" r="1" />
+            <circle cx="12" cy="11" r="1" />
+            <circle cx="15" cy="11" r="1" />
+          </svg>
+        </span>
+        <span>助手</span>
+      </button>
+      <button type="button" class="tab" id="tab-orders" data-tab="orders">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M8 6h13M8 12h13M8 18h13" />
+            <circle cx="4" cy="6" r="1" />
+            <circle cx="4" cy="12" r="1" />
+            <circle cx="4" cy="18" r="1" />
+          </svg>
+        </span>
+        <span>订单</span>
+      </button>
+      <button type="button" class="tab" id="tab-mine" data-tab="mine">
+        <span class="tab-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 20a8 8 0 0116 0" />
+          </svg>
+        </span>
+        <span>我的</span>
+      </button>
+    </nav>
+
+    <script>
+      (function () {
+        var stack = [];
+        var pkgUsedForRefundDemo = false;
+
+        var screens = {
+          "wx-pkg-list": document.getElementById("wx-pkg-list"),
+          "wx-pkg-detail": document.getElementById("wx-pkg-detail"),
+          "wx-pkg-checkout": document.getElementById("wx-pkg-checkout"),
+          "wx-pkg-pay-success": document.getElementById("wx-pkg-pay-success"),
+          "wx-mine": document.getElementById("wx-mine"),
+          "wx-my-pkg": document.getElementById("wx-my-pkg"),
+          "wx-coupon-list": document.getElementById("wx-coupon-list"),
+          "wx-coupon-detail": document.getElementById("wx-coupon-detail"),
+          "wx-store-select": document.getElementById("wx-store-select"),
+          "wx-service-success": document.getElementById("wx-service-success"),
+        };
+
+        var currentPkg = null;
+        var demoOffline = false;
+
+        var PKG_ITEMS = [
+          {
+            id: "p1",
+            title: "洗车美容畅享包",
+            sub: "精洗 + 打蜡组合，全城门店通用",
+            content: "精洗服务 15 次、打蜡服务 1 次",
+            price: 299,
+            orig: 598,
+            filter: "wash",
+            img: "https://images.unsplash.com/photo-1607861716497-e65ab29fc7ac?auto=format&fit=crop&w=900&q=80",
+          },
+          {
+            id: "p2",
+            title: "家用车维保省心套餐",
+            sub: "小保养两次 + 安全检查一次",
+            content: "小保养 2 次、安全检测 1 次",
+            price: 688,
+            orig: 960,
+            filter: "maint",
+            img: "https://images.unsplash.com/photo-1486006920555-c77dcf18193c?auto=format&fit=crop&w=900&q=80",
+          },
+          {
+            id: "p3",
+            title: "全车安全检测套餐",
+            sub: "人保合作检测线，报告可查",
+            content: "全车安全检测 1 次",
+            price: 128,
+            orig: 199,
+            filter: "check",
+            img: "https://images.unsplash.com/photo-1625047509168-a7026f36de04?auto=format&fit=crop&w=900&q=80",
+          },
+          {
+            id: "p4",
+            title: "综合养车大礼包",
+            sub: "洗车 + 维保 + 检测一站囤齐",
+            content: "洗车美容多项、基础保养、安全检测（详见套餐详情）",
+            price: 999,
+            orig: 1580,
+            filter: "all",
+            img: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=900&q=80",
+          },
+        ];
+
+        function setAria(el, open) {
+          if (!el) return;
+          el.classList.toggle("is-open", open);
+          el.setAttribute("aria-hidden", open ? "false" : "true");
+        }
+
+        function setMyPkgTab(which) {
+          document.querySelectorAll("[data-my-pkg-tab]").forEach(function (btn) {
+            var w = btn.getAttribute("data-my-pkg-tab");
+            var active = w === which;
+            btn.classList.toggle("is-active", active);
+            btn.setAttribute("aria-selected", active ? "true" : "false");
+          });
+          var listPanel = document.getElementById("my-pkg-panel-list");
+          var recPanel = document.getElementById("my-pkg-panel-records");
+          if (listPanel) listPanel.hidden = which !== "list";
+          if (recPanel) recPanel.hidden = which !== "records";
+        }
+
+        function openScreen(id) {
+          var el = screens[id];
+          if (!el) return;
+          if (id === "wx-my-pkg") setMyPkgTab("list");
+          stack.push(id);
+          setAria(el, true);
+          document.body.style.overflow = "hidden";
+        }
+
+        function closeTop() {
+          var id = stack.pop();
+          if (id && screens[id]) setAria(screens[id], false);
+          if (stack.length === 0) document.body.style.overflow = "";
+        }
+
+        function closeAllScreens() {
+          while (stack.length) closeTop();
+        }
+
+        function showToast(msg) {
+          var t = document.getElementById("proto-toast");
+          t.textContent = msg;
+          t.classList.add("is-show");
+          setTimeout(function () {
+            t.classList.remove("is-show");
+          }, 2200);
+        }
+
+        function renderPkgList(filter) {
+          var body = document.getElementById("pkg-list-body");
+          var loading = document.getElementById("pkg-list-loading");
+          var empty = document.getElementById("pkg-list-empty");
+          var err = document.getElementById("pkg-list-error");
+          loading.style.display = "none";
+          empty.style.display = "none";
+          err.style.display = "none";
+          body.innerHTML = "";
+          var rows = PKG_ITEMS.filter(function (p) {
+            if (filter === "all") return true;
+            if (filter === "maint") return p.filter === "maint";
+            if (filter === "wash") return p.filter === "wash";
+            if (filter === "check") return p.filter === "check";
+            return true;
+          });
+          rows.forEach(function (p) {
+            var row = document.createElement("div");
+            row.className = "pkg-list-card";
+
+            var btnDetail = document.createElement("button");
+            btnDetail.type = "button";
+            btnDetail.className = "pkg-list-card-detail";
+            btnDetail.setAttribute("aria-label", "查看「" + p.title + "」详情");
+            btnDetail.innerHTML =
+              '<img class="pkg-list-card-thumb" src="' +
+              p.img +
+              '" alt="" />' +
+              '<div class="pkg-list-card-text">' +
+              "<h4>" +
+              p.title +
+              '</h4><p class="pkg-list-sub">' +
+              p.sub +
+              '</p><div class="pkg-list-price-row"><span class="pkg-list-sale">¥' +
+              p.price +
+              '</span><span class="pkg-list-orig">¥' +
+              p.orig +
+              "</span></div></div>";
+
+            var btnBuy = document.createElement("button");
+            btnBuy.type = "button";
+            btnBuy.className = "pkg-list-card-buy";
+            btnBuy.textContent = "立即购买";
+            btnBuy.disabled = !!demoOffline;
+
+            btnDetail.addEventListener("click", function () {
+              fillDetail(p);
+              openScreen("wx-pkg-detail");
+            });
+            btnBuy.addEventListener("click", function () {
+              if (demoOffline) {
+                showToast("当前为模拟下架状态，无法购买（Ctrl+O 可恢复）");
+                return;
+              }
+              fillDetail(p);
+              resetCheckoutForm();
+              fillCheckout(currentPkg);
+              openScreen("wx-pkg-checkout");
+            });
+
+            row.appendChild(btnDetail);
+            row.appendChild(btnBuy);
+            body.appendChild(row);
+          });
+          if (rows.length === 0) empty.style.display = "block";
+        }
+
+        function getPkgListActiveFilter() {
+          var el = document.querySelector("#pkg-list-filters .filter-chip[data-filter].is-active");
+          return el ? el.getAttribute("data-filter") : "all";
+        }
+
+        function setProtoListPillsActive(state) {
+          document.querySelectorAll("[data-proto-list-state]").forEach(function (b) {
+            b.classList.toggle("is-active", b.getAttribute("data-proto-list-state") === state);
+          });
+        }
+
+        function applyProtoPkgListState(state) {
+          var loading = document.getElementById("pkg-list-loading");
+          var body = document.getElementById("pkg-list-body");
+          var empty = document.getElementById("pkg-list-empty");
+          var err = document.getElementById("pkg-list-error");
+          setProtoListPillsActive(state);
+          if (state === "default") {
+            loading.style.display = "none";
+            empty.style.display = "none";
+            err.style.display = "none";
+            renderPkgList(getPkgListActiveFilter());
+            return;
+          }
+          if (state === "loading") {
+            loading.style.display = "block";
+            body.innerHTML = "";
+            empty.style.display = "none";
+            err.style.display = "none";
+            return;
+          }
+          if (state === "empty") {
+            loading.style.display = "none";
+            body.innerHTML = "";
+            empty.style.display = "block";
+            err.style.display = "none";
+            return;
+          }
+          if (state === "error") {
+            loading.style.display = "none";
+            body.innerHTML = "";
+            empty.style.display = "none";
+            err.style.display = "block";
+          }
+        }
+
+        function getCouponDiscount(price, couponVal) {
+          var v = parseInt(couponVal, 10) || 0;
+          if (v === 10 && price >= 100) return 10;
+          if (v === 20 && price >= 200) return 20;
+          if (v === 50 && price >= 500) return 50;
+          return 0;
+        }
+
+        function syncPayMethodUi() {
+          document.querySelectorAll("[data-pay-item]").forEach(function (lbl) {
+            var inp = lbl.querySelector('input[name="pay-method"]');
+            lbl.classList.toggle("pay-method-item--active", inp && inp.checked);
+          });
+        }
+
+        function applyDetailOfflineState() {
+          var off = document.getElementById("pkg-detail-offline");
+          var buy = document.getElementById("pkg-btn-buy");
+          if (!buy) return;
+          if (demoOffline) {
+            buy.disabled = true;
+            buy.textContent = "已下架，暂不可购买";
+            if (off) off.style.display = "block";
+          } else {
+            buy.disabled = false;
+            buy.textContent = "立即购买";
+            if (off) off.style.display = "none";
+          }
+        }
+
+        function updateCheckoutPaySummary() {
+          if (!currentPkg) return;
+          var price = currentPkg.price;
+          var couponVal = document.getElementById("chk-platform-coupon").value;
+          var discount = getCouponDiscount(price, couponVal);
+          var subtotal = Math.max(0, price - discount);
+          var payMethodEl = document.querySelector('input[name="pay-method"]:checked');
+          var payMethod = payMethodEl ? payMethodEl.value : "wechat";
+          var mockBalance = 128;
+
+          document.getElementById("chk-d-line-pkg").textContent = "¥" + price.toFixed(2);
+          document.getElementById("chk-d-line-coupon").textContent = discount > 0 ? "-¥" + discount.toFixed(2) : "¥0.00";
+
+          var balRow = document.getElementById("chk-d-line-balance");
+          var finalPay = subtotal;
+
+          if (payMethod === "balance") {
+            balRow.style.display = "flex";
+            var useBal = Math.min(mockBalance, subtotal);
+            document.getElementById("chk-d-balance-amt").textContent = "-¥" + useBal.toFixed(2);
+            finalPay = Math.max(0, subtotal - useBal);
+          } else if (payMethod === "combined") {
+            balRow.style.display = "flex";
+            var useBal2 = Math.min(mockBalance, Math.ceil(subtotal / 2));
+            document.getElementById("chk-d-balance-amt").textContent = "-¥" + useBal2.toFixed(2);
+            finalPay = Math.max(0, subtotal - useBal2);
+          } else {
+            balRow.style.display = "none";
+          }
+
+          document.getElementById("chk-pay-total").textContent = "¥" + finalPay.toFixed(2);
+          document.getElementById("chk-d-line-total").textContent = "¥" + finalPay.toFixed(2);
+        }
+
+        function fillCheckout(p) {
+          document.getElementById("chk-pkg-img").src = p.img;
+          document.getElementById("chk-pkg-img").alt = p.title;
+          document.getElementById("chk-pkg-title").textContent = p.title;
+          document.getElementById("chk-pkg-content").textContent = p.content || p.sub;
+          document.getElementById("chk-pkg-sale").textContent = "¥" + p.price;
+          document.getElementById("chk-pkg-orig").textContent = "¥" + p.orig;
+          updateCheckoutPaySummary();
+        }
+
+        function resetCheckoutForm() {
+          document.getElementById("chk-rule-agree").checked = false;
+          document.getElementById("chk-platform-coupon").value = "20";
+          document.getElementById("chk-vehicle").selectedIndex = 0;
+          var radios = document.querySelectorAll('input[name="pay-method"]');
+          radios.forEach(function (r, i) {
+            r.checked = i === 0;
+          });
+          syncPayMethodUi();
+          var det = document.getElementById("chk-pay-detail");
+          det.classList.remove("is-open");
+          det.setAttribute("aria-hidden", "true");
+          var tg = document.getElementById("chk-detail-toggle");
+          tg.setAttribute("aria-expanded", "false");
+          var ch = document.getElementById("chk-detail-chevron");
+          if (ch) ch.classList.remove("is-open");
+        }
+
+        function fillDetail(p) {
+          currentPkg = p;
+          document.getElementById("pkg-d-title").textContent = p.title;
+          document.getElementById("pkg-d-price").textContent = "¥" + p.price;
+          document.getElementById("pkg-d-orig").textContent = "¥" + p.orig;
+          document.getElementById("pkg-d-sub").textContent = p.sub;
+          document.getElementById("pkg-d-img").src = p.img;
+          fillCheckout(p);
+          applyDetailOfflineState();
+        }
+
+        function setProtoPageActive(jump) {
+          document.querySelectorAll("[data-proto-jump]").forEach(function (b) {
+            b.classList.toggle("is-active", b.getAttribute("data-proto-jump") === jump);
+          });
+        }
+
+        function protoJump(jump) {
+          var demoPkg = PKG_ITEMS[0];
+          setProtoPageActive(jump);
+          if (jump === "pkg-list") {
+            closeAllScreens();
+            resetTabsHome();
+            openScreen("wx-pkg-list");
+            applyProtoPkgListState("default");
+            return;
+          }
+          if (jump === "pkg-detail") {
+            demoOffline = false;
+            closeAllScreens();
+            resetTabsHome();
+            fillDetail(demoPkg);
+            openScreen("wx-pkg-detail");
+            return;
+          }
+          if (jump === "pkg-detail-offline") {
+            demoOffline = true;
+            closeAllScreens();
+            resetTabsHome();
+            fillDetail(demoPkg);
+            openScreen("wx-pkg-detail");
+            return;
+          }
+          if (jump === "pkg-checkout") {
+            demoOffline = false;
+            closeAllScreens();
+            resetTabsHome();
+            fillDetail(demoPkg);
+            resetCheckoutForm();
+            fillCheckout(demoPkg);
+            openScreen("wx-pkg-checkout");
+            return;
+          }
+          if (jump === "pay-success") {
+            closeAllScreens();
+            resetTabsHome();
+            openScreen("wx-pkg-pay-success");
+            return;
+          }
+          if (jump === "mine") {
+            closeAllScreens();
+            document.querySelectorAll(".tab").forEach(function (t) {
+              t.classList.remove("active");
+              t.removeAttribute("aria-current");
+            });
+            var tm = document.getElementById("tab-mine");
+            if (tm) tm.classList.add("active");
+            openScreen("wx-mine");
+            return;
+          }
+          if (jump === "my-pkg") {
+            closeAllScreens();
+            resetTabsHome();
+            openScreen("wx-my-pkg");
+            return;
+          }
+          if (jump === "coupon-list") {
+            closeAllScreens();
+            resetTabsHome();
+            document.getElementById("coupon-list-title").textContent = "洗车美容可用套餐";
+            applyCouponFilter("unused");
+            openScreen("wx-coupon-list");
+            return;
+          }
+          if (jump === "coupon-detail") {
+            closeAllScreens();
+            resetTabsHome();
+            openScreen("wx-coupon-detail");
+            return;
+          }
+          if (jump === "store-select") {
+            closeAllScreens();
+            resetTabsHome();
+            openScreen("wx-store-select");
+            return;
+          }
+          if (jump === "service-success") {
+            closeAllScreens();
+            resetTabsHome();
+            openScreen("wx-service-success");
+            return;
+          }
+        }
+
+        var protoConsoleRoot = document.getElementById("proto-console-root");
+        var protoDrawer = document.getElementById("proto-console-drawer");
+        var protoFab = document.getElementById("proto-console-fab");
+        var protoMask = document.getElementById("proto-console-mask");
+
+        function setProtoConsoleOpen(open) {
+          protoConsoleRoot.classList.toggle("is-open", open);
+          protoConsoleRoot.setAttribute("aria-hidden", open ? "false" : "true");
+          protoDrawer.setAttribute("aria-hidden", open ? "false" : "true");
+          protoFab.setAttribute("aria-expanded", open ? "true" : "false");
+          protoFab.setAttribute("aria-label", open ? "关闭原型控制台" : "打开原型控制台");
+        }
+
+        protoFab.addEventListener("click", function () {
+          setProtoConsoleOpen(!protoConsoleRoot.classList.contains("is-open"));
+        });
+
+        protoMask.addEventListener("click", function () {
+          setProtoConsoleOpen(false);
+        });
+
+        document.querySelectorAll("[data-proto-list-state]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var st = btn.getAttribute("data-proto-list-state");
+            closeAllScreens();
+            resetTabsHome();
+            openScreen("wx-pkg-list");
+            applyProtoPkgListState(st);
+          });
+        });
+
+        document.querySelectorAll("[data-proto-jump]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            protoJump(btn.getAttribute("data-proto-jump"));
+          });
+        });
+
+        document.getElementById("proto-btn-refresh").addEventListener("click", function () {
+          closeAllScreens();
+          resetTabsHome();
+          openScreen("wx-pkg-list");
+          var loading = document.getElementById("pkg-list-loading");
+          var body = document.getElementById("pkg-list-body");
+          var empty = document.getElementById("pkg-list-empty");
+          var err = document.getElementById("pkg-list-error");
+          loading.style.display = "block";
+          body.innerHTML = "";
+          empty.style.display = "none";
+          err.style.display = "none";
+          setProtoListPillsActive("loading");
+          var f = getPkgListActiveFilter();
+          setTimeout(function () {
+            loading.style.display = "none";
+            setProtoListPillsActive("default");
+            renderPkgList(f);
+            showToast("已模拟刷新列表");
+          }, 800);
+        });
+
+        document.getElementById("pkg-link-more").addEventListener("click", function (e) {
+          e.preventDefault();
+          document.querySelectorAll("#pkg-list-filters .filter-chip[data-filter]").forEach(function (c) {
+            c.classList.toggle("is-active", c.getAttribute("data-filter") === "all");
+          });
+          renderPkgList("all");
+          openScreen("wx-pkg-list");
+        });
+
+        function applyCouponFilter(f) {
+          document.querySelectorAll("[data-coupon-filter]").forEach(function (c) {
+            c.classList.toggle("is-active", c.getAttribute("data-coupon-filter") === f);
+          });
+          var u = document.getElementById("card-unused-sample");
+          var used = document.getElementById("card-used-sample");
+          var exp = document.getElementById("card-expired-sample");
+          if (u) u.style.display = f === "unused" ? "block" : "none";
+          if (used) used.style.display = f === "used" ? "block" : "none";
+          if (exp) exp.style.display = f === "expired" ? "block" : "none";
+          var st = document.getElementById("cdetail-status");
+          var ub = document.getElementById("coupon-use-btn");
+          if (!st || !ub) return;
+          if (f === "unused") {
+            st.textContent = "待使用";
+            st.className = "tag tag--success";
+            ub.disabled = false;
+          } else if (f === "used") {
+            st.textContent = "已使用";
+            st.className = "tag tag--warn";
+            ub.disabled = true;
+          } else {
+            st.textContent = "已过期";
+            st.className = "tag tag--danger";
+            ub.disabled = true;
+          }
+        }
+
+        document.querySelectorAll(".package-card[data-pkg-id]").forEach(function (card) {
+          card.addEventListener("click", function () {
+            var id = card.getAttribute("data-pkg-id");
+            var p = PKG_ITEMS.find(function (x) {
+              return x.id === id;
+            });
+            if (p) fillDetail(p);
+            openScreen("wx-pkg-detail");
+          });
+        });
+
+        document.querySelectorAll("[data-open]").forEach(function (node) {
+          if (node.classList.contains("package-card")) return;
+          node.addEventListener("click", function () {
+            var id = node.getAttribute("data-open");
+            if (!id) return;
+            if (id === "wx-coupon-list") {
+              var biz = node.getAttribute("data-biz") || "洗车美容";
+              document.getElementById("coupon-list-title").textContent = biz + "可用套餐";
+              applyCouponFilter("unused");
+            }
+            openScreen(id);
+          });
+        });
+
+        document.getElementById("wx-my-pkg").addEventListener("click", function (e) {
+          var tab = e.target.closest("[data-my-pkg-tab]");
+          if (!tab) return;
+          var which = tab.getAttribute("data-my-pkg-tab");
+          if (which) setMyPkgTab(which);
+        });
+
+        document.querySelectorAll("[data-mine-stub]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            showToast(btn.getAttribute("data-mine-stub") || "功能开发中（原型）");
+          });
+        });
+
+        document.getElementById("btn-mine-logout").addEventListener("click", function () {
+          showToast("已退出登录（原型）");
+        });
+
+        function resetTabsHome() {
+          document.querySelectorAll(".tab").forEach(function (t) {
+            t.classList.remove("active");
+            t.removeAttribute("aria-current");
+          });
+          var h = document.getElementById("tab-home");
+          if (h) {
+            h.classList.add("active");
+            h.setAttribute("aria-current", "page");
+          }
+        }
+
+        document.querySelectorAll("[data-close-screen]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            closeTop();
+          });
+        });
+
+        document.querySelectorAll("[data-close-all]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            closeAllScreens();
+            resetTabsHome();
+          });
+        });
+
+        document.getElementById("btn-pay-success-home").addEventListener("click", function () {
+          closeAllScreens();
+          resetTabsHome();
+        });
+
+        document.getElementById("pkg-list-filters").addEventListener("click", function (e) {
+          var t = e.target.closest(".filter-chip");
+          if (!t) return;
+          var demo = t.getAttribute("data-demo");
+          if (demo === "loading") {
+            document.getElementById("pkg-list-loading").style.display = "block";
+            document.getElementById("pkg-list-body").innerHTML = "";
+            document.getElementById("pkg-list-empty").style.display = "none";
+            document.getElementById("pkg-list-error").style.display = "none";
+            setTimeout(function () {
+              document.getElementById("pkg-list-loading").style.display = "none";
+              renderPkgList("all");
+            }, 900);
+            return;
+          }
+          if (demo === "empty") {
+            document.getElementById("pkg-list-loading").style.display = "none";
+            document.getElementById("pkg-list-body").innerHTML = "";
+            document.getElementById("pkg-list-empty").style.display = "block";
+            document.getElementById("pkg-list-error").style.display = "none";
+            return;
+          }
+          if (demo === "error") {
+            document.getElementById("pkg-list-loading").style.display = "none";
+            document.getElementById("pkg-list-body").innerHTML = "";
+            document.getElementById("pkg-list-empty").style.display = "none";
+            document.getElementById("pkg-list-error").style.display = "block";
+            return;
+          }
+          var f = t.getAttribute("data-filter");
+          if (!f) return;
+          document.querySelectorAll("#pkg-list-filters .filter-chip[data-filter]").forEach(function (c) {
+            c.classList.remove("is-active");
+          });
+          t.classList.add("is-active");
+          renderPkgList(f);
+        });
+
+        document.querySelector("[data-retry-list]") &&
+          document.querySelector("[data-retry-list]").addEventListener("click", function () {
+            document.getElementById("pkg-list-error").style.display = "none";
+            renderPkgList("all");
+          });
+
+        document.getElementById("pkg-btn-buy").addEventListener("click", function () {
+          if (demoOffline || this.disabled) return;
+          if (!currentPkg) return;
+          resetCheckoutForm();
+          fillCheckout(currentPkg);
+          openScreen("wx-pkg-checkout");
+        });
+
+        document.getElementById("chk-platform-coupon").addEventListener("change", updateCheckoutPaySummary);
+
+        document.querySelectorAll('input[name="pay-method"]').forEach(function (r) {
+          r.addEventListener("change", function () {
+            syncPayMethodUi();
+            updateCheckoutPaySummary();
+          });
+        });
+
+        document.getElementById("chk-detail-toggle").addEventListener("click", function () {
+          var panel = document.getElementById("chk-pay-detail");
+          var open = !panel.classList.contains("is-open");
+          panel.classList.toggle("is-open", open);
+          panel.setAttribute("aria-hidden", open ? "false" : "true");
+          this.setAttribute("aria-expanded", open ? "true" : "false");
+          var ch = document.getElementById("chk-detail-chevron");
+          if (ch) ch.classList.toggle("is-open", open);
+        });
+
+        document.getElementById("pkg-btn-pay").addEventListener("click", function () {
+          if (!document.getElementById("chk-rule-agree").checked) {
+            showToast("请先阅读并同意《优惠套餐购买规则及退改说明》");
+            return;
+          }
+          closeAllScreens();
+          openScreen("wx-pkg-pay-success");
+        });
+
+        document.querySelectorAll("[data-coupon-filter]").forEach(function (chip) {
+          chip.addEventListener("click", function () {
+            applyCouponFilter(chip.getAttribute("data-coupon-filter"));
+          });
+        });
+
+        document.querySelectorAll("[data-store]").forEach(function (row) {
+          row.addEventListener("click", function () {
+            document.querySelectorAll("[data-store]").forEach(function (r) {
+              r.classList.remove("is-selected");
+            });
+            row.classList.add("is-selected");
+          });
+        });
+
+        document.getElementById("btn-confirm-store").addEventListener("click", function () {
+          closeAllScreens();
+          openScreen("wx-service-success");
+          showToast("服务订单已创建");
+        });
+
+        document.getElementById("tab-mine").addEventListener("click", function () {
+          closeAllScreens();
+          document.querySelectorAll(".tab").forEach(function (t) {
+            t.classList.remove("active");
+            t.removeAttribute("aria-current");
+          });
+          document.getElementById("tab-mine").classList.add("active");
+          openScreen("wx-mine");
+        });
+
+        document.getElementById("tab-orders").addEventListener("click", function () {
+          closeAllScreens();
+          resetTabsHome();
+          showToast("订单中心页面在本原型中已移除；正式版将打开订单列表。");
+        });
+
+        document.getElementById("tab-home").addEventListener("click", function () {
+          closeAllScreens();
+          resetTabsHome();
+        });
+
+        document.getElementById("tab-assist").addEventListener("click", function () {
+          closeAllScreens();
+          document.querySelectorAll(".tab").forEach(function (t) {
+            t.classList.remove("active");
+            t.removeAttribute("aria-current");
+          });
+          document.getElementById("tab-assist").classList.add("active");
+        });
+
+        var btnRefundOk = document.getElementById("btn-refund-ok");
+        if (btnRefundOk) {
+          btnRefundOk.addEventListener("click", function () {
+            if (pkgUsedForRefundDemo) {
+              var panelBlocked = document.getElementById("panel-refund-blocked");
+              if (panelBlocked) panelBlocked.style.display = "block";
+              showToast("套餐已使用，不支持退款");
+            } else {
+              showToast("进入退款流程（原型）");
+            }
+          });
+        }
+
+        var btnRefundReset = document.getElementById("btn-refund-reset");
+        if (btnRefundReset) {
+          btnRefundReset.addEventListener("click", function () {
+            pkgUsedForRefundDemo = false;
+            var panelBlocked = document.getElementById("panel-refund-blocked");
+            if (panelBlocked) panelBlocked.style.display = "none";
+            showToast("已切换为未使用可退演示");
+          });
+        }
+
+        var btnPkgUsedFlag = document.getElementById("btn-pkg-used-flag");
+        if (btnPkgUsedFlag) {
+          btnPkgUsedFlag.addEventListener("click", function () {
+            pkgUsedForRefundDemo = true;
+            var panelBlocked = document.getElementById("panel-refund-blocked");
+            if (panelBlocked) panelBlocked.style.display = "none";
+            showToast("已标记为「套餐已使用」演示：再点申请退款将阻断");
+          });
+        }
+
+        document.getElementById("btn-service-success-view-order").addEventListener("click", function () {
+          showToast("点击后将跳转到订单详情页面，该功能和已有设计一致，本原型中不展示。");
+        });
+
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && protoConsoleRoot.classList.contains("is-open")) {
+            setProtoConsoleOpen(false);
+            return;
+          }
+          if (e.key === "o" && e.ctrlKey) {
+            e.preventDefault();
+            demoOffline = !demoOffline;
+            applyDetailOfflineState();
+            showToast(demoOffline ? "已模拟套餐下架（Ctrl+O 恢复）" : "已恢复可售");
+            var listScr = screens["wx-pkg-list"];
+            if (listScr && listScr.classList.contains("is-open")) {
+              renderPkgList(getPkgListActiveFilter());
+            }
+          }
+        });
+
+        syncPayMethodUi();
+        renderPkgList("all");
+      })();
+    </script>
+  </body>
+</html>

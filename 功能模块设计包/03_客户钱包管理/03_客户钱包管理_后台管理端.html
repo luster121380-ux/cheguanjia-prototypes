@@ -1,0 +1,1580 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>客户钱包管理 · 后台管理端原型</title>
+  <style>
+    :root {
+      --color-primary-6: #165dff;
+      --color-primary-5: #4080ff;
+      --color-primary-7: #0e42d2;
+      --color-text-1: #1d2129;
+      --color-text-2: #4e5969;
+      --color-text-3: #86909c;
+      --color-border-1: #e5e6eb;
+      --color-border-2: #c9cdd4;
+      --color-fill-1: #f7f8fa;
+      --color-fill-2: #f2f3f5;
+      --color-fill-3: #e5e6eb;
+      --color-bg-1: #fff;
+      --color-success-6: #00b42a;
+      --color-warning-6: #ff7d00;
+      --color-danger-6: #f53f3f;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --shadow-card: 0 1px 3px rgba(29, 33, 41, 0.06);
+      --shadow-popup: 0 8px 24px rgba(29, 33, 41, 0.12);
+      --ctrl-h: 36px;
+      --font: Inter, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+      --mono: Menlo, Consolas, "Courier New", monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 1366px;
+      height: 100vh;
+      overflow: hidden;
+      color: var(--color-text-1);
+      background: var(--color-fill-1);
+      font: 14px/1.57 var(--font);
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .layout-root {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--color-fill-1);
+    }
+
+    .layout-header {
+      height: 56px;
+      flex: 0 0 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px 0 16px;
+      background: var(--color-bg-1);
+      border-bottom: 1px solid var(--color-border-1);
+      box-shadow: var(--shadow-card);
+      z-index: 20;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--color-primary-6), #14c9c9);
+    }
+
+    .brand-sub {
+      display: block;
+      margin-top: -2px;
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--color-text-3);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-meta {
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 10px;
+      border-radius: var(--radius-sm);
+      color: var(--color-text-2);
+      background: var(--color-fill-2);
+      font-size: 13px;
+    }
+
+    .icon-btn {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-sm);
+      background: var(--color-bg-1);
+      color: var(--color-text-2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.15s;
+    }
+
+    .icon-btn:hover {
+      color: var(--color-primary-6);
+      border-color: var(--color-primary-5);
+      background: rgba(22, 93, 255, 0.06);
+    }
+
+    .badge-dot {
+      position: absolute;
+      top: -5px;
+      right: -4px;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      border-radius: 8px;
+      background: var(--color-danger-6);
+      color: #fff;
+      font-size: 10px;
+      line-height: 16px;
+    }
+
+    .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: var(--color-primary-6);
+      font-size: 13px;
+    }
+
+    .layout-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+    }
+
+    .sidebar {
+      width: 220px;
+      flex: 0 0 220px;
+      padding: 8px 0 20px;
+      overflow-y: auto;
+      background: #f5f7fa;
+      border-right: 1px solid var(--color-border-1);
+    }
+
+    .nav-group { margin-bottom: 2px; }
+
+    .nav-l1 {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      color: var(--color-text-2);
+      font-size: 13px;
+      user-select: none;
+    }
+
+    .nav-l1:hover { background: rgba(29, 33, 41, 0.04); }
+
+    .nav-icon {
+      width: 18px;
+      text-align: center;
+      color: var(--color-text-3);
+    }
+
+    .nav-arrow {
+      margin-left: auto;
+      color: var(--color-text-3);
+      font-size: 12px;
+    }
+
+    .nav-l2 {
+      height: 34px;
+      margin: 2px 10px 2px 42px;
+      padding: 0 10px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      color: var(--color-text-2);
+      font-size: 13px;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-l2.active {
+      color: var(--color-primary-6);
+      background: rgba(22, 93, 255, 0.08);
+      border-left-color: var(--color-primary-6);
+      font-weight: 500;
+    }
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      overflow: auto;
+      background: var(--color-fill-1);
+    }
+
+    .tabs {
+      height: 36px;
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      padding: 0 16px;
+      background: var(--color-bg-1);
+      border-bottom: 1px solid var(--color-border-1);
+    }
+
+    .tab {
+      height: 30px;
+      min-width: 90px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--color-border-1);
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      background: var(--color-fill-1);
+      color: var(--color-text-2);
+      font-size: 13px;
+    }
+
+    .tab.active {
+      background: var(--color-bg-1);
+      color: var(--color-primary-6);
+      font-weight: 500;
+    }
+
+    .page {
+      padding: 16px 20px 24px;
+    }
+
+    .breadcrumb {
+      height: 22px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-text-3);
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .breadcrumb span:last-child { color: var(--color-text-1); }
+
+    .panel {
+      background: var(--color-bg-1);
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+    }
+
+    .filter-panel {
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr)) 160px;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .field[hidden] { display: none !important; }
+
+    .field label {
+      font-size: 13px;
+      color: var(--color-text-2);
+    }
+
+    .required::before {
+      content: "*";
+      color: var(--color-danger-6);
+      margin-right: 4px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      height: var(--ctrl-h);
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-sm);
+      background: var(--color-bg-1);
+      color: var(--color-text-1);
+      padding: 0 10px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    textarea {
+      height: 86px;
+      padding: 8px 10px;
+      resize: vertical;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--color-primary-6);
+      box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.12);
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      height: var(--ctrl-h);
+      padding: 0 14px;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: 0.15s;
+    }
+
+    .btn-primary {
+      color: #fff;
+      background: var(--color-primary-6);
+      border-color: var(--color-primary-6);
+    }
+
+    .btn-primary:hover {
+      background: var(--color-primary-5);
+      border-color: var(--color-primary-5);
+    }
+
+    .btn-secondary {
+      color: var(--color-text-1);
+      background: var(--color-bg-1);
+      border-color: var(--color-border-2);
+    }
+
+    .btn-secondary:hover {
+      color: var(--color-primary-6);
+      border-color: var(--color-primary-5);
+      background: rgba(22, 93, 255, 0.04);
+    }
+
+    .btn-danger {
+      color: #fff;
+      background: var(--color-danger-6);
+      border-color: var(--color-danger-6);
+    }
+
+    .btn-text {
+      height: 26px;
+      padding: 0 4px;
+      border: none;
+      background: transparent;
+      color: var(--color-primary-6);
+    }
+
+    .btn-text.danger { color: var(--color-danger-6); }
+    .btn-text.warning { color: var(--color-warning-6); }
+    .btn:disabled, .btn-text:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .toolbar-left, .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .table-panel { padding: 16px; }
+
+    .table-scroll {
+      overflow: auto;
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-md);
+      background: var(--color-bg-1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 1420px;
+      table-layout: fixed;
+    }
+
+    th, td {
+      height: 44px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--color-border-1);
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 13px;
+    }
+
+    th {
+      background: var(--color-fill-2);
+      color: var(--color-text-2);
+      font-weight: 500;
+    }
+
+    tbody tr td { background: var(--color-bg-1); }
+    tbody tr:hover td { background: #f3f7ff; }
+    tbody tr:last-child td { border-bottom: none; }
+
+    .op-col {
+      position: sticky;
+      right: 0;
+      z-index: 2;
+      box-shadow: -6px 0 8px -6px rgba(29, 33, 41, 0.08);
+    }
+
+    th.op-col { background: var(--color-fill-2); }
+    tbody td.op-col { background: var(--color-bg-1); }
+    tbody tr:hover td.op-col { background: #f3f7ff; }
+
+    .op-col .btn-text { padding: 0 6px; }
+    .op-col .btn-text + .btn-text { margin-left: 4px; }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      height: 22px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      line-height: 22px;
+      border: 1px solid transparent;
+    }
+
+    .tag.success { color: var(--color-success-6); background: rgba(0, 180, 42, 0.1); border-color: rgba(0, 180, 42, 0.25); }
+    .tag.warning { color: var(--color-warning-6); background: rgba(255, 125, 0, 0.1); border-color: rgba(255, 125, 0, 0.25); }
+    .tag.danger { color: var(--color-danger-6); background: rgba(245, 63, 63, 0.1); border-color: rgba(245, 63, 63, 0.25); }
+    .tag.info { color: var(--color-primary-6); background: rgba(22, 93, 255, 0.1); border-color: rgba(22, 93, 255, 0.2); }
+    .tag.gray { color: var(--color-text-2); background: var(--color-fill-2); border-color: var(--color-border-1); }
+
+    .money-pos { color: var(--color-success-6); font-family: var(--mono); }
+    .money-neg { color: var(--color-danger-6); font-family: var(--mono); }
+    .mono { font-family: var(--mono); }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      padding-top: 12px;
+      color: var(--color-text-2);
+      font-size: 13px;
+    }
+
+    .page-input {
+      width: 48px;
+      height: 28px;
+      text-align: center;
+      padding: 0 6px;
+    }
+
+    .page-size {
+      width: 72px;
+      height: 28px;
+      padding: 0 6px;
+    }
+
+    .pager {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pager button {
+      min-width: 28px;
+      height: 28px;
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-sm);
+      background: var(--color-bg-1);
+      color: var(--color-text-2);
+    }
+
+    .pager button.active {
+      color: #fff;
+      background: var(--color-primary-6);
+      border-color: var(--color-primary-6);
+    }
+
+    .empty {
+      padding: 56px 16px;
+      text-align: center;
+      color: var(--color-text-3);
+      background: var(--color-bg-1);
+    }
+
+    .empty-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--color-fill-2);
+      color: var(--color-text-3);
+      font-size: 24px;
+    }
+
+    .skeleton-row {
+      height: 16px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--color-fill-2), var(--color-fill-1), var(--color-fill-2));
+      background-size: 200% 100%;
+      animation: pulse 1.2s linear infinite;
+    }
+
+    @keyframes pulse {
+      from { background-position: 100% 0; }
+      to { background-position: -100% 0; }
+    }
+
+    .drawer-mask, .modal-mask, .proto-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(29, 33, 41, 0.45);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s;
+    }
+
+    .drawer-mask { z-index: 100; }
+    .modal-mask { z-index: 200; }
+    .proto-mask { z-index: 230; }
+
+    .drawer-mask.show, .modal-mask.show, .proto-mask.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 80vw;
+      height: 100vh;
+      background: var(--color-bg-1);
+      transform: translateX(100%);
+      transition: transform 0.22s ease;
+      z-index: 110;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-popup);
+    }
+
+    .drawer.show { transform: translateX(0); }
+
+    .drawer-head {
+      height: 56px;
+      flex: 0 0 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--color-border-1);
+    }
+
+    .drawer-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .drawer-body {
+      flex: 1;
+      overflow: auto;
+      padding: 20px;
+      background: var(--color-bg-1);
+    }
+
+    .drawer-foot {
+      min-height: 56px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-top: 1px solid var(--color-border-1);
+      background: var(--color-bg-1);
+    }
+
+    .section {
+      margin-bottom: 20px;
+      padding: 16px;
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-md);
+      background: var(--color-bg-1);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      font-weight: 600;
+    }
+
+    .section-title::before {
+      content: "";
+      width: 3px;
+      height: 16px;
+      border-radius: 3px;
+      background: var(--color-primary-6);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      gap: 14px 16px;
+    }
+
+    .form-grid.two { grid-template-columns: repeat(2, minmax(220px, 1fr)); }
+    .field.full { grid-column: 1 / -1; }
+
+    .readonly {
+      min-height: var(--ctrl-h);
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      border-radius: var(--radius-sm);
+      background: var(--color-fill-1);
+      color: var(--color-text-1);
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--color-text-3);
+      font-size: 12px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .summary-card {
+      padding: 14px;
+      border-radius: var(--radius-md);
+      background: var(--color-fill-1);
+      border: 1px solid var(--color-border-1);
+    }
+
+    .summary-label {
+      color: var(--color-text-3);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .summary-value {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .switch {
+      width: 44px;
+      height: 24px;
+      border: none;
+      border-radius: 999px;
+      background: var(--color-border-2);
+      padding: 2px;
+      position: relative;
+      transition: 0.15s;
+    }
+
+    .switch::after {
+      content: "";
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      top: 2px;
+      left: 2px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(29, 33, 41, 0.2);
+      transition: 0.15s;
+    }
+
+    .switch.on {
+      background: var(--color-primary-6);
+    }
+
+    .switch.on::after {
+      left: 22px;
+    }
+
+    .tier-list {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .tier-card {
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      background: var(--color-bg-1);
+    }
+
+    .tier-card.disabled {
+      background: var(--color-fill-1);
+      opacity: 0.72;
+    }
+
+    .tier-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .tier-amount {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--color-primary-6);
+    }
+
+    .coupon-preview {
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      background: rgba(22, 93, 255, 0.06);
+      color: var(--color-text-2);
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    .modal {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 620px;
+      max-height: 86vh;
+      display: flex;
+      flex-direction: column;
+      transform: translate(-50%, -50%) scale(0.96);
+      background: var(--color-bg-1);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-popup);
+      opacity: 0;
+      transition: 0.18s;
+    }
+
+    .modal-mask.show .modal {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .modal-head {
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--color-border-1);
+      font-weight: 600;
+    }
+
+    .modal-body {
+      padding: 20px;
+      overflow: auto;
+    }
+
+    .modal-foot {
+      min-height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 10px 20px;
+      border-top: 1px solid var(--color-border-1);
+    }
+
+    .danger-box, .info-box, .warning-box {
+      padding: 12px;
+      border-radius: var(--radius-md);
+      margin-bottom: 14px;
+      font-size: 13px;
+    }
+
+    .danger-box { color: var(--color-danger-6); background: rgba(245, 63, 63, 0.08); border: 1px solid rgba(245, 63, 63, 0.2); }
+    .warning-box { color: var(--color-warning-6); background: rgba(255, 125, 0, 0.08); border: 1px solid rgba(255, 125, 0, 0.2); }
+    .info-box { color: var(--color-primary-6); background: rgba(22, 93, 255, 0.08); border: 1px solid rgba(22, 93, 255, 0.2); }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      top: 72px;
+      transform: translateX(-50%) translateY(-12px);
+      min-width: 220px;
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      color: #fff;
+      background: rgba(29, 33, 41, 0.92);
+      box-shadow: var(--shadow-popup);
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.18s;
+      z-index: 220;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .proto-fab {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 240;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      border: none;
+      color: #fff;
+      background: var(--color-primary-6);
+      box-shadow: var(--shadow-popup);
+      font-size: 20px;
+    }
+
+    .proto-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 360px;
+      height: 100vh;
+      z-index: 250;
+      transform: translateX(100%);
+      transition: transform 0.22s;
+      background: var(--color-bg-1);
+      box-shadow: var(--shadow-popup);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .proto-drawer.show { transform: translateX(0); }
+    .proto-head { height: 56px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--color-border-1); font-weight: 600; }
+    .proto-body { padding: 16px; overflow: auto; }
+    .proto-section { margin-bottom: 18px; }
+    .proto-section h3 { margin: 0 0 10px; font-size: 14px; }
+    .proto-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  </style>
+</head>
+<body>
+  <div class="layout-root">
+    <header class="layout-header">
+      <div class="brand" aria-label="车管家后台管理系统">
+        <div class="brand-logo">车</div>
+        <div>
+          车管家后台管理系统
+          <span class="brand-sub">Car Management Admin</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span class="header-meta">天府五街店 | 邱鹏</span>
+        <button type="button" class="icon-btn" title="消息通知" aria-label="消息通知">🔔<span class="badge-dot">3</span></button>
+        <button type="button" class="icon-btn" title="系统设置" aria-label="系统设置">⚙</button>
+        <button type="button" class="icon-btn" title="用户中心" aria-label="用户中心"><span class="avatar">邱</span></button>
+      </div>
+    </header>
+
+    <div class="layout-body">
+      <aside class="sidebar" aria-label="后台侧栏导航">
+        <div class="nav-group">
+          <div class="nav-l1"><span class="nav-icon">▦</span>租赁管理<span class="nav-arrow">›</span></div>
+        </div>
+        <div class="nav-group">
+          <div class="nav-l1"><span class="nav-icon">🔧</span>车辆维修管理<span class="nav-arrow">›</span></div>
+        </div>
+        <div class="nav-group">
+          <div class="nav-l1"><span class="nav-icon">🧾</span>车辆保养管理<span class="nav-arrow">›</span></div>
+        </div>
+        <div class="nav-group">
+          <div class="nav-l1"><span class="nav-icon">✨</span>汽车美容管理<span class="nav-arrow">›</span></div>
+        </div>
+        <div class="nav-group">
+          <div class="nav-l1"><span class="nav-icon">💳</span>客户管理<span class="nav-arrow">⌄</span></div>
+          <div class="nav-l2">客户信息管理</div>
+          <div class="nav-l2 active">客户钱包管理</div>
+          <div class="nav-l2">优惠券发放记录</div>
+        </div>
+        <div class="nav-group">
+          <div class="nav-l1"><span class="nav-icon">🏪</span>供应商管理<span class="nav-arrow">›</span></div>
+        </div>
+        <div class="nav-group">
+          <div class="nav-l1"><span class="nav-icon">👤</span>用户管理<span class="nav-arrow">›</span></div>
+        </div>
+        <div class="nav-group">
+          <div class="nav-l1"><span class="nav-icon">⚙</span>系统管理<span class="nav-arrow">›</span></div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="tabs" aria-label="页签栏">
+          <div class="tab">首页 ×</div>
+          <div class="tab active">客户钱包管理 ×</div>
+        </div>
+        <div class="page">
+          <nav class="breadcrumb" aria-label="面包屑">
+            <span>客户管理</span><span>/</span><span>客户钱包管理</span>
+          </nav>
+
+          <section class="panel filter-panel" aria-label="查询区">
+            <div class="filter-grid">
+              <div class="field">
+                <label for="filterCode">客户编号：</label>
+                <input id="filterCode" placeholder="请输入客户编号" />
+              </div>
+              <div class="field">
+                <label for="filterName">客户姓名：</label>
+                <input id="filterName" placeholder="请输入客户姓名" />
+              </div>
+              <div class="field">
+                <label for="filterPhone">客户电话：</label>
+                <input id="filterPhone" placeholder="请输入客户电话" />
+              </div>
+              <div class="field">
+                <label for="filterStatus">账户状态：</label>
+                <select id="filterStatus">
+                  <option value="">全部</option>
+                  <option value="normal">正常</option>
+                  <option value="frozen">冻结</option>
+                  <option value="disabled">注销/停用</option>
+                </select>
+              </div>
+              <div class="filter-actions">
+                <button type="button" class="btn btn-primary" id="btnQuery">查询</button>
+                <button type="button" class="btn btn-secondary" id="btnReset">重置</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel table-panel" aria-label="客户钱包列表">
+            <div class="toolbar">
+              <div class="toolbar-left">
+                <button type="button" class="btn btn-primary" id="btnRechargeConfig">充值配置</button>
+                <button type="button" class="btn btn-secondary" id="btnExport">导出</button>
+              </div>
+              <div class="toolbar-right">
+                <button type="button" class="icon-btn" id="btnColumnSetting" title="自定义列" aria-label="自定义列">⚙</button>
+              </div>
+            </div>
+            <div class="table-scroll" id="mainTableWrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width: 150px">客户钱包编码</th>
+                    <th style="width: 100px">客户姓名</th>
+                    <th style="width: 140px">客户电话</th>
+                    <th style="width: 120px">累计充值（元）</th>
+                    <th style="width: 120px">累计消费（元）</th>
+                    <th style="width: 120px">账户余额（元）</th>
+                    <th style="width: 120px">冻结余额（元）</th>
+                    <th style="width: 120px">可用金额（元）</th>
+                    <th style="width: 100px">账户状态</th>
+                    <th style="width: 170px">最后变动时间</th>
+                    <th style="width: 240px">备注</th>
+                    <th class="op-col" style="width: 220px">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="walletTableBody"></tbody>
+              </table>
+            </div>
+            <div class="pagination">
+              <span id="pageSummary">共 0 条记录，每页</span>
+              <input class="page-size" id="pageSize" value="10" aria-label="每页条数" />
+              <span>条</span>
+              <div class="pager">
+                <button type="button" id="firstPage">«</button>
+                <button type="button" id="prevPage">‹</button>
+                <button type="button" class="active">1</button>
+                <button type="button">2</button>
+                <button type="button">3</button>
+                <button type="button">4</button>
+                <button type="button" id="nextPage">›</button>
+                <button type="button" id="lastPage">»</button>
+              </div>
+              <span>跳转</span>
+              <input class="page-input" id="jumpPage" value="1" aria-label="跳转页码" />
+              <span>页</span>
+              <button type="button" class="btn btn-secondary" style="height: 28px; padding: 0 8px" id="btnGo">GO</button>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div class="drawer-mask" id="drawerMask"></div>
+  <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+    <div class="drawer-head">
+      <h2 class="drawer-title" id="drawerTitle">抽屉</h2>
+      <button type="button" class="icon-btn" id="drawerClose" aria-label="关闭">×</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+    <div class="drawer-foot" id="drawerFoot">
+      <button type="button" class="btn btn-secondary" id="drawerCancel">取消</button>
+      <button type="button" class="btn btn-primary" id="drawerSave">保存</button>
+    </div>
+  </aside>
+
+  <div class="modal-mask" id="modalMask">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <span id="modalTitle">提示</span>
+        <button type="button" class="icon-btn" id="modalClose" aria-label="关闭">×</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-foot" id="modalFoot"></div>
+    </div>
+  </div>
+
+  <div class="proto-mask" id="protoMask"></div>
+  <button type="button" class="proto-fab" id="protoFab" title="原型控制台" aria-label="原型控制台">☰</button>
+  <aside class="proto-drawer" id="protoDrawer" aria-label="原型控制台">
+    <div class="proto-head">
+      <span>原型控制台</span>
+      <button type="button" class="icon-btn" id="protoClose" aria-label="关闭">×</button>
+    </div>
+    <div class="proto-body">
+      <div class="proto-section">
+        <h3>列表状态</h3>
+        <div class="proto-actions">
+          <button type="button" class="btn btn-secondary" data-proto-state="default">默认</button>
+          <button type="button" class="btn btn-secondary" data-proto-state="loading">加载</button>
+          <button type="button" class="btn btn-secondary" data-proto-state="empty">空态</button>
+          <button type="button" class="btn btn-secondary" data-proto-state="error">错误</button>
+        </div>
+      </div>
+      <div class="proto-section">
+        <h3>快捷打开</h3>
+        <div class="proto-actions">
+          <button type="button" class="btn btn-secondary" id="protoFlow">资金流水</button>
+          <button type="button" class="btn btn-secondary" id="protoConfig">充值配置</button>
+          <button type="button" class="btn btn-secondary" id="protoAdjust">调账</button>
+          <button type="button" class="btn btn-secondary" id="protoVoid">作废确认</button>
+        </div>
+      </div>
+      <div class="info-box">控制台仅用于评审演示，不属于正式业务功能。</div>
+    </div>
+  </aside>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    (function () {
+      var wallets = [
+        { id: "w1", code: "CTR000000001", name: "张三", phone: "13312341234", recharge: 1000, consume: 471.64, balance: 528.36, frozen: 0, status: "normal", last: "2025-01-01 17:47:33", remark: "-" },
+        { id: "w2", code: "CTR000000002", name: "李四", phone: "13712341234", recharge: 50, consume: 47.02, balance: 2.98, frozen: 0, status: "normal", last: "2025-01-01 17:47:33", remark: "-" },
+        { id: "w3", code: "CTR000000003", name: "王五", phone: "13412341234", recharge: 30, consume: 199, balance: 30, frozen: 30, status: "frozen", last: "2025-01-01 17:47:33", remark: "使用bug获取余额，按规定冻结账户" },
+        { id: "w4", code: "CTR000000004", name: "赵六", phone: "13612341234", recharge: 1000, consume: 471.64, balance: 528.36, frozen: 0, status: "normal", last: "2025-01-01 17:47:33", remark: "-" },
+        { id: "w5", code: "CTR000000005", name: "孙七", phone: "13512341234", recharge: 300, consume: 100, balance: 200, frozen: 0, status: "normal", last: "2025-01-01 17:47:33", remark: "-" },
+        { id: "w6", code: "CTR000000006", name: "周八", phone: "13812341234", recharge: 100, consume: 100, balance: 0, frozen: 0, status: "disabled", last: "2025-01-01 17:47:33", remark: "客户主动注销，已结清余额" }
+      ];
+
+      var flows = {
+        w1: [
+          { id: "f1", code: "CFL000000001", type: "充值", amount: 200, balance: 528.36, order: "REC000000001", time: "2025-01-01 17:47:33", remark: "固定档位 200 元，赠送满 199 减 20 优惠券 1 张", giftStatus: "issued", canVoid: true },
+          { id: "f2", code: "CFL000000002", type: "消费", amount: -199, balance: 328.36, order: "ODE000000001", time: "2025-01-01 17:40:33", remark: "-", giftStatus: "none" },
+          { id: "f3", code: "CFL000000003", type: "充值", amount: 300, balance: 527.36, order: "REC000000002", time: "2025-01-01 16:18:12", remark: "自定义充值 300 元，赠送发放失败：产品范围已失效", giftStatus: "failed", canReissue: true },
+          { id: "f4", code: "CFL000000004", type: "调账", amount: 50, balance: 227.36, order: "ADJ000000001", time: "2025-01-01 15:10:00", remark: "系统错误补偿；已上传附件", attachment: true },
+          { id: "f5", code: "CFL000000005", type: "冻结", amount: 0, balance: 177.36, order: "-", time: "2025-01-01 14:20:00", remark: "账户异常临时冻结", giftStatus: "none" }
+        ],
+        w2: [
+          { id: "f6", code: "CFL000000006", type: "充值", amount: 50, balance: 50, order: "REC000000006", time: "2025-01-01 17:47:33", remark: "无赠送", giftStatus: "none" },
+          { id: "f7", code: "CFL000000007", type: "消费", amount: -47.02, balance: 2.98, order: "ODE000000006", time: "2025-01-01 17:50:33", remark: "-", giftStatus: "none" }
+        ],
+        w3: [
+          { id: "f8", code: "CFL000000008", type: "充值", amount: 300, balance: 300, order: "REC000000008", time: "2025-01-01 17:47:33", remark: "赠送券已全部使用或过期", giftStatus: "issued", canVoid: false },
+          { id: "f9", code: "CFL000000009", type: "冻结", amount: 0, balance: 30, order: "-", time: "2025-01-02 08:30:00", remark: "客诉处理冻结 30 元", giftStatus: "none" }
+        ]
+      };
+
+      var tiers = [
+        { name: "轻量充值", type: "固定金额", amount: "50.00", enabled: true, gift: "无赠送" },
+        { name: "标准充值", type: "固定金额", amount: "100.00", enabled: true, gift: "满 99 减 10，1 张" },
+        { name: "高额充值", type: "固定金额", amount: "300.00", enabled: true, gift: "满 199 减 30，2 张" },
+        { name: "自定义充值", type: "自定义金额", amount: "10.00 - 2000.00", enabled: true, gift: "匹配最高固定档位赠送" }
+      ];
+
+      var state = { pageState: "default", activeWallet: wallets[0], rechargeEnabled: true };
+
+      var el = {
+        body: document.getElementById("walletTableBody"),
+        filterCode: document.getElementById("filterCode"),
+        filterName: document.getElementById("filterName"),
+        filterPhone: document.getElementById("filterPhone"),
+        filterStatus: document.getElementById("filterStatus"),
+        btnQuery: document.getElementById("btnQuery"),
+        btnReset: document.getElementById("btnReset"),
+        btnExport: document.getElementById("btnExport"),
+        btnRechargeConfig: document.getElementById("btnRechargeConfig"),
+        btnColumnSetting: document.getElementById("btnColumnSetting"),
+        pageSummary: document.getElementById("pageSummary"),
+        drawerMask: document.getElementById("drawerMask"),
+        drawer: document.getElementById("drawer"),
+        drawerTitle: document.getElementById("drawerTitle"),
+        drawerBody: document.getElementById("drawerBody"),
+        drawerFoot: document.getElementById("drawerFoot"),
+        drawerClose: document.getElementById("drawerClose"),
+        drawerCancel: document.getElementById("drawerCancel"),
+        drawerSave: document.getElementById("drawerSave"),
+        modalMask: document.getElementById("modalMask"),
+        modalTitle: document.getElementById("modalTitle"),
+        modalBody: document.getElementById("modalBody"),
+        modalFoot: document.getElementById("modalFoot"),
+        modalClose: document.getElementById("modalClose"),
+        toast: document.getElementById("toast"),
+        protoFab: document.getElementById("protoFab"),
+        protoMask: document.getElementById("protoMask"),
+        protoDrawer: document.getElementById("protoDrawer"),
+        protoClose: document.getElementById("protoClose")
+      };
+
+      function esc(value) {
+        return String(value == null ? "" : value).replace(/[&<>"']/g, function (m) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m];
+        });
+      }
+
+      function money(value) {
+        return Number(value || 0).toFixed(2);
+      }
+
+      function statusTag(status) {
+        if (status === "normal") return '<span class="tag success">正常</span>';
+        if (status === "frozen") return '<span class="tag warning">冻结</span>';
+        return '<span class="tag gray">注销</span>';
+      }
+
+      function flowGiftCell(flow) {
+        if (flow.type !== "充值") return '<span class="tag gray">--</span>';
+        if (flow.giftStatus === "issued") return '<span class="tag info">是</span>';
+        if (flow.giftStatus === "failed") return '<span class="tag warning">是（发放失败）</span>';
+        return '<span class="tag gray">否</span>';
+      }
+
+      function showToast(text) {
+        el.toast.textContent = text;
+        el.toast.classList.add("show");
+        setTimeout(function () { el.toast.classList.remove("show"); }, 2200);
+      }
+
+      function filteredWallets() {
+        return wallets.filter(function (row) {
+          var code = el.filterCode.value.trim();
+          var name = el.filterName.value.trim();
+          var phone = el.filterPhone.value.trim();
+          var status = el.filterStatus.value;
+          return (!code || row.code.indexOf(code) > -1) &&
+            (!name || row.name.indexOf(name) > -1) &&
+            (!phone || row.phone.indexOf(phone) > -1) &&
+            (!status || row.status === status);
+        });
+      }
+
+      function renderWallets() {
+        if (state.pageState === "loading") {
+          el.body.innerHTML = Array.from({ length: 8 }).map(function () {
+            return '<tr>' + Array.from({ length: 13 }).map(function () { return '<td><div class="skeleton-row"></div></td>'; }).join("") + '</tr>';
+          }).join("");
+          el.pageSummary.textContent = "正在加载记录，每页";
+          return;
+        }
+
+        if (state.pageState === "error") {
+          el.body.innerHTML = '<tr><td colspan="12"><div class="empty"><div class="empty-icon">!</div><div>钱包列表加载失败</div><p class="hint">请检查网络后重试</p><button type="button" class="btn btn-primary" id="retryLoad">重新加载</button></div></td></tr>';
+          document.getElementById("retryLoad").onclick = function () { state.pageState = "default"; renderWallets(); };
+          el.pageSummary.textContent = "共 0 条记录，每页";
+          return;
+        }
+
+        var list = state.pageState === "empty" ? [] : filteredWallets();
+        el.pageSummary.textContent = "共 " + list.length + " 条记录，每页";
+        if (!list.length) {
+          el.body.innerHTML = '<tr><td colspan="12"><div class="empty"><div class="empty-icon">∅</div><div>暂无客户钱包数据</div><p class="hint">可调整查询条件后再次查询</p></div></td></tr>';
+          return;
+        }
+
+        el.body.innerHTML = list.map(function (row) {
+          return '<tr>' +
+            '<td class="mono">' + esc(row.code) + '</td>' +
+            '<td>' + esc(row.name) + '</td>' +
+            '<td>' + esc(row.phone) + '</td>' +
+            '<td class="mono">' + money(row.recharge) + '</td>' +
+            '<td class="mono">' + money(row.consume) + '</td>' +
+            '<td class="mono">' + money(row.balance) + '</td>' +
+            '<td class="mono">' + money(row.frozen) + '</td>' +
+            '<td class="mono">' + money(row.balance - row.frozen) + '</td>' +
+            '<td>' + statusTag(row.status) + '</td>' +
+            '<td class="mono">' + esc(row.last) + '</td>' +
+            '<td title="' + esc(row.remark) + '">' + esc(row.remark) + '</td>' +
+            '<td class="op-col">' +
+              '<button type="button" class="btn-text" data-action="flow" data-id="' + row.id + '">资金流水</button>' +
+              '<button type="button" class="btn-text" data-action="status" data-id="' + row.id + '">' + (row.status === "frozen" ? "解冻" : row.status === "disabled" ? "激活" : "冻结") + '</button>' +
+              '<button type="button" class="btn-text warning" data-action="adjust" data-id="' + row.id + '" ' + (row.status === "disabled" ? "disabled" : "") + '>调账</button>' +
+            '</td>' +
+          '</tr>';
+        }).join("");
+      }
+
+      function openDrawer(title, html, hasFooter, saveText) {
+        el.drawerTitle.textContent = title;
+        el.drawerBody.innerHTML = html;
+        el.drawerFoot.style.display = hasFooter ? "flex" : "none";
+        el.drawerSave.textContent = saveText || "保存";
+        el.drawerMask.classList.add("show");
+        el.drawer.classList.add("show");
+      }
+
+      function closeDrawer() {
+        el.drawerMask.classList.remove("show");
+        el.drawer.classList.remove("show");
+      }
+
+      function openModal(title, html, footerHtml) {
+        el.modalTitle.textContent = title;
+        el.modalBody.innerHTML = html;
+        el.modalFoot.innerHTML = footerHtml || '<button type="button" class="btn btn-secondary" data-modal-close>取消</button><button type="button" class="btn btn-primary" data-modal-ok>确定</button>';
+        el.modalMask.classList.add("show");
+      }
+
+      function closeModal() {
+        el.modalMask.classList.remove("show");
+      }
+
+      function renderFlowDrawer(wallet) {
+        state.activeWallet = wallet;
+        var list = flows[wallet.id] || flows.w1;
+        var html = '' +
+          '<div class="summary-grid">' +
+            '<div class="summary-card"><div class="summary-label">客户姓名</div><div class="summary-value">' + esc(wallet.name) + '</div></div>' +
+            '<div class="summary-card"><div class="summary-label">钱包编码</div><div class="summary-value mono">' + esc(wallet.code) + '</div></div>' +
+            '<div class="summary-card"><div class="summary-label">账户余额</div><div class="summary-value mono">¥' + money(wallet.balance) + '</div></div>' +
+            '<div class="summary-card"><div class="summary-label">账户状态</div><div class="summary-value">' + statusTag(wallet.status) + '</div></div>' +
+          '</div>' +
+          '<div class="section">' +
+            '<div class="section-title">资金流水</div>' +
+            '<div class="filter-grid" style="grid-template-columns: 220px 220px 1fr 160px; margin-bottom: 14px">' +
+              '<div class="field"><label>交易类型：</label><select><option>全部</option><option>充值</option><option>消费</option><option>调账</option></select></div>' +
+              '<div class="field"><label>交易时间：</label><input value="2025-01-01 至 2025-01-31" /></div>' +
+              '<div class="field"><label>流水/订单号：</label><input placeholder="流水编号 / 关联订单号" /></div>' +
+              '<div class="filter-actions"><button type="button" class="btn btn-primary">查询</button><button type="button" class="btn btn-secondary">重置</button></div>' +
+            '</div>' +
+            '<div class="table-scroll"><table style="min-width: 1180px"><thead><tr>' +
+              '<th style="width: 150px">流水编号</th><th style="width: 90px">交易类型</th><th style="width: 120px">交易金额（元）</th><th style="width: 130px">变动后余额（元）</th><th style="width: 150px">关联订单号</th><th style="width: 170px">交易时间</th><th style="width: 100px">是否赠送</th><th>备注</th><th class="op-col" style="width: 180px">操作</th>' +
+            '</tr></thead><tbody>' +
+            list.map(function (flow) {
+              var cls = flow.amount < 0 ? "money-neg" : flow.amount > 0 ? "money-pos" : "mono";
+              var actions = "";
+              if (flow.attachment) actions += '<button type="button" class="btn-text" data-download>下载附件</button>';
+              if (flow.canVoid) actions += '<button type="button" class="btn-text danger" data-flow-void="' + flow.id + '">一键作废</button>';
+              if (flow.canReissue) actions += '<button type="button" class="btn-text warning" data-flow-reissue="' + flow.id + '">补发</button>';
+              if (!actions) actions = '<span class="hint">--</span>';
+              return '<tr>' +
+                '<td class="mono">' + esc(flow.code) + '</td>' +
+                '<td>' + tagByType(flow.type) + '</td>' +
+                '<td class="' + cls + '">' + (flow.amount > 0 ? "+" : "") + money(flow.amount) + '</td>' +
+                '<td class="mono">' + money(flow.balance) + '</td>' +
+                '<td class="mono">' + esc(flow.order) + '</td>' +
+                '<td class="mono">' + esc(flow.time) + '</td>' +
+                '<td>' + flowGiftCell(flow) + '</td>' +
+                '<td title="' + esc(flow.remark) + '">' + esc(flow.remark) + '</td>' +
+                '<td class="op-col">' + actions + '</td>' +
+              '</tr>';
+            }).join("") +
+            '</tbody></table></div>' +
+            '<div class="pagination"><span>共 ' + list.length + ' 条记录，每页</span><input class="page-size" value="10" /><span>条</span><div class="pager"><button>«</button><button>‹</button><button class="active">1</button><button>›</button><button>»</button></div><span>跳转</span><input class="page-input" value="1" /><span>页</span><button class="btn btn-secondary" style="height:28px;padding:0 8px">GO</button></div>' +
+          '</div>';
+        openDrawer("资金流水", html, false);
+      }
+
+      function tagByType(type) {
+        var map = { "充值": "success", "消费": "gray", "退款": "info", "冻结": "warning", "解冻": "info", "调账": "warning" };
+        return '<span class="tag ' + (map[type] || "gray") + '">' + esc(type) + '</span>';
+      }
+
+      function renderRechargeConfig() {
+        var html = '' +
+          '<div class="section">' +
+            '<div class="section-title">充值功能开关</div>' +
+            '<div class="switch-row">' +
+              '<button type="button" class="switch ' + (state.rechargeEnabled ? "on" : "") + '" id="rechargeSwitch" role="switch" aria-checked="' + state.rechargeEnabled + '"></button>' +
+              '<div><strong>' + (state.rechargeEnabled ? "充值功能已开启" : "充值功能已关闭") + '</strong><p class="hint">关闭后客户端充值按钮置灰，文案显示“充值暂不可用”，服务端同步阻断充值请求。</p></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="section">' +
+            '<div class="section-title">充值档位配置</div>' +
+            '<div class="toolbar"><div class="toolbar-left"><button type="button" class="btn btn-primary" id="addTier">新增档位</button><span class="hint">最多 6 个档位，当前 ' + tiers.length + ' 个</span></div></div>' +
+            '<div class="tier-list">' +
+              tiers.map(function (tier, i) {
+                return '<div class="tier-card ' + (tier.enabled ? "" : "disabled") + '">' +
+                  '<div class="tier-top"><span class="tag ' + (tier.enabled ? "success" : "gray") + '">' + (tier.enabled ? "启用" : "停用") + '</span><span class="hint">顺序 ' + (i + 1) + '</span></div>' +
+                  '<div class="tier-amount">' + esc(tier.amount) + '</div>' +
+                  '<div class="hint">' + esc(tier.name) + ' · ' + esc(tier.type) + '</div>' +
+                  '<div class="coupon-preview">' + esc(tier.gift) + '</div>' +
+                  '<div style="margin-top: 12px"><button type="button" class="btn-text" data-edit-tier>编辑</button><button type="button" class="btn-text" data-coupon-config>配置赠送</button><button type="button" class="btn-text">上移</button><button type="button" class="btn-text">下移</button></div>' +
+                '</div>';
+              }).join("") +
+            '</div>' +
+          '</div>';
+        openDrawer("充值配置", html, true, "保存配置");
+      }
+
+      function openStatusModal(wallet) {
+        var action = wallet.status === "frozen" ? "解冻账户" : wallet.status === "disabled" ? "激活账户" : "冻结账户";
+        openModal("账户操作", '' +
+          '<div class="section" style="margin-bottom:0">' +
+            '<div class="section-title">操作客户</div>' +
+            '<div class="form-grid two">' +
+              '<div class="field"><label>客户姓名</label><div class="readonly">' + esc(wallet.name) + '</div></div>' +
+              '<div class="field"><label>账户余额</label><div class="readonly mono">¥' + money(wallet.balance) + '</div></div>' +
+              '<div class="field"><label>当前操作人</label><div class="readonly">邱鹏</div></div>' +
+              '<div class="field"><label>操作类型</label><div class="readonly">' + action + '</div></div>' +
+              '<div class="field full"><label>备注</label><textarea placeholder="请输入操作备注"></textarea></div>' +
+            '</div>' +
+          '</div>',
+          '<button type="button" class="btn btn-secondary" data-modal-close>取消</button><button type="button" class="btn btn-primary" data-modal-ok>保存</button>'
+        );
+      }
+
+      function openAdjustModal(wallet) {
+        openModal("调账", '' +
+          '<div class="section" style="margin-bottom:0">' +
+            '<div class="section-title">调账客户</div>' +
+            '<div class="form-grid two">' +
+              '<div class="field"><label>客户姓名</label><div class="readonly">' + esc(wallet.name) + '</div></div>' +
+              '<div class="field"><label>账户余额</label><div class="readonly mono">¥' + money(wallet.balance) + '</div></div>' +
+            '</div>' +
+            '<div class="section-title" style="margin-top:18px">调账金额</div>' +
+            '<div class="form-grid two">' +
+              '<div class="field"><label>当前操作人</label><div class="readonly">邱鹏</div></div>' +
+              '<div class="field"><label class="required">调账类型</label><select><option>增加余额</option><option>扣减余额</option></select></div>' +
+              '<div class="field"><label class="required">变动原因</label><select><option>系统错误补偿</option><option>客诉赔偿</option><option>其他</option></select></div>' +
+              '<div class="field"><label class="required">调账金额</label><input type="number" value="50.00" /></div>' +
+              '<div class="field full"><label>凭证上传</label><input value="system-proof-20250509.pdf" /><p class="hint">支持 JPG/JPEG/PNG/PDF，保存后资金流水可下载附件。</p></div>' +
+              '<div class="field full"><label>备注</label><textarea placeholder="请输入备注">系统错误补偿，已核实支付回调重复扣减。</textarea></div>' +
+            '</div>' +
+          '</div>',
+          '<button type="button" class="btn btn-secondary" data-modal-close>取消</button><button type="button" class="btn btn-primary" data-modal-ok>保存</button>'
+        );
+      }
+
+      function openVoidModal() {
+        openModal("一键作废确认", '' +
+          '<div class="danger-box">作废后客户无法再使用这些优惠券，已使用和已过期优惠券不会处理。该操作不可逆。</div>' +
+          '<div class="form-grid two">' +
+            '<div class="field"><label>流水编号</label><div class="readonly mono">CFL000000001</div></div>' +
+            '<div class="field"><label>充值单号</label><div class="readonly mono">REC000000001</div></div>' +
+            '<div class="field"><label>客户姓名</label><div class="readonly">' + esc(state.activeWallet.name) + '</div></div>' +
+            '<div class="field"><label>充值金额</label><div class="readonly mono">¥200.00</div></div>' +
+          '</div>' +
+          '<div class="summary-grid" style="grid-template-columns: repeat(5, 1fr); margin-top:14px">' +
+            '<div class="summary-card"><div class="summary-label">赠送总数</div><div class="summary-value">3</div></div>' +
+            '<div class="summary-card"><div class="summary-label">可作废</div><div class="summary-value">2</div></div>' +
+            '<div class="summary-card"><div class="summary-label">已使用</div><div class="summary-value">1</div></div>' +
+            '<div class="summary-card"><div class="summary-label">已过期</div><div class="summary-value">0</div></div>' +
+            '<div class="summary-card"><div class="summary-label">已作废</div><div class="summary-value">0</div></div>' +
+          '</div>',
+          '<button type="button" class="btn btn-secondary" data-modal-close>取消</button><button type="button" class="btn btn-danger" data-modal-ok>确认作废</button>'
+        );
+      }
+
+      function openReissueModal() {
+        openModal("赠送券补发确认", '' +
+          '<div class="warning-box">本次补发将按充值成功时的赠送配置快照生成优惠券，不使用当前已修改的新配置。</div>' +
+          '<div class="form-grid two">' +
+            '<div class="field"><label>流水编号</label><div class="readonly mono">CFL000000003</div></div>' +
+            '<div class="field"><label>充值单号</label><div class="readonly mono">REC000000002</div></div>' +
+            '<div class="field"><label>失败时间</label><div class="readonly mono">2025-01-01 16:18:12</div></div>' +
+            '<div class="field"><label>失败原因</label><div class="readonly">产品范围已失效</div></div>' +
+            '<div class="field full"><label>赠送配置快照</label><div class="readonly">满 199 减 30，2 张；适用汽车保养，全部供应商，全部已发布产品</div></div>' +
+          '</div>',
+          '<button type="button" class="btn btn-secondary" data-modal-close>取消</button><button type="button" class="btn btn-primary" data-modal-ok>确认补发</button>'
+        );
+      }
+
+      function openTierModal() {
+        openModal("新增/编辑充值档位", '' +
+          '<div class="form-grid two">' +
+            '<div class="field"><label class="required">档位名称</label><input value="标准充值" /></div>' +
+            '<div class="field"><label class="required">档位类型</label>' +
+              '<select data-tier-type>' +
+                '<option value="fixed" selected>固定金额</option>' +
+                '<option value="custom">自定义金额</option>' +
+              '</select>' +
+            '</div>' +
+            '<div class="field" data-fixed-field><label class="required">固定充值金额</label><input type="number" value="100.00" placeholder="如 100.00" /></div>' +
+            '<div class="field" data-custom-field hidden><label>最低充值金额</label><input type="number" placeholder="不填表示不限制" /></div>' +
+            '<div class="field" data-custom-field hidden><label>最高充值金额</label><input type="number" placeholder="不填表示不限制" /></div>' +
+            '<div class="field"><label class="required">启用状态</label><select><option>启用</option><option>停用</option></select></div>' +
+            '<div class="field"><label class="required">展示顺序</label><input type="number" value="2" /></div>' +
+          '</div>' +
+          '<p class="hint" style="margin-top:12px">赠送规则请通过档位卡片上的「配置赠送」功能进行配置；本表单不再设置赠送方式。</p>',
+          '<button type="button" class="btn btn-secondary" data-modal-close>取消</button><button type="button" class="btn btn-primary" data-modal-ok>保存</button>'
+        );
+      }
+
+      function applyTierTypeToggle(tierType) {
+        var fixedFields = el.modalBody.querySelectorAll("[data-fixed-field]");
+        var customFields = el.modalBody.querySelectorAll("[data-custom-field]");
+        fixedFields.forEach(function (node) { node.hidden = tierType !== "fixed"; });
+        customFields.forEach(function (node) { node.hidden = tierType !== "custom"; });
+      }
+
+      function openCouponModal() {
+        openModal("优惠券配置", '' +
+          '<div class="form-grid two">' +
+            '<div class="field"><label>优惠券类型</label><div class="readonly">满减券</div></div>' +
+            '<div class="field"><label class="required">优惠券名称</label><input value="充值赠送保养券" /></div>' +
+            '<div class="field"><label class="required">发放数量</label><input type="number" value="1" /></div>' +
+            '<div class="field"><label class="required">适用业务</label><select><option>汽车保养</option><option>汽车维修</option><option>汽车美容</option><option>自助洗车</option><option>车辆年检</option><option>充电卡</option><option>加油卡</option></select></div>' +
+            '<div class="field"><label class="required">适用供应商</label><select><option>全部供应商</option><option>连云港旗舰店</option></select></div>' +
+            '<div class="field"><label class="required">适用产品</label><select><option>所选供应商下全部产品</option><option>小保养套餐</option></select></div>' +
+            '<div class="field"><label class="required">满减条件</label><input type="number" value="99.00" /></div>' +
+            '<div class="field"><label class="required">优惠金额</label><input type="number" value="10.00" /></div>' +
+            '<div class="field"><label class="required">有效期（天）</label><input type="number" value="30" /></div>' +
+          '</div><p class="hint" style="margin-top:12px">有效期按领取当日 + 有效期计算，算头不算尾，最后一天 23:59:59 前可用。</p>',
+          '<button type="button" class="btn btn-secondary" data-modal-close>取消</button><button type="button" class="btn btn-primary" data-modal-ok>保存</button>'
+        );
+      }
+
+      function openColumnSetting() {
+        openModal("自定义列", '<div class="info-box">可配置列表字段显示、隐藏和顺序。</div><label><input type="checkbox" checked /> 冻结余额</label><br /><label><input type="checkbox" checked /> 最后变动时间</label><br /><label><input type="checkbox" checked /> 备注</label>');
+      }
+
+      el.body.addEventListener("click", function (event) {
+        var btn = event.target.closest("button[data-action]");
+        if (!btn) return;
+        var wallet = wallets.find(function (item) { return item.id === btn.dataset.id; }) || wallets[0];
+        if (btn.dataset.action === "flow") renderFlowDrawer(wallet);
+        if (btn.dataset.action === "status") openStatusModal(wallet);
+        if (btn.dataset.action === "adjust") openAdjustModal(wallet);
+      });
+
+      el.drawerBody.addEventListener("click", function (event) {
+        if (event.target.closest("[data-flow-void]")) openVoidModal();
+        if (event.target.closest("[data-flow-reissue]")) openReissueModal();
+        if (event.target.closest("[data-download]")) showToast("附件下载已开始");
+        if (event.target.closest("#rechargeSwitch")) {
+          state.rechargeEnabled = !state.rechargeEnabled;
+          renderRechargeConfig();
+        }
+        if (event.target.closest("#addTier") || event.target.closest("[data-edit-tier]")) openTierModal();
+        if (event.target.closest("[data-coupon-config]")) openCouponModal();
+      });
+
+      document.addEventListener("click", function (event) {
+        if (event.target.matches("[data-modal-close]") || event.target === el.modalClose) closeModal();
+        if (event.target.matches("[data-modal-ok]")) {
+          closeModal();
+          showToast("操作成功，数据已刷新");
+        }
+      });
+
+      el.modalBody.addEventListener("change", function (event) {
+        if (event.target.matches("[data-tier-type]")) applyTierTypeToggle(event.target.value);
+      });
+
+      el.btnQuery.onclick = function () { state.pageState = "default"; renderWallets(); showToast("查询完成"); };
+      el.btnReset.onclick = function () {
+        el.filterCode.value = "";
+        el.filterName.value = "";
+        el.filterPhone.value = "";
+        el.filterStatus.value = "";
+        state.pageState = "default";
+        renderWallets();
+      };
+      el.btnExport.onclick = function () { showToast("导出任务已提交"); };
+      el.btnRechargeConfig.onclick = renderRechargeConfig;
+      el.btnColumnSetting.onclick = openColumnSetting;
+      el.drawerClose.onclick = closeDrawer;
+      el.drawerCancel.onclick = closeDrawer;
+      el.drawerMask.onclick = closeDrawer;
+      el.drawerSave.onclick = function () { closeDrawer(); showToast("保存成功"); };
+      el.modalMask.onclick = function (event) { if (event.target === el.modalMask) closeModal(); };
+
+      el.protoFab.onclick = function () {
+        el.protoMask.classList.add("show");
+        el.protoDrawer.classList.add("show");
+      };
+      function closeProto() {
+        el.protoMask.classList.remove("show");
+        el.protoDrawer.classList.remove("show");
+      }
+      el.protoClose.onclick = closeProto;
+      el.protoMask.onclick = closeProto;
+      document.querySelectorAll("[data-proto-state]").forEach(function (btn) {
+        btn.onclick = function () {
+          state.pageState = btn.dataset.protoState;
+          renderWallets();
+          closeProto();
+        };
+      });
+      document.getElementById("protoFlow").onclick = function () { closeProto(); renderFlowDrawer(wallets[0]); };
+      document.getElementById("protoConfig").onclick = function () { closeProto(); renderRechargeConfig(); };
+      document.getElementById("protoAdjust").onclick = function () { closeProto(); openAdjustModal(wallets[0]); };
+      document.getElementById("protoVoid").onclick = function () { closeProto(); state.activeWallet = wallets[0]; openVoidModal(); };
+
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+          closeModal();
+          closeDrawer();
+          closeProto();
+        }
+      });
+
+      renderWallets();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>透明车间 · 门店硬件管理（后台原型）</title>
+  <style>
+    /**
+     * 视觉与组件尺度参考：DESIGN/DESIGN_ARCO.md
+     * Arco token：主色 #165DFF、中性文字与边框、14px 正文、筛选与表格间距 16px 等
+     */
+    :root {
+      --color-primary-6: #165dff;
+      --color-primary-5: #4080ff;
+      --color-primary-7: #0e42d2;
+      --color-text-1: #1d2129;
+      --color-text-2: #4e5969;
+      --color-text-3: #86909c;
+      --color-border-1: #e5e6eb;
+      --color-border-2: #c9cdd4;
+      --color-fill-1: #f7f8fa;
+      --color-fill-2: #f2f3f5;
+      --color-bg: #ffffff;
+      --color-success-6: #00b42a;
+      --color-success-bg: #e8ffea;
+      --color-warning-6: #ff7d00;
+      --color-danger-6: #f53f3f;
+      --color-danger-bg: #ffece8;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --shadow-popup: 0 4px 10px rgba(0, 0, 0, 0.08);
+      --shadow-modal: 0 8px 24px rgba(0, 0, 0, 0.12);
+      --ctrl-h: 36px;
+      --font: Inter, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+      --font-mono: Menlo, Consolas, "Courier New", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    body {
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.57;
+      color: var(--color-text-1);
+      background: var(--color-fill-1);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* —— 后台壳层：侧栏 + 主区（Arco 后台常见结构） —— */
+    .layout-admin {
+      display: flex;
+      height: 100vh;
+      width: 100%;
+    }
+
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--color-bg);
+      border-right: 1px solid var(--color-border-1);
+      display: flex;
+      flex-direction: column;
+      z-index: 50;
+    }
+
+    .sidebar-brand {
+      height: 56px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--color-text-1);
+      border-bottom: 1px solid var(--color-border-1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-brand span {
+      color: var(--color-primary-6);
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 0 24px;
+    }
+
+    .nav-group-label {
+      padding: 12px 20px 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-3);
+      text-transform: none;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 20px 10px 17px;
+      margin: 2px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      color: var(--color-text-2);
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .nav-item:hover {
+      background: var(--color-fill-1);
+      color: var(--color-text-1);
+    }
+
+    .nav-item.active {
+      background: rgba(22, 93, 255, 0.08);
+      color: var(--color-primary-6);
+      font-weight: 500;
+      border-left-color: var(--color-primary-6);
+    }
+
+    .nav-item.disabled {
+      color: var(--color-text-3);
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .layout-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: var(--color-fill-1);
+    }
+
+    .topbar {
+      height: 56px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px;
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-border-1);
+      z-index: 40;
+    }
+
+    .topbar-search {
+      width: 280px;
+      max-width: 40vw;
+    }
+
+    .topbar-search input {
+      width: 100%;
+      height: var(--ctrl-h);
+      padding: 0 12px 0 36px;
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      outline: none;
+      background: var(--color-fill-1) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2386909C' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") 10px center no-repeat;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .topbar-search input:focus {
+      border-color: var(--color-primary-6);
+      box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.12);
+      background-color: var(--color-bg);
+    }
+
+    .topbar-spacer {
+      flex: 1;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      cursor: pointer;
+      color: var(--color-text-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-btn:hover {
+      background: var(--color-fill-1);
+      color: var(--color-text-1);
+    }
+
+    .icon-btn .badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
+      border-radius: 8px;
+      background: var(--color-danger-6);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 16px;
+      text-align: center;
+    }
+
+    .user-block {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 8px 4px 4px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      font-size: 14px;
+      color: var(--color-text-1);
+    }
+
+    .user-block:hover {
+      background: var(--color-fill-1);
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--color-primary-5), var(--color-primary-6));
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .main-scroll {
+      flex: 1;
+      overflow: auto;
+      padding: 16px 24px 32px;
+    }
+
+    .breadcrumb {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--color-text-3);
+      margin-bottom: 16px;
+    }
+
+    .breadcrumb a {
+      color: var(--color-text-2);
+      text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+      color: var(--color-primary-6);
+    }
+
+    .breadcrumb .sep {
+      color: var(--color-border-2);
+      user-select: none;
+    }
+
+    .breadcrumb .current {
+      color: var(--color-text-1);
+      font-weight: 500;
+    }
+
+    .page-head {
+      margin-bottom: 24px;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 1.33;
+      color: var(--color-text-1);
+      letter-spacing: -0.02em;
+    }
+
+    .page-sub {
+      margin-top: 8px;
+      font-size: 14px;
+      color: var(--color-text-2);
+    }
+
+    .card {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+      padding: 20px;
+      max-width: 100%;
+    }
+
+    .whitelist-callout {
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      background: rgba(22, 93, 255, 0.06);
+      border: 1px solid rgba(22, 93, 255, 0.2);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--color-text-2);
+    }
+
+    .whitelist-callout strong {
+      color: var(--color-text-1);
+    }
+
+    .drawer.drawer-lg {
+      width: min(560px, 100vw);
+    }
+
+    .wl-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .wl-toolbar .field {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .pagination-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--color-border-1);
+    }
+
+    .pagination-info {
+      font-size: 14px;
+      color: var(--color-text-2);
+    }
+
+    .pagination-ctrl {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pagination-ctrl .page-size {
+      height: var(--ctrl-h);
+      padding: 0 8px;
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      color: var(--color-text-1);
+      background: var(--color-bg);
+    }
+
+    .page-btns {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .page-btn {
+      min-width: 32px;
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-sm);
+      background: var(--color-bg);
+      color: var(--color-text-1);
+      font-size: 14px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .page-btn:hover:not(:disabled) {
+      border-color: var(--color-primary-6);
+      color: var(--color-primary-6);
+    }
+
+    .page-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .page-btn.active {
+      border-color: var(--color-primary-6);
+      background: rgba(22, 93, 255, 0.08);
+      color: var(--color-primary-6);
+      font-weight: 500;
+    }
+
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 160px;
+    }
+
+    .field label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--color-text-2);
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      height: var(--ctrl-h);
+      padding: 0 12px;
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      color: var(--color-text-1);
+      background: var(--color-bg);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .field textarea {
+      height: auto;
+      min-height: 80px;
+      padding: 8px 12px;
+      resize: vertical;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--color-primary-6);
+      box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.15);
+    }
+
+    .field.field-grow {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .actions-inline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-left: auto;
+      align-items: flex-end;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: var(--ctrl-h);
+      padding: 0 16px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--color-primary-6);
+      color: #fff;
+      border-color: var(--color-primary-6);
+    }
+
+    .btn-primary:hover {
+      background: var(--color-primary-5);
+      border-color: var(--color-primary-5);
+    }
+
+    .btn-primary:active {
+      background: var(--color-primary-7);
+      border-color: var(--color-primary-7);
+    }
+
+    .btn-secondary {
+      background: var(--color-bg);
+      color: var(--color-text-1);
+      border-color: var(--color-border-1);
+    }
+
+    .btn-secondary:hover {
+      background: var(--color-fill-2);
+      border-color: var(--color-border-2);
+    }
+
+    .btn-text {
+      background: transparent;
+      color: var(--color-primary-6);
+      border-color: transparent;
+      padding: 0 8px;
+    }
+
+    .btn-text:hover {
+      background: rgba(22, 93, 255, 0.06);
+    }
+
+    .btn-danger {
+      background: var(--color-danger-6);
+      color: #fff;
+      border-color: var(--color-danger-6);
+    }
+
+    .btn-danger:hover {
+      filter: brightness(1.05);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-md);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 12px 16px;
+      font-weight: 500;
+      color: var(--color-text-1);
+      background: var(--color-fill-2);
+      border-bottom: 1px solid var(--color-border-1);
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--color-border-1);
+      color: var(--color-text-1);
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover td {
+      background: var(--color-fill-1);
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--color-text-2);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 0 8px;
+      height: 24px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .tag-success {
+      background: var(--color-success-bg);
+      color: var(--color-success-6);
+    }
+
+    .tag-muted {
+      background: var(--color-fill-2);
+      color: var(--color-text-3);
+    }
+
+    .tag-warn {
+      background: #fff7e8;
+      color: var(--color-warning-6);
+    }
+
+    .cell-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .link-btn {
+      background: none;
+      border: none;
+      color: var(--color-primary-6);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 0;
+      font-weight: 500;
+    }
+
+    .link-btn:hover {
+      color: var(--color-primary-5);
+      text-decoration: underline;
+    }
+
+    .link-btn.danger {
+      color: var(--color-danger-6);
+    }
+
+    .link-btn.danger:hover {
+      color: #cb2634;
+    }
+
+    /* Drawer */
+    #wlDrawerMask {
+      z-index: 1010;
+    }
+
+    #wlDrawer {
+      z-index: 1011;
+    }
+
+    .drawer-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(29, 33, 41, 0.45);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .drawer-mask.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: min(480px, 100vw);
+      height: 100%;
+      background: var(--color-bg);
+      z-index: 1001;
+      box-shadow: var(--shadow-modal);
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-head {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--color-border-1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .drawer-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--color-text-1);
+    }
+
+    .drawer-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: var(--color-fill-1);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      color: var(--color-text-2);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .drawer-close:hover {
+      background: var(--color-fill-2);
+      color: var(--color-text-1);
+    }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .drawer-foot {
+      padding: 16px 24px;
+      border-top: 1px solid var(--color-border-1);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .form-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--color-text-3);
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .switch {
+      position: relative;
+      width: 40px;
+      height: 24px;
+      border-radius: 12px;
+      background: var(--color-border-2);
+      cursor: pointer;
+      border: none;
+      flex-shrink: 0;
+    }
+
+    .switch.on {
+      background: var(--color-primary-6);
+    }
+
+    .switch::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+      transition: transform 0.2s;
+    }
+
+    .switch.on::after {
+      transform: translateX(16px);
+    }
+
+    /* Modal */
+    .modal-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(29, 33, 41, 0.45);
+      z-index: 1200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-mask.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 400px;
+      background: var(--color-bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-modal);
+      overflow: hidden;
+      transform: scale(0.96);
+      transition: transform 0.2s;
+    }
+
+    .modal-mask.open .modal {
+      transform: scale(1);
+    }
+
+    .modal-head {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--color-border-1);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-text-1);
+    }
+
+    .modal-body {
+      padding: 20px;
+      font-size: 14px;
+      color: var(--color-text-2);
+      line-height: 1.65;
+    }
+
+    .modal-foot {
+      padding: 12px 20px 16px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: var(--color-text-1);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      z-index: 1200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      box-shadow: var(--shadow-popup);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 200px;
+      }
+
+      .topbar-search {
+        width: 200px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .layout-admin {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+        border-right: none;
+        border-bottom: 1px solid var(--color-border-1);
+      }
+
+      .sidebar-brand {
+        border-bottom: none;
+        flex: 0 0 auto;
+      }
+
+      .sidebar-nav {
+        display: flex;
+        flex: 1;
+        overflow-x: auto;
+        padding: 8px 12px;
+        gap: 4px;
+      }
+
+      .nav-group-label {
+        display: none;
+      }
+
+      .nav-item {
+        margin: 0;
+        white-space: nowrap;
+      }
+
+      .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .actions-inline {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .actions-inline .btn {
+        flex: 1;
+      }
+
+      .topbar {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 12px 16px;
+      }
+
+      .topbar-search {
+        width: 100%;
+        max-width: none;
+        order: 3;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout-admin">
+    <aside class="sidebar" aria-label="主导航">
+      <div class="sidebar-brand">车管家后台管理系统</div>
+      <nav class="sidebar-nav">
+        <div class="nav-group-label">透明车间</div>
+        <div class="nav-item active" role="link" tabindex="0">门店硬件管理</div>
+      </nav>
+    </aside>
+
+    <div class="layout-main">
+      <header class="topbar">
+        <div class="topbar-search">
+          <label for="globalSearch" class="visually-hidden">全局搜索</label>
+          <input id="globalSearch" type="search" placeholder="搜索订单、车辆、设备…" />
+        </div>
+        <div class="topbar-spacer"></div>
+        <div class="topbar-actions">
+          <button type="button" class="icon-btn" title="通知" aria-label="通知">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            <span class="badge">2</span>
+          </button>
+          <button type="button" class="user-block">
+            <span class="user-avatar">张</span>
+            <span>张运营</span>
+            <span style="color: var(--color-text-3); font-size: 12px">▼</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="main-scroll">
+        <nav class="breadcrumb" aria-label="面包屑">
+          <a href="#">首页</a>
+          <span class="sep">/</span>
+          <a href="#">透明车间</a>
+          <span class="sep">/</span>
+          <span class="current">门店硬件</span>
+        </nav>
+
+        <section class="card" aria-label="B01 门店硬件列表">
+      <div class="filter-bar">
+        <div class="field">
+          <label for="storeSelect">门店</label>
+          <select id="storeSelect">
+            <option value="s1">连云港旗舰店</option>
+            <option value="s2">开发区服务店</option>
+          </select>
+        </div>
+        <div class="field field-grow">
+          <label for="keyword">关键字</label>
+          <input id="keyword" type="search" placeholder="设备名 / 平台设备 ID / 厂商编号" />
+        </div>
+        <div class="field">
+          <label for="filterEnabled">启用状态</label>
+          <select id="filterEnabled">
+            <option value="">全部</option>
+            <option value="1">启用</option>
+            <option value="0">停用</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="filterLocation">监测位置</label>
+          <select id="filterLocation">
+            <option value="">全部</option>
+            <option value="set">已配置</option>
+            <option value="unset">未配置</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="filterType">设备类型</label>
+          <select id="filterType">
+            <option value="">全部</option>
+            <option value="CAMERA">摄像头</option>
+          </select>
+        </div>
+        <div class="actions-inline">
+          <button type="button" class="btn btn-secondary" id="btnReset">重置</button>
+          <button type="button" class="btn btn-secondary" id="btnQuery">查询</button>
+          <button type="button" class="btn btn-secondary" id="btnWhitelist">功能白名单</button>
+          <button type="button" class="btn btn-primary" id="btnAdd">新增硬件</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>设备展示名称</th>
+              <th>设备类型</th>
+              <th>监测位置</th>
+              <th>启用状态</th>
+              <th>平台设备 ID</th>
+              <th>对接侧设备编号</th>
+              <th>最近更新时间</th>
+              <th style="width: 200px">操作</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="pagination-bar" aria-label="分页">
+        <div class="pagination-info" id="pageInfo">共 0 条</div>
+        <div class="pagination-ctrl">
+          <select class="page-size" id="pageSize" aria-label="每页条数">
+            <option value="10">10 条/页</option>
+            <option value="20">20 条/页</option>
+            <option value="50">50 条/页</option>
+          </select>
+          <div class="page-btns">
+            <button type="button" class="page-btn" id="pagePrev" aria-label="上一页">上一页</button>
+            <div id="pageNumbers" style="display: flex; gap: 4px"></div>
+            <button type="button" class="page-btn" id="pageNext" aria-label="下一页">下一页</button>
+          </div>
+        </div>
+      </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- B02 / B03 Drawer -->
+  <div class="drawer-mask" id="drawerMask" aria-hidden="true"></div>
+  <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+    <div class="drawer-head">
+      <h2 class="drawer-title" id="drawerTitle">新增硬件</h2>
+      <button type="button" class="drawer-close" id="drawerClose" aria-label="关闭">×</button>
+    </div>
+    <div class="drawer-body">
+      <div class="form-grid">
+        <div class="field">
+          <label for="formStore">门店</label>
+          <select id="formStore"></select>
+          <p class="hint" id="formStoreHint">新增时可选择门店；编辑时不可改门店，改绑请使用解绑后在目标门店新增绑定。</p>
+        </div>
+        <div class="field">
+          <label for="formDeviceId">绑定设备</label>
+          <input id="formDeviceId" placeholder="绑定设备ID" />
+        </div>
+        <div class="field">
+          <label for="formDisplayName">设备展示名称</label>
+          <input id="formDisplayName" maxlength="32" placeholder="设备展示名称，如：洗车房_摄像头" />
+        </div>
+        <div class="field">
+          <label for="formLocation">监测位置</label>
+          <input id="formLocation" maxlength="64" placeholder="监测位置，如：洗车房-入口" />
+        </div>
+        <div class="field">
+          <label>启用状态</label>
+          <div class="switch-row">
+            <button type="button" class="switch on" id="formSwitch" role="switch" aria-checked="true"></button>
+            <span id="formSwitchLabel" style="color: var(--color-text-2)">启用（采集写入）</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="formRemark">备注</label>
+          <textarea id="formRemark" placeholder="可选"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-foot">
+      <button type="button" class="btn btn-secondary" id="drawerCancel">取消</button>
+      <button type="button" class="btn btn-primary" id="drawerSave">保存</button>
+    </div>
+  </aside>
+
+  <!-- B06 小程序入口白名单（自 B01 打开） -->
+  <div class="drawer-mask" id="wlDrawerMask" aria-hidden="true"></div>
+  <aside class="drawer drawer-lg" id="wlDrawer" role="dialog" aria-modal="true" aria-labelledby="wlDrawerTitle">
+    <div class="drawer-head">
+      <h2 class="drawer-title" id="wlDrawerTitle">小程序入口白名单</h2>
+      <button type="button" class="drawer-close" id="wlDrawerClose" aria-label="关闭">×</button>
+    </div>
+    <div class="drawer-body">
+      <div class="whitelist-callout">
+        <strong>说明</strong>：仅名单内的 <strong>平台用户</strong> 可在微信小程序中看到「透明车间」功能入口；未列入名单的用户不展示该入口。本配置与当前门店硬件列表相互独立。白名单为空时，默认没有任何用户可见该入口。
+      </div>
+      <div class="wl-toolbar">
+        <div class="field">
+          <label for="wlKeyword">关键字</label>
+          <input id="wlKeyword" type="search" placeholder="平台用户 ID / 手机号 / 昵称" />
+        </div>
+        <div class="actions-inline" style="margin-bottom: 0">
+          <button type="button" class="btn btn-secondary" id="btnWlReset">重置</button>
+          <button type="button" class="btn btn-secondary" id="btnWlQuery">查询</button>
+          <button type="button" class="btn btn-primary" id="btnWlOpenAdd">添加用户</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>平台用户 ID</th>
+              <th>昵称</th>
+              <th>手机号</th>
+              <th>添加时间</th>
+              <th>操作人</th>
+              <th style="width: 120px">操作</th>
+            </tr>
+          </thead>
+          <tbody id="wlTableBody"></tbody>
+        </table>
+      </div>
+      <p class="pagination-info" id="wlPageInfo" style="margin-top: 12px; font-size: 14px; color: var(--color-text-2)">共 0 条</p>
+    </div>
+    <div class="drawer-foot">
+      <button type="button" class="btn btn-secondary" id="wlDrawerDone">关闭</button>
+    </div>
+  </aside>
+
+  <!-- B04 / B05 / B07 Modal -->
+  <div class="modal-mask" id="modalMask" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head" id="modalTitle">确认</div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-secondary" id="modalCancel">取消</button>
+        <button type="button" class="btn btn-primary" id="modalOk">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    (function () {
+      var rows = [
+        { id: "b1", deviceDisplayName: "接车区-入口", deviceType: "CAMERA", locationLabel: "大门接车区", enabled: true, deviceId: "dev_cam_001", externalDeviceKey: "HIK-chan-12", updatedAt: "2026-05-07 14:32:00" },
+        { id: "b2", deviceDisplayName: "精洗工位-南", deviceType: "CAMERA", locationLabel: "精洗工位", enabled: true, deviceId: "dev_cam_002", externalDeviceKey: "—", updatedAt: "2026-05-06 09:10:22" },
+        { id: "b3", deviceDisplayName: "未命名设备", deviceType: "CAMERA", locationLabel: "", enabled: false, deviceId: "dev_cam_003", externalDeviceKey: "DH-IPC-889", updatedAt: "2026-05-05 18:00:00" },
+        { id: "b4", deviceDisplayName: "美容工位-东", deviceType: "CAMERA", locationLabel: "美容工位", enabled: true, deviceId: "dev_cam_004", externalDeviceKey: "HIK-chan-15", updatedAt: "2026-05-04 11:20:00" },
+        { id: "b5", deviceDisplayName: "烤漆房外", deviceType: "CAMERA", locationLabel: "烤漆房通道", enabled: true, deviceId: "dev_cam_005", externalDeviceKey: "—", updatedAt: "2026-05-04 10:05:00" },
+        { id: "b6", deviceDisplayName: "客户休息区", deviceType: "CAMERA", locationLabel: "休息区", enabled: true, deviceId: "dev_cam_006", externalDeviceKey: "UNV-778", updatedAt: "2026-05-03 16:40:00" },
+        { id: "b7", deviceDisplayName: "维修工位-1", deviceType: "CAMERA", locationLabel: "机修工位", enabled: true, deviceId: "dev_cam_007", externalDeviceKey: "—", updatedAt: "2026-05-03 09:00:00" },
+        { id: "b8", deviceDisplayName: "维修工位-2", deviceType: "CAMERA", locationLabel: "机修工位", enabled: false, deviceId: "dev_cam_008", externalDeviceKey: "HIK-chan-20", updatedAt: "2026-05-02 15:22:00" },
+        { id: "b9", deviceDisplayName: "洗车线入口", deviceType: "CAMERA", locationLabel: "洗车区", enabled: true, deviceId: "dev_cam_009", externalDeviceKey: "—", updatedAt: "2026-05-02 08:30:00" },
+        { id: "b10", deviceDisplayName: "配件库门口", deviceType: "CAMERA", locationLabel: "仓库门口", enabled: true, deviceId: "dev_cam_010", externalDeviceKey: "DH-IPC-902", updatedAt: "2026-05-01 13:11:00" },
+        { id: "b11", deviceDisplayName: "交车区", deviceType: "CAMERA", locationLabel: "交车区", enabled: true, deviceId: "dev_cam_011", externalDeviceKey: "—", updatedAt: "2026-05-01 10:00:00" },
+        { id: "b12", deviceDisplayName: "车间全景", deviceType: "CAMERA", locationLabel: "车间全景", enabled: true, deviceId: "dev_cam_012", externalDeviceKey: "HIK-pano-01", updatedAt: "2026-04-30 17:55:00" },
+      ];
+
+      var drawerMode = "create";
+      var editingId = null;
+      var modalResolve = null;
+      var modalKind = "confirm";
+      var currentPage = 1;
+
+      var el = {
+        tableBody: document.getElementById("tableBody"),
+        storeSelect: document.getElementById("storeSelect"),
+        btnAdd: document.getElementById("btnAdd"),
+        btnQuery: document.getElementById("btnQuery"),
+        btnReset: document.getElementById("btnReset"),
+        pageInfo: document.getElementById("pageInfo"),
+        pageSize: document.getElementById("pageSize"),
+        pagePrev: document.getElementById("pagePrev"),
+        pageNext: document.getElementById("pageNext"),
+        pageNumbers: document.getElementById("pageNumbers"),
+        drawer: document.getElementById("drawer"),
+        drawerMask: document.getElementById("drawerMask"),
+        drawerTitle: document.getElementById("drawerTitle"),
+        drawerClose: document.getElementById("drawerClose"),
+        drawerCancel: document.getElementById("drawerCancel"),
+        drawerSave: document.getElementById("drawerSave"),
+        formStore: document.getElementById("formStore"),
+        formStoreHint: document.getElementById("formStoreHint"),
+        formDeviceId: document.getElementById("formDeviceId"),
+        formDisplayName: document.getElementById("formDisplayName"),
+        formLocation: document.getElementById("formLocation"),
+        formSwitch: document.getElementById("formSwitch"),
+        formSwitchLabel: document.getElementById("formSwitchLabel"),
+        formRemark: document.getElementById("formRemark"),
+        modalMask: document.getElementById("modalMask"),
+        modalTitle: document.getElementById("modalTitle"),
+        modalBody: document.getElementById("modalBody"),
+        modalCancel: document.getElementById("modalCancel"),
+        modalOk: document.getElementById("modalOk"),
+        toast: document.getElementById("toast"),
+      };
+
+      function esc(s) {
+        if (!s) return "";
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function showToast(msg) {
+        el.toast.textContent = msg;
+        el.toast.classList.add("show");
+        setTimeout(function () {
+          el.toast.classList.remove("show");
+        }, 2200);
+      }
+
+      function getPageSize() {
+        var n = parseInt(el.pageSize.value, 10);
+        return n > 0 ? n : 10;
+      }
+
+      function clampPage() {
+        var total = rows.length;
+        var size = getPageSize();
+        var totalPages = Math.max(1, Math.ceil(total / size) || 1);
+        if (total === 0) {
+          currentPage = 1;
+          return;
+        }
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+      }
+
+      function renderPagination() {
+        clampPage();
+        var total = rows.length;
+        var size = getPageSize();
+        var totalPages = Math.max(1, Math.ceil(total / size) || 1);
+        if (total === 0) {
+          el.pageInfo.textContent = "共 0 条";
+          el.pagePrev.disabled = true;
+          el.pageNext.disabled = true;
+          el.pageNumbers.innerHTML = "";
+          return;
+        }
+        var start = (currentPage - 1) * size + 1;
+        var end = Math.min(currentPage * size, total);
+        el.pageInfo.textContent =
+          "共 " + total + " 条 · 显示第 " + start + "-" + end + " 条 · 第 " + currentPage + " / " + totalPages + " 页";
+        el.pagePrev.disabled = currentPage <= 1;
+        el.pageNext.disabled = currentPage >= totalPages;
+
+        el.pageNumbers.innerHTML = "";
+        var tp = Math.max(1, Math.ceil(total / size) || 1);
+        var maxBtn = 9;
+        var startP = 1;
+        var endP = tp;
+        if (tp > maxBtn) {
+          startP = Math.max(1, currentPage - 4);
+          endP = Math.min(tp, startP + maxBtn - 1);
+          if (endP - startP < maxBtn - 1) startP = Math.max(1, endP - maxBtn + 1);
+        }
+        var p;
+        for (p = startP; p <= endP; p++) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "page-btn" + (p === currentPage ? " active" : "");
+          btn.textContent = String(p);
+          btn.setAttribute("data-page", String(p));
+          el.pageNumbers.appendChild(btn);
+        }
+      }
+
+      function renderTable() {
+        var size = getPageSize();
+        clampPage();
+        var start = (currentPage - 1) * size;
+        var slice = rows.slice(start, start + size);
+        el.tableBody.innerHTML = slice
+          .map(function (r) {
+            var locCell =
+              r.locationLabel === ""
+                ? '<span class="tag tag-warn">未配置</span>'
+                : esc(r.locationLabel);
+            var enTag = r.enabled
+              ? '<span class="tag tag-success">启用</span>'
+              : '<span class="tag tag-muted">停用</span>';
+            return (
+              "<tr data-id=\"" +
+              esc(r.id) +
+              "\">" +
+              "<td>" +
+              esc(r.deviceDisplayName) +
+              "</td>" +
+              "<td>" +
+              esc(r.deviceType) +
+              "</td>" +
+              "<td>" +
+              locCell +
+              "</td>" +
+              "<td>" +
+              enTag +
+              "</td>" +
+              "<td class=\"mono\">" +
+              esc(r.deviceId) +
+              "</td>" +
+              "<td class=\"mono\">" +
+              esc(r.externalDeviceKey) +
+              "</td>" +
+              "<td style=\"color:var(--color-text-2)\">" +
+              esc(r.updatedAt) +
+              "</td>" +
+              "<td class=\"cell-actions\">" +
+              "<button type=\"button\" class=\"link-btn\" data-act=\"edit\">编辑</button>" +
+              "<button type=\"button\" class=\"link-btn\" data-act=\"toggle\">" +
+              (r.enabled ? "停用" : "启用") +
+              "</button>" +
+              "<button type=\"button\" class=\"link-btn danger\" data-act=\"unbind\">解绑</button>" +
+              "</td>" +
+              "</tr>"
+            );
+          })
+          .join("");
+      }
+
+      function renderView() {
+        renderTable();
+        renderPagination();
+      }
+
+      function openDrawer(mode, id) {
+        closeWlDrawer();
+        drawerMode = mode;
+        editingId = id || null;
+        el.formStore.innerHTML =
+          "<option value=\"s1\">连云港旗舰店</option><option value=\"s2\">开发区服务店</option>";
+        el.storeSelect.value = el.storeSelect.value || "s1";
+
+        if (mode === "create") {
+          el.drawerTitle.textContent = "新增硬件";
+          el.formStore.value = el.storeSelect.value;
+          el.formStore.disabled = false;
+          el.formStoreHint.style.display = "";
+          el.formDeviceId.value = "";
+          el.formDeviceId.disabled = false;
+          el.formDisplayName.value = "";
+          el.formLocation.value = "";
+          el.formRemark.value = "";
+          setSwitch(true);
+        } else {
+          el.drawerTitle.textContent = "编辑硬件";
+          var r = rows.find(function (x) {
+            return x.id === id;
+          });
+          if (!r) return;
+          el.formStore.value = "s1";
+          el.formStore.disabled = true;
+          el.formStoreHint.style.display = "none";
+          el.formDeviceId.value = r.deviceId;
+          el.formDeviceId.disabled = true;
+          el.formDisplayName.value = r.deviceDisplayName;
+          el.formLocation.value = r.locationLabel;
+          el.formRemark.value = "";
+          setSwitch(!!r.enabled);
+        }
+
+        el.drawer.classList.add("open");
+        el.drawerMask.classList.add("open");
+        el.drawerMask.setAttribute("aria-hidden", "false");
+      }
+
+      function closeDrawer() {
+        el.drawer.classList.remove("open");
+        el.drawerMask.classList.remove("open");
+        el.drawerMask.setAttribute("aria-hidden", "true");
+      }
+
+      function setSwitch(on) {
+        el.formSwitch.classList.toggle("on", on);
+        el.formSwitch.setAttribute("aria-checked", on ? "true" : "false");
+        el.formSwitchLabel.textContent = on ? "启用（采集写入）" : "停用（停止采集写入）";
+      }
+
+      function openModal(title, html, dangerOk) {
+        return new Promise(function (resolve) {
+          modalKind = "confirm";
+          modalResolve = resolve;
+          el.modalTitle.textContent = title;
+          el.modalBody.innerHTML = html;
+          el.modalOk.textContent = "确定";
+          el.modalOk.className = "btn " + (dangerOk ? "btn-danger" : "btn-primary");
+          el.modalMask.classList.add("open");
+          el.modalMask.setAttribute("aria-hidden", "false");
+        });
+      }
+
+      function closeModal(result) {
+        el.modalMask.classList.remove("open");
+        el.modalMask.setAttribute("aria-hidden", "true");
+        el.modalOk.textContent = "确定";
+        var r = modalResolve;
+        var kind = modalKind;
+        modalKind = "confirm";
+        modalResolve = null;
+        if (r && kind === "confirm") {
+          r(!!result);
+        }
+      }
+
+      function openWlAddModal() {
+        modalKind = "wlAdd";
+        modalResolve = null;
+        el.modalTitle.textContent = "添加白名单用户";
+        el.modalBody.innerHTML =
+          "<p style=\"margin:0 0 14px;font-size:13px;color:var(--color-text-2);line-height:1.6\">请输入平台用户 ID（如 <span class=\"mono\">pu_xxx</span>）或手机号。正式环境应先调用「检索平台用户」接口确认主体后再写入名单。</p>" +
+          "<div class=\"field\" style=\"min-width:0\">" +
+          "<label for=\"wlModalKeyword\">平台用户 ID / 手机号</label>" +
+          "<input id=\"wlModalKeyword\" type=\"text\" autocomplete=\"off\" placeholder=\"平台用户 ID 或手机号\" />" +
+          "</div>";
+        el.modalOk.textContent = "确定添加";
+        el.modalOk.className = "btn btn-primary";
+        el.modalMask.classList.add("open");
+        el.modalMask.setAttribute("aria-hidden", "false");
+        setTimeout(function () {
+          var inp = document.getElementById("wlModalKeyword");
+          if (inp) inp.focus();
+        }, 50);
+      }
+
+      el.formSwitch.addEventListener("click", function () {
+        var next = !el.formSwitch.classList.contains("on");
+        if (!next) {
+          openModal(
+            "停用设备",
+            "停用后该设备将<strong>停止采集写入</strong>，不再产生新的轨迹事件。",
+            true
+          ).then(function (ok) {
+            if (ok) setSwitch(false);
+          });
+        } else {
+          setSwitch(true);
+        }
+      });
+
+      el.drawerMask.addEventListener("click", closeDrawer);
+      el.drawerClose.addEventListener("click", closeDrawer);
+      el.drawerCancel.addEventListener("click", closeDrawer);
+
+      el.drawerSave.addEventListener("click", function () {
+        var name = el.formDisplayName.value.trim();
+        var loc = el.formLocation.value.trim();
+        if (!name) {
+          showToast("请填写设备展示名称");
+          return;
+        }
+        if (!loc) {
+          showToast("请填写监测位置");
+          return;
+        }
+        if (drawerMode === "create" && !el.formDeviceId.value.trim()) {
+          showToast("请填写或选择绑定设备");
+          return;
+        }
+        var en = el.formSwitch.classList.contains("on");
+        if (drawerMode === "create") {
+          rows.unshift({
+            id: "b" + Date.now(),
+            deviceDisplayName: name,
+            deviceType: "CAMERA",
+            locationLabel: loc,
+            enabled: en,
+            deviceId: el.formDeviceId.value.trim(),
+            externalDeviceKey: "—",
+            updatedAt: new Date().toISOString().slice(0, 19).replace("T", " "),
+          });
+          currentPage = 1;
+          showToast("已新增（演示）");
+        } else {
+          var r = rows.find(function (x) {
+            return x.id === editingId;
+          });
+          if (r) {
+            r.deviceDisplayName = name;
+            r.locationLabel = loc;
+            r.enabled = en;
+            r.updatedAt = new Date().toISOString().slice(0, 19).replace("T", " ");
+          }
+          showToast("已保存（演示）");
+        }
+        renderView();
+        closeDrawer();
+      });
+
+      el.modalCancel.addEventListener("click", function () {
+        closeModal(false);
+      });
+
+      el.modalOk.addEventListener("click", function () {
+        if (modalKind === "wlAdd") {
+          var inp = document.getElementById("wlModalKeyword");
+          var raw = inp && inp.value.trim();
+          if (!raw) {
+            showToast("请输入平台用户 ID 或手机号");
+            return;
+          }
+          if (whitelistRows.some(function (x) { return x.platformUserId === raw; })) {
+            showToast("该用户已在白名单中");
+            return;
+          }
+          var digits = raw.replace(/\D/g, "");
+          var mobileMasked =
+            digits.length >= 7 ? digits.slice(0, 3) + "****" + digits.slice(-4) : "—";
+          var platformUserId = raw.indexOf("pu_") === 0 ? raw : "pu_new_" + Date.now().toString(36);
+          whitelistRows.unshift({
+            id: "w" + Date.now(),
+            platformUserId: platformUserId,
+            nickname: "新添加用户",
+            mobileMasked: mobileMasked,
+            createdAt: new Date().toISOString().slice(0, 19).replace("T", " "),
+            operatorName: "张运营",
+          });
+          closeModal(false);
+          renderWhitelist();
+          showToast("已加入白名单（演示）");
+          return;
+        }
+        closeModal(true);
+      });
+
+      el.tableBody.addEventListener("click", function (e) {
+        var btn = e.target.closest("[data-act]");
+        if (!btn) return;
+        var tr = btn.closest("tr");
+        var id = tr && tr.getAttribute("data-id");
+        var act = btn.getAttribute("data-act");
+        if (act === "edit") openDrawer("edit", id);
+        if (act === "toggle") {
+          var row = rows.find(function (x) {
+            return x.id === id;
+          });
+          if (!row) return;
+          if (row.enabled) {
+            openModal(
+              "停用设备",
+              "停用后该设备将<strong>停止采集写入</strong>，不再产生新的轨迹事件。",
+              true
+            ).then(function (ok) {
+              if (ok) {
+                row.enabled = false;
+                row.updatedAt = new Date().toISOString().slice(0, 19).replace("T", " ");
+                renderView();
+                showToast("已停用");
+              }
+            });
+          } else {
+            row.enabled = true;
+            row.updatedAt = new Date().toISOString().slice(0, 19).replace("T", " ");
+            renderView();
+            showToast("已启用");
+          }
+        }
+        if (act === "unbind") {
+          var row2 = rows.find(function (x) {
+            return x.id === id;
+          });
+          if (!row2) return;
+          openModal(
+            "解绑设备",
+            "解绑后本门店不再管理该设备，设备进入<strong>待绑定</strong>池，可由其他门店新增绑定。<br/><br/>解绑<strong>不删除</strong>历史数据；小程序将按门店归属查询，不串显他店历史。",
+            true
+          ).then(function (ok) {
+            if (ok) {
+              rows = rows.filter(function (x) {
+                return x.id !== id;
+              });
+              renderView();
+              showToast("已解绑（演示）");
+            }
+          });
+        }
+      });
+
+      el.btnAdd.addEventListener("click", function () {
+        openDrawer("create");
+      });
+
+      el.btnQuery.addEventListener("click", function () {
+        showToast("已查询（演示，未接真实筛选）");
+      });
+
+      el.btnReset.addEventListener("click", function () {
+        document.getElementById("keyword").value = "";
+        document.getElementById("filterEnabled").value = "";
+        document.getElementById("filterLocation").value = "";
+        document.getElementById("filterType").value = "";
+        showToast("已重置条件");
+      });
+
+      el.modalMask.addEventListener("click", function (e) {
+        if (e.target === el.modalMask) closeModal(false);
+      });
+
+      el.pageSize.addEventListener("change", function () {
+        currentPage = 1;
+        renderView();
+      });
+
+      el.pagePrev.addEventListener("click", function () {
+        if (currentPage > 1) {
+          currentPage -= 1;
+          renderView();
+        }
+      });
+
+      el.pageNext.addEventListener("click", function () {
+        var tp = Math.max(1, Math.ceil(rows.length / getPageSize()) || 1);
+        if (currentPage < tp) {
+          currentPage += 1;
+          renderView();
+        }
+      });
+
+      el.pageNumbers.addEventListener("click", function (e) {
+        var btn = e.target.closest("[data-page]");
+        if (!btn) return;
+        var p = parseInt(btn.getAttribute("data-page"), 10);
+        if (p > 0 && p !== currentPage) {
+          currentPage = p;
+          renderView();
+        }
+      });
+
+      /* —— B06 小程序入口白名单（B01 按钮 → 抽屉；添加 → 弹窗 B07） —— */
+      var whitelistRows = [
+        {
+          id: "w1",
+          platformUserId: "pu_88001",
+          nickname: "李先生",
+          mobileMasked: "139****1201",
+          createdAt: "2026-05-10 11:20:00",
+          operatorName: "张运营",
+        },
+        {
+          id: "w2",
+          platformUserId: "pu_88002",
+          nickname: "赵女士",
+          mobileMasked: "186****0098",
+          createdAt: "2026-05-09 15:00:00",
+          operatorName: "张运营",
+        },
+        {
+          id: "w3",
+          platformUserId: "pu_88003",
+          nickname: "测试用户C",
+          mobileMasked: "137****5566",
+          createdAt: "2026-05-08 09:30:22",
+          operatorName: "王主管",
+        },
+      ];
+      var wlFilterKeyword = "";
+      var wlDrawer = document.getElementById("wlDrawer");
+      var wlDrawerMask = document.getElementById("wlDrawerMask");
+      var wlTableBody = document.getElementById("wlTableBody");
+      var wlPageInfo = document.getElementById("wlPageInfo");
+      var wlKeyword = document.getElementById("wlKeyword");
+
+      function closeWlDrawer() {
+        wlDrawer.classList.remove("open");
+        wlDrawerMask.classList.remove("open");
+        wlDrawerMask.setAttribute("aria-hidden", "true");
+      }
+
+      function openWlDrawer() {
+        closeDrawer();
+        wlDrawer.classList.add("open");
+        wlDrawerMask.classList.add("open");
+        wlDrawerMask.setAttribute("aria-hidden", "false");
+        renderWhitelist();
+      }
+
+      function getWlFiltered() {
+        var kw = wlFilterKeyword.trim().toLowerCase();
+        if (!kw) return whitelistRows.slice();
+        return whitelistRows.filter(function (r) {
+          return (
+            String(r.platformUserId).toLowerCase().indexOf(kw) >= 0 ||
+            String(r.nickname).toLowerCase().indexOf(kw) >= 0 ||
+            String(r.mobileMasked).toLowerCase().indexOf(kw) >= 0
+          );
+        });
+      }
+
+      function renderWhitelist() {
+        var list = getWlFiltered();
+        wlPageInfo.textContent =
+          "共 " + list.length + " 条" + (wlFilterKeyword.trim() ? "（已按关键字筛选）" : "");
+        wlTableBody.innerHTML = list
+          .map(function (r) {
+            return (
+              "<tr data-wid=\"" +
+              esc(r.id) +
+              "\"><td class=\"mono\">" +
+              esc(r.platformUserId) +
+              "</td><td>" +
+              esc(r.nickname) +
+              "</td><td>" +
+              esc(r.mobileMasked) +
+              "</td><td style=\"color:var(--color-text-2)\">" +
+              esc(r.createdAt) +
+              "</td><td>" +
+              esc(r.operatorName) +
+              "</td><td class=\"cell-actions\"><button type=\"button\" class=\"link-btn danger\" data-wact=\"remove\">移除</button></td></tr>"
+            );
+          })
+          .join("");
+      }
+
+      document.getElementById("btnWhitelist").addEventListener("click", function () {
+        openWlDrawer();
+      });
+
+      document.getElementById("wlDrawerClose").addEventListener("click", closeWlDrawer);
+      document.getElementById("wlDrawerDone").addEventListener("click", closeWlDrawer);
+      wlDrawerMask.addEventListener("click", function (e) {
+        if (e.target === wlDrawerMask) closeWlDrawer();
+      });
+
+      document.getElementById("btnWlOpenAdd").addEventListener("click", function () {
+        openWlAddModal();
+      });
+
+      document.getElementById("btnWlQuery").addEventListener("click", function () {
+        wlFilterKeyword = wlKeyword.value;
+        renderWhitelist();
+        showToast("已查询");
+      });
+
+      document.getElementById("btnWlReset").addEventListener("click", function () {
+        wlKeyword.value = "";
+        wlFilterKeyword = "";
+        renderWhitelist();
+        showToast("已重置");
+      });
+
+      wlTableBody.addEventListener("click", function (e) {
+        var btn = e.target.closest("[data-wact]");
+        if (!btn || btn.getAttribute("data-wact") !== "remove") return;
+        var tr = btn.closest("tr");
+        var wid = tr && tr.getAttribute("data-wid");
+        var row = whitelistRows.find(function (x) {
+          return x.id === wid;
+        });
+        if (!row) return;
+        openModal(
+          "移出白名单",
+          "移出后，用户 <strong>" +
+            esc(row.nickname) +
+            "</strong>（" +
+            esc(row.platformUserId) +
+            "）将<strong>不可在小程序看到</strong>透明车间入口。确定移除？",
+          true
+        ).then(function (ok) {
+          if (ok) {
+            whitelistRows = whitelistRows.filter(function (x) {
+              return x.id !== wid;
+            });
+            renderWhitelist();
+            showToast("已移出白名单（演示）");
+          }
+        });
+      });
+
+      renderView();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>透明车间 · 微信小程序原型</title>
+  <style>
+    :root {
+      --color-primary-6: #165dff;
+      --color-primary-5: #4080ff;
+      --color-primary-7: #0e42d2;
+      --color-text-1: #1d2129;
+      --color-text-2: #4e5969;
+      --color-text-3: #86909c;
+      --color-border-1: #e5e6eb;
+      --color-border-2: #c9cdd4;
+      --color-fill-1: #f7f8fa;
+      --color-fill-2: #f2f3f5;
+      --color-bg: #ffffff;
+      --color-success-6: #00b42a;
+      --color-warning-6: #ff7d00;
+      --color-danger-6: #f53f3f;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --space-4: 4px;
+      --space-8: 8px;
+      --space-12: 12px;
+      --space-16: 16px;
+      --space-20: 20px;
+      --space-24: 24px;
+      --status-bar-h: 44px;
+      --nav-h: 44px;
+      --capsule-w: 87px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
+      font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--color-fill-2);
+      color: var(--color-text-1);
+      font-size: 14px;
+      line-height: 1.57;
+      min-height: 100vh;
+    }
+
+    /* 原型画布：手机框外区域 */
+    .prototype-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-16) var(--space-12) calc(var(--space-24) + var(--safe-bottom));
+      min-height: 100vh;
+    }
+
+    .prototype-annotation {
+      max-width: 420px;
+      width: 100%;
+      font-size: 12px;
+      color: var(--color-text-3);
+      line-height: 1.55;
+      margin-bottom: var(--space-12);
+      padding: var(--space-8) var(--space-12);
+      background: var(--color-bg);
+      border: 1px dashed var(--color-border-2);
+      border-radius: var(--radius-md);
+    }
+
+    /* 手机 + 边框外 FAB 同台 */
+    .prototype-stage {
+      position: relative;
+      display: inline-block;
+      vertical-align: top;
+      max-width: 100%;
+    }
+
+    /* 设备框：仅业务界面 */
+    .device-shell {
+      width: 390px;
+      max-width: 100%;
+      min-height: min(780px, calc(100vh - 120px));
+      background: var(--color-fill-1);
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 0 1px var(--color-border-1), 0 12px 40px rgba(0, 0, 0, 0.08);
+    }
+
+
+    /* 系统状态栏占位 */
+    .status-bar {
+      height: calc(var(--status-bar-h) + var(--safe-top));
+      padding-top: var(--safe-top);
+      background: var(--color-bg);
+      flex-shrink: 0;
+    }
+
+    /* 自定义导航栏：左侧返回 | 标题 | 右侧胶囊占位（不可点业务） */
+    .nav-bar {
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      padding: 0 var(--space-12);
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-border-1);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .nav-bar-inner {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      position: relative;
+    }
+
+    .nav-side {
+      width: var(--capsule-w);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      min-height: 40px;
+    }
+
+    .nav-side--left {
+      justify-content: flex-start;
+    }
+
+    .nav-side--right {
+      justify-content: flex-end;
+    }
+
+    .nav-title-wrap {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0 var(--space-8);
+      min-width: 0;
+    }
+
+    .nav-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--color-text-1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .btn-back {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      color: var(--color-text-1);
+      font-size: 20px;
+      line-height: 40px;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+    }
+
+    .btn-back:active {
+      opacity: 0.65;
+    }
+
+    .btn-back--hidden {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* 微信胶囊视觉占位（非业务控件） */
+    .capsule-placeholder {
+      width: var(--capsule-w);
+      height: 32px;
+      border-radius: 16px;
+      background: var(--color-fill-2);
+      border: 1px solid var(--color-border-1);
+      flex-shrink: 0;
+      pointer-events: none;
+    }
+
+    /* 主内容滚动区 */
+    .page-scroll {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: calc(var(--space-24) + var(--safe-bottom));
+    }
+
+    .page-frame {
+      display: none;
+      flex-direction: column;
+      min-height: calc(100vh - var(--safe-top) - var(--status-bar-h));
+    }
+
+    .page-frame.is-active {
+      display: flex;
+    }
+
+    /* 筛选区 */
+    .filter-panel {
+      background: var(--color-bg);
+      padding: var(--space-12) var(--space-16);
+      border-bottom: 1px solid var(--color-border-1);
+    }
+
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-8);
+      margin-bottom: var(--space-12);
+      flex-wrap: wrap;
+    }
+
+    .filter-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .filter-label {
+      font-size: 12px;
+      color: var(--color-text-3);
+      width: 72px;
+      flex-shrink: 0;
+    }
+
+    .filter-control {
+      flex: 1;
+      min-width: 0;
+    }
+
+    select.input-like,
+    input.input-like {
+      width: 100%;
+      height: 36px;
+      padding: 0 var(--space-12);
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      color: var(--color-text-1);
+      background: var(--color-bg);
+      outline: none;
+    }
+
+    select.input-like:focus,
+    input.input-like:focus {
+      border-color: var(--color-primary-6);
+      box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.15);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: var(--space-8) 0;
+    }
+
+    .toggle-label {
+      font-size: 14px;
+      color: var(--color-text-2);
+    }
+
+    .switch {
+      width: 44px;
+      height: 24px;
+      border-radius: 12px;
+      background: var(--color-border-2);
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .switch.is-on {
+      background: var(--color-primary-6);
+    }
+
+    .switch-knob {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+    }
+
+    .switch.is-on .switch-knob {
+      transform: translateX(20px);
+    }
+
+    /* 卡片列表 */
+    .card-list {
+      padding: var(--space-12) var(--space-16);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-12);
+    }
+
+    .vehicle-card {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-lg);
+      padding: var(--space-16);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .vehicle-card:active {
+      border-color: var(--color-primary-5);
+    }
+
+    .vehicle-card__head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-12);
+      margin-bottom: var(--space-12);
+    }
+
+    .plate {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--color-text-1);
+      letter-spacing: 0.02em;
+    }
+
+    .plate--unknown {
+      color: var(--color-text-3);
+      font-weight: 500;
+    }
+
+    /* C01 异常标记：文字 + 样式，不靠仅靠颜色 */
+    .tag-abnormal {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding: 2px var(--space-8);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      background: rgba(245, 63, 63, 0.08);
+      color: var(--color-danger-6);
+      border: 1px solid rgba(245, 63, 63, 0.35);
+      white-space: nowrap;
+    }
+
+    .tag-abnormal::before {
+      content: "⚠";
+      font-size: 11px;
+    }
+
+    .tag-normal-hint {
+      font-size: 12px;
+      color: var(--color-success-6);
+      font-weight: 500;
+    }
+
+    .meta-grid {
+      display: grid;
+      gap: var(--space-8);
+    }
+
+    .meta-line {
+      display: flex;
+      gap: var(--space-8);
+      font-size: 13px;
+      color: var(--color-text-2);
+    }
+
+    .meta-line strong {
+      color: var(--color-text-3);
+      font-weight: 500;
+      min-width: 72px;
+    }
+
+    /* 骨架屏 */
+    .skeleton-card {
+      background: var(--color-bg);
+      border-radius: var(--radius-lg);
+      padding: var(--space-16);
+      border: 1px solid var(--color-border-1);
+    }
+
+    .sk {
+      background: linear-gradient(90deg, var(--color-fill-2) 25%, var(--color-fill-1) 50%, var(--color-fill-2) 75%);
+      background-size: 200% 100%;
+      animation: sk 1.2s ease-in-out infinite;
+      border-radius: var(--radius-sm);
+    }
+
+    @keyframes sk {
+      0% {
+        background-position: 200% 0;
+      }
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+    .sk-line {
+      height: 14px;
+      margin-bottom: var(--space-8);
+    }
+
+    .sk-line--short {
+      width: 40%;
+    }
+
+    /* 空态 / 错态 */
+    .state-block {
+      padding: var(--space-24) var(--space-20);
+      text-align: center;
+    }
+
+    .state-icon {
+      font-size: 48px;
+      line-height: 1;
+      margin-bottom: var(--space-12);
+      opacity: 0.85;
+    }
+
+    .state-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-text-1);
+      margin-bottom: var(--space-8);
+    }
+
+    .state-desc {
+      font-size: 13px;
+      color: var(--color-text-3);
+      margin-bottom: var(--space-16);
+      line-height: 1.6;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0 var(--space-20);
+      background: var(--color-primary-6);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-primary:active {
+      background: var(--color-primary-7);
+    }
+
+    .btn-text {
+      background: transparent;
+      color: var(--color-primary-6);
+      border: 1px solid var(--color-primary-6);
+    }
+
+    /* P02 详情顶区 */
+    .detail-hero {
+      background: var(--color-bg);
+      padding: var(--space-16);
+      border-bottom: 1px solid var(--color-border-1);
+    }
+
+    .detail-plate-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-12);
+      margin-bottom: var(--space-12);
+    }
+
+    .detail-plate-row .plate {
+      font-size: 22px;
+    }
+
+    .detail-meta {
+      font-size: 13px;
+      color: var(--color-text-2);
+    }
+
+    .detail-meta div + div {
+      margin-top: var(--space-8);
+    }
+
+    /* C03 关联订单 */
+    .section {
+      background: var(--color-bg);
+      margin-top: var(--space-8);
+      padding: var(--space-16);
+      border-top: 1px solid var(--color-border-1);
+      border-bottom: 1px solid var(--color-border-1);
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-text-1);
+      margin-bottom: var(--space-12);
+    }
+
+    .order-row {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      padding: var(--space-12);
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-8);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .order-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .order-row:active {
+      background: var(--color-fill-1);
+      border-color: var(--color-primary-5);
+    }
+
+    .order-id {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-text-1);
+    }
+
+    .order-sub {
+      font-size: 12px;
+      color: var(--color-text-3);
+    }
+
+    .order-action {
+      font-size: 12px;
+      color: var(--color-primary-6);
+      margin-top: var(--space-4);
+    }
+
+    .empty-orders {
+      padding: var(--space-16);
+      background: var(--color-fill-1);
+      border-radius: var(--radius-md);
+      border: 1px dashed var(--color-border-2);
+    }
+
+    .empty-orders p {
+      font-size: 13px;
+      color: var(--color-text-2);
+      line-height: 1.6;
+    }
+
+    /* C02 时间线 */
+    .timeline {
+      position: relative;
+      padding-left: var(--space-20);
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 6px;
+      bottom: 6px;
+      width: 2px;
+      background: var(--color-border-1);
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-bottom: var(--space-20);
+    }
+
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -14px;
+      top: 4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--color-primary-6);
+      border: 2px solid var(--color-bg);
+      box-shadow: 0 0 0 1px var(--color-border-1);
+    }
+
+    .timeline-time {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-1);
+      margin-bottom: var(--space-4);
+    }
+
+    .timeline-loc {
+      font-size: 13px;
+      color: var(--color-text-2);
+    }
+
+    .timeline-device {
+      font-size: 12px;
+      color: var(--color-text-3);
+      margin-top: var(--space-4);
+    }
+
+    .timeline-row {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-12);
+      flex-wrap: wrap;
+    }
+
+    .timeline-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* 每条轨迹点抓拍缩略图（可点击预览 M01） */
+    .timeline-capture {
+      flex-shrink: 0;
+      width: 88px;
+      height: 66px;
+      min-width: 88px;
+      min-height: 66px;
+      padding: 0;
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--color-fill-2);
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    .timeline-capture:active {
+      border-color: var(--color-primary-6);
+      opacity: 0.92;
+    }
+
+    .timeline-capture img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* M01 抓拍预览层（相对手机框定位） */
+    .capture-preview {
+      position: absolute;
+      inset: 0;
+      z-index: 400;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-16);
+    }
+
+    .capture-preview.hidden {
+      display: none !important;
+    }
+
+    .capture-preview__mask {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+    }
+
+    .capture-preview__content {
+      position: relative;
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.35);
+    }
+
+    .capture-preview__img {
+      display: block;
+      max-width: 100%;
+      max-height: min(72vh, 520px);
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      background: #000;
+    }
+
+    .capture-preview__close {
+      position: absolute;
+      top: var(--space-8);
+      right: var(--space-8);
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .capture-preview__close:active {
+      background: rgba(0, 0, 0, 0.7);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 100px;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(0, 0, 0, 0.78);
+      color: #fff;
+      padding: var(--space-12) var(--space-20);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s;
+      z-index: 200;
+      max-width: 85%;
+      text-align: center;
+    }
+
+    .toast.is-visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* 原型菜单 FAB：位于手机框外右侧（大屏）；小屏回退为 fixed 见 @media） */
+    .proto-fab {
+      position: absolute;
+      left: calc(100% + 12px);
+      bottom: 28px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--color-primary-6);
+      color: #fff;
+      border: none;
+      box-shadow: 0 4px 12px rgba(22, 93, 255, 0.35);
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .proto-fab:active {
+      background: var(--color-primary-7);
+    }
+
+    @media (max-width: 480px) {
+      .device-shell {
+        min-height: calc(100vh - 100px);
+        border-radius: 0;
+        box-shadow: 0 0 0 1px var(--color-border-1);
+      }
+
+      .proto-fab {
+        position: fixed;
+        left: auto;
+        right: 12px;
+        bottom: calc(16px + var(--safe-bottom));
+      }
+    }
+
+    .proto-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 310;
+    }
+
+    .proto-mask.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .proto-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: min(280px, 86vw);
+      height: 100%;
+      background: var(--color-bg);
+      box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+      transform: translateX(100%);
+      transition: transform 0.28s ease;
+      z-index: 320;
+      padding: calc(var(--safe-top) + var(--space-16)) var(--space-16) var(--space-24);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .proto-drawer.is-open {
+      transform: translateX(0);
+    }
+
+    .proto-drawer h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: var(--space-8);
+      color: var(--color-text-1);
+    }
+
+    .proto-drawer-sub {
+      font-size: 12px;
+      color: var(--color-text-3);
+      margin-bottom: var(--space-12);
+      line-height: 1.5;
+    }
+
+    .proto-section-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-text-2);
+      margin: var(--space-16) 0 var(--space-8);
+    }
+
+    .proto-section-label:first-of-type {
+      margin-top: 0;
+    }
+
+    /* P01 列表状态：与示意图一致的胶囊按钮组 */
+    .proto-pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-8);
+      margin-bottom: var(--space-4);
+    }
+
+    .proto-pill {
+      font-size: 12px;
+      padding: 6px var(--space-12);
+      border-radius: 999px;
+      border: 1px solid var(--color-border-1);
+      background: var(--color-bg);
+      color: var(--color-text-2);
+      cursor: pointer;
+      line-height: 1.4;
+    }
+
+    .proto-pill.is-active {
+      border-color: var(--color-primary-6);
+      color: var(--color-primary-6);
+      background: rgba(22, 93, 255, 0.08);
+      font-weight: 500;
+    }
+
+    .proto-simulate-btn {
+      display: block;
+      width: 100%;
+      margin-top: var(--space-8);
+      padding: var(--space-8) var(--space-12);
+      font-size: 13px;
+      color: var(--color-primary-6);
+      background: rgba(22, 93, 255, 0.06);
+      border: 1px solid rgba(22, 93, 255, 0.35);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .proto-simulate-btn:active {
+      background: rgba(22, 93, 255, 0.12);
+    }
+
+    .proto-menu-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: var(--space-12) var(--space-12);
+      border: 1px solid var(--color-border-1);
+      border-radius: var(--radius-md);
+      background: var(--color-fill-1);
+      margin-bottom: var(--space-8);
+      font-size: 14px;
+      color: var(--color-text-1);
+      cursor: pointer;
+    }
+
+    .proto-menu-item.is-active {
+      border-color: var(--color-primary-6);
+      background: rgba(22, 93, 255, 0.06);
+      color: var(--color-primary-6);
+      font-weight: 600;
+    }
+
+    .proto-note {
+      margin-top: auto;
+      font-size: 11px;
+      color: var(--color-text-3);
+      line-height: 1.5;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="prototype-layout">
+    <div class="prototype-stage">
+      <div class="device-shell">
+    <!-- P01 轨迹列表 -->
+    <div id="page-list" class="page-frame is-active">
+      <div class="status-bar" aria-hidden="true"></div>
+      <header class="nav-bar">
+        <div class="nav-bar-inner">
+          <div class="nav-side nav-side--left">
+            <span class="btn-back btn-back--hidden" aria-hidden="true">‹</span>
+          </div>
+          <div class="nav-title-wrap">
+            <h1 class="nav-title">透明车间</h1>
+          </div>
+          <div class="nav-side nav-side--right">
+            <div class="capsule-placeholder" aria-hidden="true"></div>
+          </div>
+        </div>
+      </header>
+
+      <main class="page-scroll" id="list-scroll">
+        <div class="filter-panel">
+          <div class="filter-row">
+            <span class="filter-label">门店</span>
+            <div class="filter-control">
+              <select class="input-like" aria-label="门店">
+                <option>连云港旗舰店（当前）</option>
+                <option>连云分店</option>
+              </select>
+            </div>
+          </div>
+          <div class="filter-row">
+            <span class="filter-label">日期</span>
+            <div class="filter-control">
+              <input class="input-like" type="date" value="2026-05-07" max="2026-05-07" aria-label="判定日" />
+            </div>
+          </div>
+          <div class="filter-row">
+            <span class="filter-label">车牌号</span>
+            <div class="filter-control">
+              <input class="input-like" type="text" placeholder="搜索车牌" aria-label="车牌号" />
+            </div>
+          </div>
+          <div class="filter-row">
+            <span class="filter-label">筛选</span>
+            <div class="filter-control">
+              <div class="toggle-row">
+                <span class="toggle-label">仅看异常车辆</span>
+                <div class="switch" id="switch-abnormal" role="switch" aria-checked="false" tabindex="0">
+                  <span class="switch-knob"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <section id="list-content-default" class="card-list">
+          <article class="vehicle-card" data-go-detail="normal-multi">
+            <div class="vehicle-card__head">
+              <span class="plate">苏G·D88518</span>
+              <span class="tag-normal-hint" title="已识别且存在覆盖判定日的匹配订单">已关联订单</span>
+            </div>
+            <div class="meta-grid">
+              <div class="meta-line"><strong>首次/末次</strong><span>05-07 08:32 — 05-07 11:05</span></div>
+              <div class="meta-line"><strong>位置摘要</strong><span>大门 → 接待区 → 工位A</span></div>
+              <div class="meta-line"><strong>关联客户</strong><span>王**</span></div>
+            </div>
+          </article>
+
+          <article class="vehicle-card" data-go-detail="abnormal">
+            <div class="vehicle-card__head">
+              <span class="plate">苏G·C10291</span>
+              <span class="tag-abnormal">无匹配订单</span>
+            </div>
+            <div class="meta-grid">
+              <div class="meta-line"><strong>首次/末次</strong><span>05-07 09:10 — 05-07 09:48</span></div>
+              <div class="meta-line"><strong>位置摘要</strong><span>大门 → 洗车区</span></div>
+              <div class="meta-line"><strong>关联客户</strong><span>—</span></div>
+            </div>
+          </article>
+
+          <article class="vehicle-card" data-go-detail="unknown">
+            <div class="vehicle-card__head">
+              <span class="plate plate--unknown">未识别</span>
+              <span class="tag-abnormal">未识别车牌</span>
+            </div>
+            <div class="meta-grid">
+              <div class="meta-line"><strong>首次/末次</strong><span>05-07 14:22 — 05-07 14:35</span></div>
+              <div class="meta-line"><strong>位置摘要</strong><span>大门</span></div>
+              <div class="meta-line"><strong>关联客户</strong><span>—</span></div>
+            </div>
+          </article>
+        </section>
+
+        <section id="list-content-loading" class="card-list hidden">
+          <div class="skeleton-card">
+            <div class="sk sk-line" style="width: 45%; margin-bottom: 16px;"></div>
+            <div class="sk sk-line"></div>
+            <div class="sk sk-line sk-line--short"></div>
+            <div class="sk sk-line"></div>
+          </div>
+          <div class="skeleton-card">
+            <div class="sk sk-line" style="width: 40%; margin-bottom: 16px;"></div>
+            <div class="sk sk-line"></div>
+            <div class="sk sk-line"></div>
+          </div>
+        </section>
+
+        <section id="list-content-empty" class="hidden">
+          <div class="state-block">
+            <div class="state-icon" aria-hidden="true">📭</div>
+            <p class="state-title">暂无轨迹数据</p>
+            <p class="state-desc">当前判定日门店尚无到店轨迹，或筛选条件下无结果。可更换日期或关闭「仅看异常」后重试。</p>
+          </div>
+        </section>
+
+        <section id="list-content-error" class="hidden">
+          <div class="state-block">
+            <div class="state-icon" aria-hidden="true">📶</div>
+            <p class="state-title">网络异常</p>
+            <p class="state-desc">暂时无法获取轨迹列表，请检查网络后重试。下拉刷新或点击按钮重新加载。</p>
+            <button type="button" class="btn-primary" id="btn-retry-list">重新加载</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- P02 车辆轨迹详情（多订单示例） -->
+    <div id="page-detail-multi" class="page-frame">
+      <div class="status-bar" aria-hidden="true"></div>
+      <header class="nav-bar">
+        <div class="nav-bar-inner">
+          <div class="nav-side nav-side--left">
+            <button type="button" class="btn-back" aria-label="返回">‹</button>
+          </div>
+          <div class="nav-title-wrap">
+            <h1 class="nav-title">车辆轨迹</h1>
+          </div>
+          <div class="nav-side nav-side--right">
+            <div class="capsule-placeholder"></div>
+          </div>
+        </div>
+      </header>
+
+      <main class="page-scroll">
+        <div class="detail-hero">
+          <div class="detail-plate-row">
+            <span class="plate">苏G·D88518</span>
+            <span class="tag-normal-hint">已关联订单</span>
+          </div>
+          <div class="detail-meta">
+            <div><strong style="color: var(--color-text-3); font-weight: 500;">关联客户：</strong>王**</div>
+            <div><strong style="color: var(--color-text-3); font-weight: 500;">首次/末次：</strong>05-07 08:32 — 05-07 11:05</div>
+          </div>
+        </div>
+
+        <section class="section">
+          <h2 class="section-title">关联订单</h2>
+          <div class="order-row" data-toast="跳转订单详情 order-001">
+            <span class="order-id">订单 SO202605070001</span>
+            <span class="order-sub">小保养套餐 · 05-07 08:00 — 05-07 12:00</span>
+            <span class="order-action">查看订单详情 ›</span>
+          </div>
+          <div class="order-row" data-toast="跳转订单详情 order-002">
+            <span class="order-id">订单 SO202605070088</span>
+            <span class="order-sub">更换刹车片 · 05-07 10:30 — 05-07 18:00</span>
+            <span class="order-action">查看订单详情 ›</span>
+          </div>
+        </section>
+
+        <section class="section" style="margin-top: 0; border-top: none;">
+          <h2 class="section-title">轨迹时间线</h2>
+          <div class="timeline">
+            <div class="timeline-item">
+              <span class="timeline-dot"></span>
+              <div class="timeline-row">
+                <div class="timeline-text">
+                  <div class="timeline-time">08:32:06</div>
+                  <div class="timeline-loc">监测位置：大门</div>
+                  <div class="timeline-device">设备：入口摄像头-01</div>
+                </div>
+                <button type="button" class="timeline-capture js-capture-preview" aria-label="查看抓拍图" data-preview-src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='360'%3E%3Crect fill='%230E42D2' width='480' height='360'/%3E%3Ctext x='240' y='188' text-anchor='middle' fill='white' font-size='18' font-family='system-ui,sans-serif'%3E08:32%20%E5%A4%A7%E9%97%A8%3C/text%3E%3C/svg%3E">
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='176' height='132'%3E%3Crect fill='%23E8F3FF' width='176' height='132'/%3E%3Ctext x='88' y='72' text-anchor='middle' fill='%23165DFF' font-size='12' font-family='system-ui,sans-serif'%3E%E6%8A%93%E6%8B%8D%3C/text%3E%3C/svg%3E" width="88" height="66" alt="" />
+                </button>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-dot"></span>
+              <div class="timeline-row">
+                <div class="timeline-text">
+                  <div class="timeline-time">08:45:21</div>
+                  <div class="timeline-loc">监测位置：接待区</div>
+                  <div class="timeline-device">设备：接待顶摄-A</div>
+                </div>
+                <button type="button" class="timeline-capture js-capture-preview" aria-label="查看抓拍图" data-preview-src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='360'%3E%3Crect fill='%23165DFF' width='480' height='360'/%3E%3Ctext x='240' y='188' text-anchor='middle' fill='white' font-size='18' font-family='system-ui,sans-serif'%3E08:45%20%E6%8E%A5%E5%BE%85%E5%8C%BA%3C/text%3E%3C/svg%3E">
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='176' height='132'%3E%3Crect fill='%23F2F3F5' width='176' height='132'/%3E%3Ctext x='88' y='72' text-anchor='middle' fill='%234E5969' font-size='12' font-family='system-ui,sans-serif'%3E%E6%8A%93%E6%8B%8D%3C/text%3E%3C/svg%3E" width="88" height="66" alt="" />
+                </button>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-dot"></span>
+              <div class="timeline-row">
+                <div class="timeline-text">
+                  <div class="timeline-time">09:12:00</div>
+                  <div class="timeline-loc">监测位置：工位A</div>
+                  <div class="timeline-device">设备：工位球机-03</div>
+                </div>
+                <button type="button" class="timeline-capture js-capture-preview" aria-label="查看抓拍图" data-preview-src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='360'%3E%3Crect fill='%231D2129' width='480' height='360'/%3E%3Ctext x='240' y='188' text-anchor='middle' fill='%23F7F8FA' font-size='18' font-family='system-ui,sans-serif'%3E09:12%20%E5%B7%A5%E4%BD%8DA%3C/text%3E%3C/svg%3E">
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='176' height='132'%3E%3Crect fill='%23E5E6EB' width='176' height='132'/%3E%3Ctext x='88' y='72' text-anchor='middle' fill='%231D2129' font-size='12' font-family='system-ui,sans-serif'%3E%E6%8A%93%E6%8B%8D%3C/text%3E%3C/svg%3E" width="88" height="66" alt="" />
+                </button>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-dot"></span>
+              <div class="timeline-row">
+                <div class="timeline-text">
+                  <div class="timeline-time">11:05:18</div>
+                  <div class="timeline-loc">监测位置：大门</div>
+                  <div class="timeline-device">设备：入口摄像头-01</div>
+                </div>
+                <button type="button" class="timeline-capture js-capture-preview" aria-label="查看抓拍图" data-preview-src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='360'%3E%3Crect fill='%2300B42A' width='480' height='360'/%3E%3Ctext x='240' y='188' text-anchor='middle' fill='white' font-size='18' font-family='system-ui,sans-serif'%3E11:05%20%E5%A4%A7%E9%97%A8%3C/text%3E%3C/svg%3E">
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='176' height='132'%3E%3Crect fill='%23F7F8FA' width='176' height='132'/%3E%3Ctext x='88' y='72' text-anchor='middle' fill='%2300B42A' font-size='12' font-family='system-ui,sans-serif'%3E%E6%8A%93%E6%8B%8D%3C/text%3E%3C/svg%3E" width="88" height="66" alt="" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- P02 无匹配订单异常态 -->
+    <div id="page-detail-abnormal" class="page-frame">
+      <div class="status-bar" aria-hidden="true"></div>
+      <header class="nav-bar">
+        <div class="nav-bar-inner">
+          <div class="nav-side nav-side--left">
+            <button type="button" class="btn-back" aria-label="返回">‹</button>
+          </div>
+          <div class="nav-title-wrap">
+            <h1 class="nav-title">车辆轨迹</h1>
+          </div>
+          <div class="nav-side nav-side--right">
+            <div class="capsule-placeholder"></div>
+          </div>
+        </div>
+      </header>
+
+      <main class="page-scroll">
+        <div class="detail-hero">
+          <div class="detail-plate-row">
+            <span class="plate">苏G·C10291</span>
+            <span class="tag-abnormal">无匹配订单</span>
+          </div>
+          <div class="detail-meta">
+            <div><strong style="color: var(--color-text-3); font-weight: 500;">关联客户：</strong>—</div>
+            <div><strong style="color: var(--color-text-3); font-weight: 500;">首次/末次：</strong>05-07 09:10 — 05-07 09:48</div>
+          </div>
+        </div>
+
+        <section class="section">
+          <h2 class="section-title">关联订单</h2>
+          <div class="empty-orders">
+            <p>暂无关联订单。</p>
+          </div>
+        </section>
+
+        <section class="section" style="margin-top: 0; border-top: none;">
+          <h2 class="section-title">轨迹时间线</h2>
+          <div class="timeline">
+            <div class="timeline-item">
+              <span class="timeline-dot"></span>
+              <div class="timeline-row">
+                <div class="timeline-text">
+                  <div class="timeline-time">09:10:02</div>
+                  <div class="timeline-loc">监测位置：大门</div>
+                  <div class="timeline-device">设备：入口摄像头-01</div>
+                </div>
+                <button type="button" class="timeline-capture js-capture-preview" aria-label="查看抓拍图" data-preview-src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='360'%3E%3Crect fill='%23F53F3F' width='480' height='360'/%3E%3Ctext x='240' y='188' text-anchor='middle' fill='white' font-size='18' font-family='system-ui,sans-serif'%3E09:10%20%E5%A4%A7%E9%97%A8%3C/text%3E%3C/svg%3E">
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='176' height='132'%3E%3Crect fill='%23FFF3F0' width='176' height='132'/%3E%3Ctext x='88' y='72' text-anchor='middle' fill='%23F53F3F' font-size='12' font-family='system-ui,sans-serif'%3E%E6%8A%93%E6%8B%8D%3C/text%3E%3C/svg%3E" width="88" height="66" alt="" />
+                </button>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-dot"></span>
+              <div class="timeline-row">
+                <div class="timeline-text">
+                  <div class="timeline-time">09:48:55</div>
+                  <div class="timeline-loc">监测位置：洗车区</div>
+                  <div class="timeline-device">设备：洗车线-侧摄</div>
+                </div>
+                <button type="button" class="timeline-capture js-capture-preview" aria-label="查看抓拍图" data-preview-src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='360'%3E%3Crect fill='%23FF7D00' width='480' height='360'/%3E%3Ctext x='240' y='188' text-anchor='middle' fill='white' font-size='18' font-family='system-ui,sans-serif'%3E09:48%20%E6%B4%97%E8%BD%A6%E5%8C%BA%3C/text%3E%3C/svg%3E">
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='176' height='132'%3E%3Crect fill='%23FFF7E8' width='176' height='132'/%3E%3Ctext x='88' y='72' text-anchor='middle' fill='%23FF7D00' font-size='12' font-family='system-ui,sans-serif'%3E%E6%8A%93%E6%8B%8D%3C/text%3E%3C/svg%3E" width="88" height="66" alt="" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- P02 未识别车牌 -->
+    <div id="page-detail-unknown" class="page-frame">
+      <div class="status-bar" aria-hidden="true"></div>
+      <header class="nav-bar">
+        <div class="nav-bar-inner">
+          <div class="nav-side nav-side--left">
+            <button type="button" class="btn-back" aria-label="返回">‹</button>
+          </div>
+          <div class="nav-title-wrap">
+            <h1 class="nav-title">车辆轨迹</h1>
+          </div>
+          <div class="nav-side nav-side--right">
+            <div class="capsule-placeholder"></div>
+          </div>
+        </div>
+      </header>
+
+      <main class="page-scroll">
+        <div class="detail-hero">
+          <div class="detail-plate-row">
+            <span class="plate plate--unknown">未识别</span>
+            <span class="tag-abnormal">未识别车牌</span>
+          </div>
+          <div class="detail-meta">
+            <div><strong style="color: var(--color-text-3); font-weight: 500;">关联客户：</strong>—</div>
+            <div><strong style="color: var(--color-text-3); font-weight: 500;">首次/末次：</strong>05-07 14:22 — 05-07 14:35</div>
+          </div>
+        </div>
+
+        <section class="section">
+          <h2 class="section-title">关联订单</h2>
+          <div class="empty-orders">
+            <p>暂无关联订单。</p>
+          </div>
+        </section>
+
+        <section class="section" style="margin-top: 0; border-top: none;">
+          <h2 class="section-title">轨迹时间线</h2>
+          <div class="timeline">
+            <div class="timeline-item">
+              <span class="timeline-dot"></span>
+              <div class="timeline-row">
+                <div class="timeline-text">
+                  <div class="timeline-time">14:22:41</div>
+                  <div class="timeline-loc">监测位置：大门</div>
+                  <div class="timeline-device">设备：入口摄像头-01</div>
+                </div>
+                <button type="button" class="timeline-capture js-capture-preview" aria-label="查看抓拍图" data-preview-src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='360'%3E%3Crect fill='%2386909C' width='480' height='360'/%3E%3Ctext x='240' y='188' text-anchor='middle' fill='white' font-size='18' font-family='system-ui,sans-serif'%3E14:22%20%E6%9C%AA%E8%AF%86%E5%88%AB%3C/text%3E%3C/svg%3E">
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='176' height='132'%3E%3Crect fill='%23F2F3F5' width='176' height='132'/%3E%3Ctext x='88' y='72' text-anchor='middle' fill='%2386909C' font-size='12' font-family='system-ui,sans-serif'%3E%E6%8A%93%E6%8B%8D%3C/text%3E%3C/svg%3E" width="88" height="66" alt="" />
+                </button>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-dot"></span>
+              <div class="timeline-row">
+                <div class="timeline-text">
+                  <div class="timeline-time">14:35:09</div>
+                  <div class="timeline-loc">监测位置：大门</div>
+                  <div class="timeline-device">设备：入口摄像头-01</div>
+                </div>
+                <button type="button" class="timeline-capture js-capture-preview" aria-label="查看抓拍图" data-preview-src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='360'%3E%3Crect fill='%234E5969' width='480' height='360'/%3E%3Ctext x='240' y='188' text-anchor='middle' fill='white' font-size='18' font-family='system-ui,sans-serif'%3E14:35%20%E5%A4%A7%E9%97%A8%3C/text%3E%3C/svg%3E">
+                  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='176' height='132'%3E%3Crect fill='%23E5E6EB' width='176' height='132'/%3E%3Ctext x='88' y='72' text-anchor='middle' fill='%234E5969' font-size='12' font-family='system-ui,sans-serif'%3E%E6%8A%93%E6%8B%8D%3C/text%3E%3C/svg%3E" width="88" height="66" alt="" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- M01 抓拍预览（业务弹层，位于手机框内；正式实现推荐 wx.previewImage） -->
+    <div id="capture-preview" class="capture-preview hidden" aria-hidden="true">
+      <div class="capture-preview__mask" id="capture-preview-mask"></div>
+      <div class="capture-preview__content" role="dialog" aria-modal="true" aria-label="抓拍预览">
+        <button type="button" class="capture-preview__close" id="capture-preview-close" aria-label="关闭">×</button>
+        <img id="capture-preview-img" class="capture-preview__img" src="" alt="抓拍预览" />
+      </div>
+    </div>
+      </div>
+      <button type="button" class="proto-fab" id="proto-fab" aria-label="打开原型控制菜单" title="原型控制">☰</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <div class="proto-mask" id="proto-mask"></div>
+  <aside class="proto-drawer" id="proto-drawer" aria-hidden="true">
+    <h3>原型控制</h3>
+    <p class="proto-drawer-sub">从右侧滑出；与手机内业务界面分离，仅用于评审与演示。</p>
+
+    <div class="proto-section-label">P01 列表状态</div>
+    <div class="proto-pill-row" role="tablist" aria-label="P01 列表状态切换">
+      <button type="button" class="proto-pill is-active" data-list-state="default">默认列表</button>
+      <button type="button" class="proto-pill" data-list-state="loading">加载态</button>
+      <button type="button" class="proto-pill" data-list-state="empty">空态</button>
+      <button type="button" class="proto-pill" data-list-state="error">错误态</button>
+    </div>
+
+    <div class="proto-section-label">页面</div>
+    <button type="button" class="proto-menu-item is-active" data-target="page-list">P01 轨迹列表</button>
+    <button type="button" class="proto-menu-item" data-target="page-detail-multi">P02 详情 · 多订单</button>
+    <button type="button" class="proto-menu-item" data-target="page-detail-abnormal">P02 详情 · 无匹配订单</button>
+    <button type="button" class="proto-menu-item" data-target="page-detail-unknown">P02 详情 · 未识别</button>
+
+    <div class="proto-section-label">演示操作</div>
+    <button type="button" class="proto-simulate-btn" id="btn-simulate-pull-refresh">模拟下拉刷新</button>
+    <p class="proto-note" style="margin-top: 12px;">正式小程序中为微信原生下拉刷新；此处按钮仅模拟「重新拉取并重算订单匹配」的反馈。</p>
+    <p class="proto-note">视觉遵循 DESIGN_ARCO；结构遵循微信小程序页面结构约束规范。</p>
+  </aside>
+
+  <script>
+    (function () {
+      var toastEl = document.getElementById("toast");
+      var toastTimer;
+      function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add("is-visible");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+          toastEl.classList.remove("is-visible");
+        }, 2200);
+      }
+
+      var pages = ["page-list", "page-detail-multi", "page-detail-abnormal", "page-detail-unknown"];
+      function showPage(id) {
+        pages.forEach(function (pid) {
+          var el = document.getElementById(pid);
+          if (el) el.classList.toggle("is-active", pid === id);
+        });
+        document.querySelectorAll(".proto-menu-item[data-target]").forEach(function (btn) {
+          btn.classList.toggle("is-active", btn.getAttribute("data-target") === id);
+        });
+      }
+
+      function applyListState(st) {
+        document.getElementById("list-content-default").classList.toggle("hidden", st !== "default");
+        document.getElementById("list-content-loading").classList.toggle("hidden", st !== "loading");
+        document.getElementById("list-content-empty").classList.toggle("hidden", st !== "empty");
+        document.getElementById("list-content-error").classList.toggle("hidden", st !== "error");
+        document.querySelectorAll(".proto-pill[data-list-state]").forEach(function (b) {
+          b.classList.toggle("is-active", b.getAttribute("data-list-state") === st);
+        });
+      }
+
+      function closeProtoDrawer() {
+        document.getElementById("proto-mask").classList.remove("is-open");
+        document.getElementById("proto-drawer").classList.remove("is-open");
+        document.getElementById("proto-drawer").setAttribute("aria-hidden", "true");
+      }
+
+      document.getElementById("proto-fab").addEventListener("click", function () {
+        document.getElementById("proto-mask").classList.add("is-open");
+        document.getElementById("proto-drawer").classList.add("is-open");
+        document.getElementById("proto-drawer").setAttribute("aria-hidden", "false");
+      });
+      document.getElementById("proto-mask").addEventListener("click", closeProtoDrawer);
+      document.querySelectorAll(".proto-menu-item[data-target]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          showPage(btn.getAttribute("data-target"));
+          closeProtoDrawer();
+        });
+      });
+
+      document.querySelectorAll(".proto-pill[data-list-state]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var st = btn.getAttribute("data-list-state");
+          showPage("page-list");
+          applyListState(st);
+          closeProtoDrawer();
+        });
+      });
+
+      document.getElementById("btn-simulate-pull-refresh").addEventListener("click", function () {
+        showToast("已模拟下拉刷新：列表与异常标记已按最新订单重算");
+        closeProtoDrawer();
+      });
+
+      function bindBack() {
+        document.querySelectorAll("#page-detail-multi .btn-back, #page-detail-abnormal .btn-back, #page-detail-unknown .btn-back").forEach(function (b) {
+          b.addEventListener("click", function () {
+            showPage("page-list");
+          });
+        });
+      }
+      bindBack();
+
+      var mapDetail = {
+        "normal-multi": "page-detail-multi",
+        abnormal: "page-detail-abnormal",
+        unknown: "page-detail-unknown",
+      };
+      document.querySelectorAll(".vehicle-card[data-go-detail]").forEach(function (card) {
+        card.addEventListener("click", function () {
+          var key = card.getAttribute("data-go-detail");
+          if (mapDetail[key]) showPage(mapDetail[key]);
+        });
+      });
+
+      var switchEl = document.getElementById("switch-abnormal");
+      switchEl.addEventListener("click", function () {
+        switchEl.classList.toggle("is-on");
+        var on = switchEl.classList.contains("is-on");
+        switchEl.setAttribute("aria-checked", on ? "true" : "false");
+        showToast(on ? "已开启：仅看异常车辆（含未识别、无匹配订单）" : "已关闭：展示全部车辆");
+      });
+      switchEl.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          switchEl.click();
+        }
+      });
+
+      document.getElementById("btn-retry-list").addEventListener("click", function () {
+        showToast("重试成功（演示）：已切换回默认列表");
+        showPage("page-list");
+        applyListState("default");
+      });
+
+      document.querySelectorAll(".order-row[data-toast]").forEach(function (row) {
+        row.addEventListener("click", function () {
+          showToast(row.getAttribute("data-toast"));
+        });
+      });
+
+      /* M01 抓拍预览（HTML 原型用遮罩层；正式小程序推荐 wx.previewImage） */
+      (function initCapturePreview() {
+        var root = document.getElementById("capture-preview");
+        var img = document.getElementById("capture-preview-img");
+        var closeBtn = document.getElementById("capture-preview-close");
+        var mask = document.getElementById("capture-preview-mask");
+        if (!root || !img || !closeBtn || !mask) return;
+
+        function openPreview(src) {
+          img.src = src;
+          root.classList.remove("hidden");
+          root.setAttribute("aria-hidden", "false");
+        }
+
+        function closePreview() {
+          root.classList.add("hidden");
+          root.setAttribute("aria-hidden", "true");
+          img.removeAttribute("src");
+        }
+
+        document.querySelectorAll(".js-capture-preview").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var src = btn.getAttribute("data-preview-src");
+            if (src) openPreview(src);
+          });
+        });
+        closeBtn.addEventListener("click", closePreview);
+        mask.addEventListener("click", closePreview);
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && !root.classList.contains("hidden")) closePreview();
+        });
+      })();
+    })();
+  </script>
+</body>
+</html>

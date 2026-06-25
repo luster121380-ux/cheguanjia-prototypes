@@ -1,0 +1,992 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>小程序客户端布局管理配置 · 后台管理端</title>
+    <style>
+      :root {
+        --color-primary-6: #165dff;
+        --color-primary-5: #4080ff;
+        --color-text-1: #1d2129;
+        --color-text-2: #4e5969;
+        --color-text-3: #86909c;
+        --color-border-1: #e5e6eb;
+        --color-fill-1: #f7f8fa;
+        --color-fill-2: #f2f3f5;
+        --color-bg-1: #ffffff;
+        --color-success-6: #00b42a;
+        --color-danger-6: #f53f3f;
+        --shadow-card: 0 1px 3px rgba(29, 33, 41, 0.06);
+        --shadow-popup: 0 8px 24px rgba(29, 33, 41, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--color-text-1);
+        background: var(--color-fill-1);
+        font-family: Inter, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1.57;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      .layout-root {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--color-fill-1);
+      }
+
+      .layout-header {
+        height: 56px;
+        flex-shrink: 0;
+        background: var(--color-bg-1);
+        border-bottom: 1px solid var(--color-border-1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px 0 16px;
+        z-index: 20;
+        box-shadow: var(--shadow-card);
+      }
+
+      .header-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        font-size: 16px;
+      }
+
+      .header-brand-mark {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--color-primary-6), #00b2ff);
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .header-meta {
+        font-size: 13px;
+        color: var(--color-text-2);
+        padding: 6px 10px;
+        border-radius: 4px;
+        background: var(--color-fill-2);
+        margin-right: 4px;
+      }
+
+      .icon-btn {
+        width: 36px;
+        height: 36px;
+        border: 1px solid var(--color-border-1);
+        border-radius: 4px;
+        background: var(--color-bg-1);
+        color: var(--color-text-2);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+      }
+
+      .icon-btn:hover {
+        color: var(--color-primary-6);
+        border-color: var(--color-primary-5);
+        background: rgba(22, 93, 255, 0.06);
+      }
+
+      .icon-wrap {
+        position: relative;
+        display: inline-flex;
+      }
+
+      .badge-dot {
+        position: absolute;
+        margin: -18px 0 0 10px;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 4px;
+        font-size: 10px;
+        line-height: 16px;
+        text-align: center;
+        background: var(--color-danger-6);
+        color: #fff;
+        border-radius: 8px;
+      }
+
+      .layout-body {
+        flex: 1;
+        display: flex;
+        min-height: 0;
+        min-width: 0;
+      }
+
+      .sidebar {
+        width: 220px;
+        flex-shrink: 0;
+        background: #f5f7fa;
+        color: var(--color-text-2);
+        border-right: 1px solid var(--color-border-1);
+        overflow-y: auto;
+        padding: 8px 0 20px;
+      }
+
+      .nav-group {
+        margin-bottom: 2px;
+      }
+
+      .nav-l1 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        font-size: 13px;
+        cursor: pointer;
+        user-select: none;
+        color: var(--color-text-2);
+        border: 0;
+        width: 100%;
+        background: transparent;
+        text-align: left;
+        font-family: inherit;
+      }
+
+      .nav-l1:hover {
+        background: #eceff1;
+        color: var(--color-text-1);
+      }
+
+      .nav-l1 .chev {
+        margin-left: auto;
+        font-size: 12px;
+        opacity: 0.55;
+        transition: transform 0.15s;
+      }
+
+      .nav-group:not(.collapsed) .chev {
+        transform: rotate(90deg);
+      }
+
+      .nav-group.collapsed .nav-l2-list {
+        display: none;
+      }
+
+      .nav-icon {
+        width: 20px;
+        text-align: center;
+      }
+
+      .nav-l2-list {
+        padding-bottom: 4px;
+      }
+
+      .nav-l2 {
+        padding: 8px 14px 8px 44px;
+        font-size: 12px;
+        cursor: pointer;
+        color: var(--color-text-3);
+        border: 0;
+        width: 100%;
+        background: transparent;
+        text-align: left;
+        font-family: inherit;
+        display: block;
+      }
+
+      .nav-l2:hover {
+        color: var(--color-text-1);
+        background: #eceff1;
+      }
+
+      .nav-l2.current {
+        color: var(--color-primary-6);
+        font-weight: 600;
+        background: rgba(22, 93, 255, 0.08);
+        border-right: 3px solid var(--color-primary-6);
+      }
+
+      .main {
+        flex: 1;
+        min-width: 0;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        background: var(--color-fill-1);
+      }
+
+      .main-scroll {
+        flex: 1;
+        overflow: auto;
+        padding: 0 20px 24px;
+        min-width: 0;
+        min-height: 0;
+      }
+
+      .tabs-bar {
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+        padding-top: 10px;
+        border-bottom: 1px solid var(--color-border-1);
+        background: var(--color-fill-1);
+        position: sticky;
+        top: 0;
+        z-index: 5;
+      }
+
+      .tab-item {
+        padding: 8px 14px 10px;
+        font-size: 13px;
+        background: var(--color-fill-2);
+        color: var(--color-text-3);
+        border-radius: 6px 6px 0 0;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 0;
+        font-family: inherit;
+      }
+
+      .tab-item.active {
+        background: var(--color-bg-1);
+        color: var(--color-text-1);
+        font-weight: 500;
+        box-shadow: 0 -1px 0 var(--color-bg-1);
+      }
+
+      .tab-close {
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        opacity: 0.5;
+        font-size: 14px;
+        padding: 0 2px;
+      }
+
+      .breadcrumb {
+        padding: 12px 0 10px;
+        font-size: 13px;
+        color: var(--color-text-3);
+      }
+
+      .breadcrumb strong {
+        color: var(--color-text-1);
+        font-weight: 500;
+      }
+
+      .card {
+        background: var(--color-bg-1);
+        border: 1px solid var(--color-border-1);
+        border-radius: 8px;
+        box-shadow: var(--shadow-card);
+      }
+
+      .card-body {
+        padding: 16px;
+      }
+
+      .filters {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(160px, 1fr)) auto;
+        gap: 12px;
+        align-items: end;
+      }
+
+      .field label {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--color-text-2);
+        font-size: 12px;
+      }
+
+      .input,
+      .select {
+        width: 100%;
+        min-height: 36px;
+        border: 1px solid var(--color-border-1);
+        border-radius: 4px;
+        padding: 0 12px;
+        background: #fff;
+        outline: none;
+      }
+
+      .input:focus,
+      .select:focus {
+        border-color: var(--color-primary-6);
+        box-shadow: 0 0 0 3px rgba(22, 93, 255, 0.14);
+      }
+
+      .button {
+        height: 36px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        padding: 0 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        cursor: pointer;
+        background: #fff;
+        color: var(--color-text-1);
+      }
+
+      .button.primary {
+        color: #fff;
+        background: var(--color-primary-6);
+      }
+
+      .button.primary:hover {
+        background: var(--color-primary-5);
+      }
+
+      .button.secondary {
+        border-color: var(--color-border-1);
+        background: var(--color-bg-1);
+      }
+
+      .button.secondary:hover {
+        background: var(--color-fill-1);
+      }
+
+      .button.sm {
+        height: 28px;
+        padding: 0 8px;
+        font-size: 12px;
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 16px 0;
+        flex-wrap: wrap;
+      }
+
+      .toolbar-left,
+      .toolbar-right {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+
+      table.king-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 980px;
+      }
+
+      .king-table th,
+      .king-table td {
+        padding: 12px;
+        border-bottom: 1px solid var(--color-border-1);
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      .king-table th:last-child,
+      .king-table td:last-child {
+        position: sticky;
+        right: 0;
+        background: inherit;
+        z-index: 1;
+      }
+
+      .king-table th:last-child {
+        background: var(--color-fill-1);
+        z-index: 2;
+      }
+      
+      .king-table th:last-child::before,
+      .king-table td:last-child::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background: var(--color-border-1);
+      }
+
+      .king-table tbody tr {
+        background: var(--color-bg-1);
+      }
+
+      .king-table th {
+        background: var(--color-fill-1);
+        color: var(--color-text-2);
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      .king-table tbody tr:hover {
+        background: #f8fbff;
+      }
+
+      .king-table .cell-actions a {
+        color: var(--color-primary-6);
+        text-decoration: none;
+        margin-right: 10px;
+        cursor: pointer;
+        font-size: 14px;
+        background: none;
+        border: 0;
+        padding: 0;
+        font-family: inherit;
+      }
+
+      .king-table .cell-actions a:hover {
+        text-decoration: underline;
+      }
+
+      .king-table .cell-actions {
+        white-space: normal;
+        line-height: 1.6;
+      }
+
+      .sort-num {
+        font-variant-numeric: tabular-nums;
+        color: var(--color-text-2);
+        font-size: 13px;
+      }
+
+      .thumb-ico {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 1px solid var(--color-border-1);
+        background: var(--color-fill-1);
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        height: 24px;
+        border-radius: 999px;
+        padding: 0 8px;
+        font-size: 12px;
+      }
+
+      .tag.green {
+        color: var(--color-success-6);
+        background: rgba(0, 180, 42, 0.1);
+      }
+
+      .tag.gray {
+        color: var(--color-text-2);
+        background: var(--color-fill-2);
+      }
+
+      .muted {
+        color: var(--color-text-3);
+        font-size: 13px;
+      }
+
+      .notice {
+        border: 1px solid rgba(22, 93, 255, 0.22);
+        background: rgba(22, 93, 255, 0.06);
+        border-radius: 8px;
+        padding: 12px 14px;
+        color: var(--color-text-2);
+        font-size: 13px;
+        margin-bottom: 16px;
+      }
+
+      /* 抽屉 */
+      .drawer-mask {
+        position: fixed;
+        inset: 0;
+        background: rgba(29, 33, 41, 0.45);
+        z-index: 1000;
+        display: none;
+      }
+
+      .drawer-mask.open {
+        display: block;
+      }
+
+      .drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 80%;
+        height: 100vh;
+        background: #fff;
+        box-shadow: var(--shadow-popup);
+        transform: translateX(100%);
+        transition: transform 0.2s ease;
+        z-index: 1001;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .drawer.open {
+        transform: translateX(0);
+      }
+
+      .drawer-head {
+        min-height: 56px;
+        padding: 0 20px;
+        border-bottom: 1px solid var(--color-border-1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .drawer-body {
+        padding: 20px;
+        overflow: auto;
+        flex: 1;
+      }
+
+      .drawer-foot {
+        padding: 12px 20px;
+        border-top: 1px solid var(--color-border-1);
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .close {
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        color: var(--color-text-3);
+        font-size: 20px;
+      }
+
+      .drawer-section-title {
+        font-size: 15px;
+        font-weight: 600;
+        margin: 24px 0 16px;
+        padding-left: 10px;
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .drawer-section-title::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 16px;
+        background: var(--color-primary-6);
+        border-radius: 2px;
+      }
+
+      .drawer-section-title:first-child {
+        margin-top: 0;
+      }
+
+      .form-grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      @media (max-width: 520px) {
+        .form-grid-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .upload-zone {
+        border: 1px dashed var(--color-border-1);
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        color: var(--color-text-3);
+        font-size: 13px;
+        background: var(--color-fill-1);
+        cursor: pointer;
+      }
+
+      .upload-zone:hover {
+        border-color: var(--color-primary-5);
+        color: var(--color-primary-6);
+      }
+
+      .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 14px 16px;
+        font-size: 13px;
+        color: var(--color-text-2);
+        border-top: 1px solid var(--color-border-1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout-root">
+      <header class="layout-header" role="banner">
+        <div class="header-brand">
+          <div class="header-brand-mark" aria-hidden="true">车</div>
+          <span>车管家后台管理系统</span>
+        </div>
+        <div class="header-actions">
+          <span class="header-meta">连云港海州店 | 王敏</span>
+          <button type="button" class="icon-btn" title="用户" aria-label="用户">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          </button>
+          <span class="icon-wrap">
+            <button type="button" class="icon-btn" title="消息与通知" aria-label="消息与通知">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+              <span class="badge-dot">2</span>
+            </button>
+          </span>
+          <button type="button" class="icon-btn" title="设置" aria-label="设置">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="layout-body">
+        <aside class="sidebar" aria-label="主导航">
+          <div class="nav-group" id="navClient">
+            <button type="button" class="nav-l1" data-toggle-group="navClient" aria-expanded="true">
+              <span class="nav-icon">📱</span><span class="nav-text">客户端管理</span><span class="chev">›</span>
+            </button>
+            <div class="nav-l2-list">
+              <button type="button" class="nav-l2">banner管理</button>
+              <button type="button" class="nav-l2">文档管理</button>
+              <button type="button" class="nav-l2 current">客户端布局管理</button>
+            </div>
+          </div>
+          <div class="nav-group collapsed" id="navPkg">
+            <button type="button" class="nav-l1" data-toggle-group="navPkg" aria-expanded="false">
+              <span class="nav-icon">▦</span><span class="nav-text">套餐运营</span><span class="chev">›</span>
+            </button>
+            <div class="nav-l2-list">
+              <button type="button" class="nav-l2" onclick="location.href='../02_优惠套餐/01_优惠套餐_后台管理端.html'">套餐管理</button>
+            </div>
+          </div>
+        </aside>
+
+        <main class="main">
+          <div class="main-scroll">
+            <div class="tabs-bar" role="tablist">
+              <button type="button" class="tab-item" disabled>首页</button>
+              <div class="tab-item active" role="tab">
+                <span>客户端布局管理</span>
+                <button type="button" class="tab-close" tabindex="-1" aria-label="关闭">×</button>
+              </div>
+            </div>
+
+            <nav class="breadcrumb" aria-label="面包屑">
+              客户端运营 <strong>&gt;</strong> <strong>客户端布局管理</strong>
+            </nav>
+
+            <div class="card" aria-label="筛选区">
+                  <div class="card-body">
+                    <div class="filters">
+                      <div class="field">
+                        <label>菜单名称：</label>
+                        <input class="input" placeholder="模糊搜索" />
+                      </div>
+                      <div class="field">
+                        <label>状态：</label>
+                        <select class="select">
+                          <option>全部</option>
+                          <option>启用</option>
+                          <option>停用</option>
+                        </select>
+                      </div>
+                      <div class="actions" style="align-self: end; display: flex; gap: 8px">
+                        <button type="button" class="button primary">查询</button>
+                        <button type="button" class="button secondary">重置</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="toolbar">
+                  <div class="toolbar-left">
+                    <button type="button" class="button primary" id="btnSaveOrder">保存排序</button>
+                    <button type="button" class="button secondary">发布到线上</button>
+                  </div>
+                  <div class="toolbar-right">
+                    <button type="button" class="icon-btn" title="自定义列" aria-label="自定义列">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div class="table-wrap">
+                    <table class="king-table" id="kingTable">
+                      <thead>
+                        <tr>
+                          <th style="width: 72px">排序</th>
+                          <th style="width: 72px">图标</th>
+                          <th>菜单名称</th>
+                          <th>跳转类型</th>
+                          <th>跳转目标</th>
+                          <th>状态</th>
+                          <th style="min-width: 240px">操作</th>
+                        </tr>
+                      </thead>
+                      <tbody id="kingTbody"></tbody>
+                    </table>
+                  </div>
+                  <div class="pagination">
+                    <span class="page-total">共 10 条记录</span>
+                    <select class="select sm" style="width: 100px; min-height: 28px;">
+                      <option>20 条/页</option>
+                      <option>50 条/页</option>
+                      <option>100 条/页</option>
+                    </select>
+                    <div class="page-nav" style="display: flex; gap: 4px;">
+                      <button type="button" class="icon-btn sm" disabled>&lt;</button>
+                      <button type="button" class="button sm primary">1</button>
+                      <button type="button" class="icon-btn sm" disabled>&gt;</button>
+                    </div>
+                    <span class="page-jump" style="display: flex; align-items: center; gap: 8px;">
+                      前往 <input class="input sm" style="width: 48px; text-align: center; min-height: 28px; padding: 0 4px;" value="1" /> 页
+                    </span>
+                  </div>
+                </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <div class="drawer-mask" id="drawerMask"></div>
+    <aside class="drawer" id="editDrawer" aria-label="编辑金刚区菜单项">
+      <div class="drawer-head">
+        <div class="card-title" style="font-weight: 600">编辑菜单项</div>
+        <button type="button" class="close" id="closeDrawer" aria-label="关闭">×</button>
+      </div>
+      <div class="drawer-body">
+        <h3 class="drawer-section-title">展示信息</h3>
+        <div class="form-grid-2">
+          <div class="field">
+            <label><span style="color: var(--color-danger-6);">*</span> 菜单名称 <span class="muted">（客户端展示）</span></label>
+            <input class="input" id="fName" maxlength="8" placeholder="2～8 个汉字为宜" />
+          </div>
+          <div class="field">
+            <label><span style="color: var(--color-danger-6);">*</span> 排序号</label>
+            <input class="input" id="fOrder" type="number" min="1" max="99" />
+          </div>
+          <div class="field" style="grid-column: 1 / -1">
+            <label><span style="color: var(--color-danger-6);">*</span> 是否启用</label>
+            <select class="select" id="fEnabled">
+              <option value="1">启用</option>
+              <option value="0">停用（客户端不展示）</option>
+            </select>
+          </div>
+        </div>
+
+        <h3 class="drawer-section-title" style="margin-top: 24px">图标</h3>
+        <div class="field">
+          <label><span style="color: var(--color-danger-6);">*</span> 上传图标</label>
+          <div class="upload-zone" id="uploadZone" role="button" tabindex="0">
+            点击或拖拽上传图片<br />
+            <span class="muted">支持 PNG / JPG，建议透明底或浅色底</span>
+          </div>
+          <input type="file" id="fileIcon" accept="image/*" hidden />
+        </div>
+      </div>
+      <div class="drawer-foot">
+        <button type="button" class="button secondary" id="cancelDrawer">取消</button>
+        <button type="button" class="button primary" id="confirmDrawer">确定</button>
+      </div>
+    </aside>
+
+    <script>
+      (function () {
+        var initial = [
+          { name: "租赁", icon: "https://images.unsplash.com/photo-1489515217757-5fd1be406fef?w=128&h=128&fit=crop", linkType: "native", target: "/pages/rent/index", enabled: true },
+          { name: "检测", icon: "https://images.unsplash.com/photo-1625047509168-a7026f36de04?w=128&h=128&fit=crop", linkType: "native", target: "/pages/inspect/index", enabled: true },
+          { name: "洗车美容", icon: "https://images.unsplash.com/photo-1607861716497-e65ab29fc7ac?w=128&h=128&fit=crop", linkType: "native", target: "/pages/wash/index", enabled: true },
+          { name: "维保", icon: "https://images.unsplash.com/photo-1486006920555-c77dcf18193c?w=128&h=128&fit=crop", linkType: "native", target: "/pages/maint/index", enabled: true },
+          { name: "充电", icon: "https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=128&h=128&fit=crop", linkType: "h5", target: "https://example.com/charge", enabled: true },
+          { name: "加油", icon: "https://images.unsplash.com/photo-1549924231-f129b911e442?w=128&h=128&fit=crop", linkType: "h5", target: "https://example.com/fuel", enabled: true },
+          { name: "销售", icon: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=128&h=128&fit=crop", linkType: "native", target: "/pages/car/new", enabled: true },
+          { name: "二手车", icon: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=128&h=128&fit=crop", linkType: "native", target: "/pages/car/used", enabled: true },
+          { name: "保险报价", icon: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=128&h=128&fit=crop", linkType: "h5", target: "https://example.com/ins", enabled: true },
+          { name: "港城停车", icon: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=128&h=128&fit=crop", linkType: "mini", target: "appId:wxParking /pages/index", enabled: true }
+        ];
+
+        var rows = initial.map(function (r, i) {
+          return { id: "k" + (i + 1), order: i + 1, name: r.name, icon: r.icon, linkType: r.linkType, target: r.target, enabled: r.enabled };
+        });
+
+        var tbody = document.getElementById("kingTbody");
+        var editIndex = -1;
+        var drawer = document.getElementById("editDrawer");
+        var mask = document.getElementById("drawerMask");
+
+        function linkTypeLabel(t) {
+          if (t === "h5") return "H5";
+          if (t === "mini") return "其他小程序";
+          return "原生页";
+        }
+
+        function sortRows() {
+          rows.sort(function (a, b) {
+            return a.order - b.order;
+          });
+        }
+
+        function renderTable() {
+          sortRows();
+          tbody.innerHTML = "";
+          rows.forEach(function (row, idx) {
+            var tr = document.createElement("tr");
+            tr.innerHTML =
+              '<td><span class="sort-num">' +
+              row.order +
+              "</span></td>" +
+              '<td><img class="thumb-ico" alt="" src="' +
+              row.icon +
+              '" /></td>' +
+              "<td>" +
+              row.name +
+              "</td>" +
+              "<td>" +
+              linkTypeLabel(row.linkType) +
+              "</td>" +
+              '<td class="muted" style="max-width:220px;overflow:hidden;text-overflow:ellipsis">' +
+              row.target +
+              "</td>" +
+              "<td>" +
+              (row.enabled ? '<span class="tag green">启用</span>' : '<span class="tag gray">停用</span>') +
+              "</td>" +
+              '<td class="cell-actions">' +
+              '<a href="javascript:void(0)" data-act="up" data-i="' +
+              idx +
+              '">上移</a>' +
+              '<a href="javascript:void(0)" data-act="down" data-i="' +
+              idx +
+              '">下移</a>' +
+              '<a href="javascript:void(0)" data-act="edit" data-i="' +
+              idx +
+              '">编辑</a>' +
+              '<a href="javascript:void(0)" data-act="toggle" data-i="' +
+              idx +
+              '">' +
+              (row.enabled ? "停用" : "启用") +
+              "</a></td>";
+            tbody.appendChild(tr);
+          });
+
+          tbody.querySelectorAll("[data-act]").forEach(function (a) {
+            a.addEventListener("click", function () {
+              var i = parseInt(a.getAttribute("data-i"), 10);
+              var act = a.getAttribute("data-act");
+              if (act === "up" || act === "down") {
+                var j = act === "up" ? i - 1 : i + 1;
+                if (j < 0 || j >= rows.length) return;
+                var oa = rows[i].order;
+                rows[i].order = rows[j].order;
+                rows[j].order = oa;
+                renderTable();
+                return;
+              }
+              if (act === "toggle") {
+                rows[i].enabled = !rows[i].enabled;
+                renderTable();
+                return;
+              }
+              if (act === "edit") openDrawer(i);
+            });
+          });
+
+          document.getElementById("enabledCount").textContent = rows.filter(function (r) {
+            return r.enabled;
+          }).length;
+        }
+
+        function openDrawer(index) {
+          editIndex = index;
+          var r = rows[index];
+          document.getElementById("fName").value = r.name;
+          document.getElementById("fOrder").value = r.order;
+          document.getElementById("fEnabled").value = r.enabled ? "1" : "0";
+          drawer.classList.add("open");
+          mask.classList.add("open");
+        }
+
+        function closeDrawer() {
+          drawer.classList.remove("open");
+          mask.classList.remove("open");
+          editIndex = -1;
+        }
+
+        document.querySelectorAll("[data-toggle-group]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var id = btn.getAttribute("data-toggle-group");
+            var g = document.getElementById(id);
+            g.classList.toggle("collapsed");
+            btn.setAttribute("aria-expanded", g.classList.contains("collapsed") ? "false" : "true");
+          });
+        });
+
+        document.getElementById("btnSaveOrder").addEventListener("click", function () {
+          alert("原型：已模拟保存排序（实际应调用接口并提示成功）。");
+        });
+
+        document.getElementById("closeDrawer").addEventListener("click", closeDrawer);
+        document.getElementById("cancelDrawer").addEventListener("click", closeDrawer);
+        mask.addEventListener("click", closeDrawer);
+
+        document.getElementById("confirmDrawer").addEventListener("click", function () {
+          if (editIndex < 0) return;
+          var r = rows[editIndex];
+          r.name = document.getElementById("fName").value.trim() || r.name;
+          r.order = parseInt(document.getElementById("fOrder").value, 10) || r.order;
+          r.enabled = document.getElementById("fEnabled").value === "1";
+          closeDrawer();
+          renderTable();
+        });
+
+        var fileIcon = document.getElementById("fileIcon");
+        document.getElementById("uploadZone").addEventListener("click", function () {
+          fileIcon.click();
+        });
+        fileIcon.addEventListener("change", function () {
+          var f = fileIcon.files && fileIcon.files[0];
+          if (!f || editIndex < 0) return;
+          var url = URL.createObjectURL(f);
+          rows[editIndex].icon = url;
+          renderTable();
+        });
+
+        renderTable();
+      })();
+    </script>
+  </body>
+</html>
